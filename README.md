@@ -7,3 +7,4 @@ ClientSpace - Project and Client Management System
   4. Sushant Pahari
   5. Rajan rai
   6. Paru hang limbu
+  7. Pusparaj Katuwal
