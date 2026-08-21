@@ -6,3 +6,4 @@ ClientSpace - Project and Client Management System
   3. Anmol Ojha
   4. Sushant Pahari
   5. Rajan rai
+  6. Pusparaj Katuwal
