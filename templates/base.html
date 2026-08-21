@@ -18,11 +18,17 @@
         .sidebar-bg {
             background-color: #faf1e3; /* Slightly deeper ghee tone */
         }
+        .sidebar-hover {
+            color: #6b4f3a;
+        }
         .sidebar-hover:hover {
             background-color: #f5e6d0; /* Warm hover state */
+            color: #4a3520;
         }
         .sidebar-active {
             background-color: #f5e6d0;
+            color: #4a3520;
+            font-weight: 600;
             border-right: 3px solid #d4a373;
         }
         .content-bg {
@@ -52,7 +58,7 @@
     <!-- ============================================================ -->
     <div class="flex h-screen overflow-hidden">
 
-        <!-- ========== SIDEBAR ========== -->
+        <!-- ========== DESKTOP SIDEBAR ========== -->
         <aside class="sidebar-bg w-64 shrink-0 hidden md:flex flex-col h-full border-r border-[#e8dccc] shadow-sm overflow-y-auto">
             
             <!-- Brand / Logo -->
@@ -70,50 +76,50 @@
             <nav class="flex-1 p-4 space-y-1">
                 {% block sidebar %}
                     <!-- Dashboard -->
-                    <a href="#" class="sidebar-active flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#4a3520] font-medium text-sm transition">
+                    <a href="#" data-nav="dashboard" class="sidebar-link sidebar-active flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition">
                         <i class="fas fa-th-large w-5 text-center text-[#b8895e]"></i>
                         <span>Dashboard</span>
                     </a>
 
                     <!-- Clients -->
-                    <a href="#" class="sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#6b4f3a] hover:text-[#4a3520] text-sm transition">
+                    <a href="#" data-nav="clients" class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition">
                         <i class="fas fa-users w-5 text-center text-[#b8895e]"></i>
                         <span>Clients</span>
                     </a>
 
                     <!-- Projects -->
-                    <a href="{% url 'projects:project_view' %}" class="sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#6b4f3a] hover:text-[#4a3520] text-sm transition">
+                    <a href="{% url 'projects:project_view' %}" data-nav="projects" class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition">
                         <i class="fas fa-folder-open w-5 text-center text-[#b8895e]"></i>
                         <span>Projects</span>
                     </a>
 
                     <!-- Tasks -->
-                    <a href="#" class="sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#6b4f3a] hover:text-[#4a3520] text-sm transition">
+                    <a href="#" data-nav="tasks" class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition">
                         <i class="fas fa-tasks w-5 text-center text-[#b8895e]"></i>
                         <span>Tasks</span>
                     </a>
 
                     <!-- Payments -->
-                    <a href="#" class="sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#6b4f3a] hover:text-[#4a3520] text-sm transition">
+                    <a href="#" data-nav="payments" class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition">
                         <i class="fas fa-credit-card w-5 text-center text-[#b8895e]"></i>
                         <span>Payments</span>
                     </a>
 
                     <!-- Progress & Reports -->
-                    <a href="#" class="sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#6b4f3a] hover:text-[#4a3520] text-sm transition">
+                    <a href="#" data-nav="reports" class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition">
                         <i class="fas fa-chart-line w-5 text-center text-[#b8895e]"></i>
                         <span>Progress & Reports</span>
                     </a>
 
                     <!-- WorkSpace -->
-                    <a href="#" class="sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#6b4f3a] hover:text-[#4a3520] text-sm transition">
+                    <a href="#" data-nav="workspace" class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition">
                         <i class="fas fa-cog w-5 text-center text-[#b8895e]"></i>
                         <span>WorkSpace</span>
                     </a>
                 {% endblock %}
             </nav>
 
-            <!-- Sidebar Footer (optional) -->
+            <!-- Sidebar Footer -->
             <div class="p-4 border-t border-[#e8dccc] text-xs text-[#8b6f55]">
                 <i class="far fa-circle text-[8px] text-green-500 mr-1"></i> Online
             </div>
@@ -128,7 +134,7 @@
                     <!-- Left: Mobile menu toggle + page title -->
                     <div class="flex items-center gap-4">
                         <!-- Mobile hamburger -->
-                        <button id="sidebarToggle" class="md:hidden text-[#5a3e2b] text-xl hover:text-[#b8895e] transition">
+                        <button id="sidebarToggle" class="md:hidden text-[#5a3e2b] text-xl hover:text-[#b8895e] transition focus:outline-none">
                             <i class="fas fa-bars"></i>
                         </button>
                         <h2 class="text-lg font-medium text-[#4a3520]">
@@ -160,40 +166,39 @@
     </div>
 
     <!-- ============================================================ -->
-    <!-- MOBILE SIDEBAR OVERLAY (hidden by default)                    -->
+    <!-- MOBILE SIDEBAR OVERLAY & MENU                                -->
     <!-- ============================================================ -->
     <div id="mobileSidebarOverlay" class="fixed inset-0 bg-black/40 z-40 hidden md:hidden" onclick="closeSidebar()"></div>
-    <aside id="mobileSidebar" class="fixed top-0 left-0 h-full w-64 sidebar-bg z-50 -translate-x-full transition-transform duration-300 ease-in-out md:hidden border-r border-[#e8dccc] shadow-lg overflow-y-auto">
-        <!-- Same sidebar content as above, but for mobile -->
+    <aside id="mobileSidebar" class="fixed top-0 left-0 h-full w-64 sidebar-bg z-50 -translate-x-full transition-transform duration-300 ease-in-out md:hidden border-r border-[#e8dccc] shadow-lg flex flex-col overflow-y-auto">
         <div class="p-5 border-b border-[#e8dccc] flex justify-between items-center">
             <h1 class="text-xl font-semibold text-[#5a3e2b] flex items-center gap-2">
-                <i class="fas fa-layer-group text-[#b8895e]"></i> Northlight
+                <i class="fas fa-layer-group text-[#b8895e]"></i> ClientSpace
             </h1>
-            <button onclick="closeSidebar()" class="text-[#5a3e2b] hover:text-[#b8895e] text-xl">
+            <button onclick="closeSidebar()" class="text-[#5a3e2b] hover:text-[#b8895e] text-xl focus:outline-none">
                 <i class="fas fa-times"></i>
             </button>
         </div>
-        <nav class="p-4 space-y-1">
-            <a href="#" class="sidebar-active flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#4a3520] font-medium text-sm transition">
-                <i class="fas fa-th-large w-5 text-center text-[#b8895e]"></i> Dashboard
+        <nav class="flex-1 p-4 space-y-1">
+            <a href="#" data-nav="dashboard" class="sidebar-link sidebar-active flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition">
+                <i class="fas fa-th-large w-5 text-center text-[#b8895e]"></i> <span>Dashboard</span>
             </a>
-            <a href="#" class="sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#6b4f3a] hover:text-[#4a3520] text-sm transition">
-                <i class="fas fa-users w-5 text-center text-[#b8895e]"></i> Clients
+            <a href="#" data-nav="clients" class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition">
+                <i class="fas fa-users w-5 text-center text-[#b8895e]"></i> <span>Clients</span>
             </a>
-            <a href="{% url 'projects:project_view' %}" class="sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#6b4f3a] hover:text-[#4a3520] text-sm transition">
-                <i class="fas fa-folder-open w-5 text-center text-[#b8895e]"></i> Projects
+            <a href="{% url 'projects:project_view' %}" data-nav="projects" class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition">
+                <i class="fas fa-folder-open w-5 text-center text-[#b8895e]"></i> <span>Projects</span>
             </a>
-            <a href="#" class="sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#6b4f3a] hover:text-[#4a3520] text-sm transition">
-                <i class="fas fa-tasks w-5 text-center text-[#b8895e]"></i> Tasks
+            <a href="#" data-nav="tasks" class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition">
+                <i class="fas fa-tasks w-5 text-center text-[#b8895e]"></i> <span>Tasks</span>
             </a>
-            <a href="#" class="sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#6b4f3a] hover:text-[#4a3520] text-sm transition">
-                <i class="fas fa-credit-card w-5 text-center text-[#b8895e]"></i> Payments
+            <a href="#" data-nav="payments" class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition">
+                <i class="fas fa-credit-card w-5 text-center text-[#b8895e]"></i> <span>Payments</span>
             </a>
-            <a href="#" class="sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#6b4f3a] hover:text-[#4a3520] text-sm transition">
-                <i class="fas fa-chart-line w-5 text-center text-[#b8895e]"></i> Progress & Reports
+            <a href="#" data-nav="reports" class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition">
+                <i class="fas fa-chart-line w-5 text-center text-[#b8895e]"></i> <span>Progress & Reports</span>
             </a>
-            <a href="#" class="sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#6b4f3a] hover:text-[#4a3520] text-sm transition">
-                <i class="fas fa-cog w-5 text-center text-[#b8895e]"></i> WorkSpace
+            <a href="#" data-nav="workspace" class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition">
+                <i class="fas fa-cog w-5 text-center text-[#b8895e]"></i> <span>WorkSpace</span>
             </a>
         </nav>
         <div class="p-4 border-t border-[#e8dccc] text-xs text-[#8b6f55]">
@@ -202,9 +207,10 @@
     </aside>
 
     <!-- ============================================================ -->
-    <!-- JAVASCRIPT: Mobile sidebar toggle                            -->
+    <!-- JAVASCRIPT: Active states & Mobile toggle                     -->
     <!-- ============================================================ -->
     <script>
+        // 1. Mobile Sidebar Toggle Logic
         function openSidebar() {
             document.getElementById('mobileSidebar').classList.remove('-translate-x-full');
             document.getElementById('mobileSidebarOverlay').classList.remove('hidden');
@@ -225,9 +231,56 @@
             }
         });
 
-        // Close sidebar on escape key
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') closeSidebar();
+        });
+
+        // 2. Active Tab Switcher Logic
+        document.addEventListener('DOMContentLoaded', function () {
+            const allLinks = document.querySelectorAll('.sidebar-link');
+            const currentPath = window.location.pathname;
+
+            function setActiveNav(navKey) {
+                allLinks.forEach(link => {
+                    if (link.getAttribute('data-nav') === navKey) {
+                        link.classList.add('sidebar-active');
+                        link.classList.remove('sidebar-hover');
+                    } else {
+                        link.classList.remove('sidebar-active');
+                        link.classList.add('sidebar-hover');
+                    }
+                });
+            }
+
+            // Auto-detect current page on load (e.g. if URL contains /projects)
+            let matched = false;
+            allLinks.forEach(link => {
+                const href = link.getAttribute('href');
+                if (href && href !== '#' && currentPath.includes(href)) {
+                    setActiveNav(link.getAttribute('data-nav'));
+                    matched = true;
+                }
+            });
+
+            // Handle Click Events
+            allLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    const href = this.getAttribute('href');
+                    const navKey = this.getAttribute('data-nav');
+
+                    // If link is empty or '#', prevent page jump and switch highlight
+                    if (!href || href === '#') {
+                        e.preventDefault();
+                    }
+
+                    setActiveNav(navKey);
+
+                    // Close mobile sidebar on item click
+                    if (window.innerWidth < 768) {
+                        closeSidebar();
+                    }
+                });
+            });
         });
     </script>
 
