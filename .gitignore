@@ -3,6 +3,12 @@ venv/
 env/
 .venv/
 
+# Dependencies and build output
+**/node_modules/
+**/dist/
+**/dist-ssr/
+**/.cache/
+
 # Python
 __pycache__/
 *.py[cod]
@@ -16,6 +22,11 @@ db.sqlite3-journal
 # Environment variables / secrets
 .env
 .env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
 
 # IDE
 .vscode/

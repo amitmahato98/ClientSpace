@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'tailwind',
     'theme',
     'clients',
+    'projects',
 ]
 
 TAILWIND_APP_NAME = 'theme'
