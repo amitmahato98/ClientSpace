@@ -3,6 +3,8 @@
 **/dist/
 **/dist-ssr/
 **/.cache/
+__pycache__/
+*.py[cod]
 
 # Local environment and secret files
 .env
