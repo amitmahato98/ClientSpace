@@ -1,0 +1,236 @@
+{% load static %}
+{% load tailwind_tags %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Dashboard{% endblock %}</title>
+    {% tailwind_css %}
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+        /* Ghee color scheme */
+        body {
+            background-color: #fdf6ec; /* Warm ghee-white base */
+        }
+        .sidebar-bg {
+            background-color: #faf1e3; /* Slightly deeper ghee tone */
+        }
+        .sidebar-hover:hover {
+            background-color: #f5e6d0; /* Warm hover state */
+        }
+        .sidebar-active {
+            background-color: #f5e6d0;
+            border-right: 3px solid #d4a373;
+        }
+        .content-bg {
+            background-color: #fdf6ec;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #faf1e3;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d4a373;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #b8895e;
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+    <!-- ============================================================ -->
+    <!-- MAIN WRAPPER: SIDEBAR + CONTENT                              -->
+    <!-- ============================================================ -->
+    <div class="flex h-screen overflow-hidden">
+
+        <!-- ========== SIDEBAR ========== -->
+        <aside class="sidebar-bg w-64 shrink-0 hidden md:flex flex-col h-full border-r border-[#e8dccc] shadow-sm overflow-y-auto">
+            
+            <!-- Brand / Logo -->
+            <div class="p-5 border-b border-[#e8dccc]">
+                <h1 class="text-xl font-semibold text-[#5a3e2b] tracking-wide flex items-center gap-2">
+                    <i class="fas fa-layer-group text-[#b8895e]"></i>
+                    ClientSpace
+                </h1>
+                <p class="text-xs text-[#8b6f55] mt-1 flex items-center gap-1">
+                    <i class="fas fa-users text-[10px]"></i> TEAM PLAN · 4 SEATS
+                </p>
+            </div>
+
+            <!-- Sidebar Navigation -->
+            <nav class="flex-1 p-4 space-y-1">
+                {% block sidebar %}
+                    <!-- Dashboard -->
+                    <a href="#" class="sidebar-active flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#4a3520] font-medium text-sm transition">
+                        <i class="fas fa-th-large w-5 text-center text-[#b8895e]"></i>
+                        <span>Dashboard</span>
+                    </a>
+
+                    <!-- Clients -->
+                    <a href="#" class="sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#6b4f3a] hover:text-[#4a3520] text-sm transition">
+                        <i class="fas fa-users w-5 text-center text-[#b8895e]"></i>
+                        <span>Clients</span>
+                    </a>
+
+                    <!-- Projects -->
+                    <a href="{% url 'projects:project_view' %}" class="sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#6b4f3a] hover:text-[#4a3520] text-sm transition">
+                        <i class="fas fa-folder-open w-5 text-center text-[#b8895e]"></i>
+                        <span>Projects</span>
+                    </a>
+
+                    <!-- Tasks -->
+                    <a href="#" class="sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#6b4f3a] hover:text-[#4a3520] text-sm transition">
+                        <i class="fas fa-tasks w-5 text-center text-[#b8895e]"></i>
+                        <span>Tasks</span>
+                    </a>
+
+                    <!-- Payments -->
+                    <a href="#" class="sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#6b4f3a] hover:text-[#4a3520] text-sm transition">
+                        <i class="fas fa-credit-card w-5 text-center text-[#b8895e]"></i>
+                        <span>Payments</span>
+                    </a>
+
+                    <!-- Progress & Reports -->
+                    <a href="#" class="sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#6b4f3a] hover:text-[#4a3520] text-sm transition">
+                        <i class="fas fa-chart-line w-5 text-center text-[#b8895e]"></i>
+                        <span>Progress & Reports</span>
+                    </a>
+
+                    <!-- WorkSpace -->
+                    <a href="#" class="sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#6b4f3a] hover:text-[#4a3520] text-sm transition">
+                        <i class="fas fa-cog w-5 text-center text-[#b8895e]"></i>
+                        <span>WorkSpace</span>
+                    </a>
+                {% endblock %}
+            </nav>
+
+            <!-- Sidebar Footer (optional) -->
+            <div class="p-4 border-t border-[#e8dccc] text-xs text-[#8b6f55]">
+                <i class="far fa-circle text-[8px] text-green-500 mr-1"></i> Online
+            </div>
+        </aside>
+
+        <!-- ========== MAIN CONTENT ========== -->
+        <div class="flex-1 flex flex-col h-full overflow-hidden content-bg">
+
+            <!-- ===== NAVBAR ===== -->
+            <header class="bg-white/70 backdrop-blur-sm border-b border-[#e8dccc] px-6 py-3 flex items-center justify-between shrink-0">
+                {% block navbar %}
+                    <!-- Left: Mobile menu toggle + page title -->
+                    <div class="flex items-center gap-4">
+                        <!-- Mobile hamburger -->
+                        <button id="sidebarToggle" class="md:hidden text-[#5a3e2b] text-xl hover:text-[#b8895e] transition">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <h2 class="text-lg font-medium text-[#4a3520]">
+                            {% block page_heading %}Dashboard{% endblock %}
+                        </h2>
+                    </div>
+
+                    <!-- Right: User / actions -->
+                    <div class="flex items-center gap-4 text-[#5a3e2b]">
+                        <span class="text-sm hidden sm:inline text-[#8b6f55]">
+                            Wednesday, 20 August
+                        </span>
+                        <i class="fas fa-bell text-lg hover:text-[#b8895e] cursor-pointer transition"></i>
+                        <div class="w-8 h-8 rounded-full bg-[#d4a373] flex items-center justify-center text-white text-sm font-medium">
+                            JD
+                        </div>
+                    </div>
+                {% endblock %}
+            </header>
+
+            <!-- ===== PAGE CONTENT ===== -->
+            <main class="flex-1 overflow-y-auto p-6">
+                {% block content %}
+                    <!-- Child templates will override this -->
+                {% endblock %}
+            </main>
+
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- MOBILE SIDEBAR OVERLAY (hidden by default)                    -->
+    <!-- ============================================================ -->
+    <div id="mobileSidebarOverlay" class="fixed inset-0 bg-black/40 z-40 hidden md:hidden" onclick="closeSidebar()"></div>
+    <aside id="mobileSidebar" class="fixed top-0 left-0 h-full w-64 sidebar-bg z-50 -translate-x-full transition-transform duration-300 ease-in-out md:hidden border-r border-[#e8dccc] shadow-lg overflow-y-auto">
+        <!-- Same sidebar content as above, but for mobile -->
+        <div class="p-5 border-b border-[#e8dccc] flex justify-between items-center">
+            <h1 class="text-xl font-semibold text-[#5a3e2b] flex items-center gap-2">
+                <i class="fas fa-layer-group text-[#b8895e]"></i> Northlight
+            </h1>
+            <button onclick="closeSidebar()" class="text-[#5a3e2b] hover:text-[#b8895e] text-xl">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <nav class="p-4 space-y-1">
+            <a href="#" class="sidebar-active flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#4a3520] font-medium text-sm transition">
+                <i class="fas fa-th-large w-5 text-center text-[#b8895e]"></i> Dashboard
+            </a>
+            <a href="#" class="sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#6b4f3a] hover:text-[#4a3520] text-sm transition">
+                <i class="fas fa-users w-5 text-center text-[#b8895e]"></i> Clients
+            </a>
+            <a href="{% url 'projects:project_view' %}" class="sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#6b4f3a] hover:text-[#4a3520] text-sm transition">
+                <i class="fas fa-folder-open w-5 text-center text-[#b8895e]"></i> Projects
+            </a>
+            <a href="#" class="sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#6b4f3a] hover:text-[#4a3520] text-sm transition">
+                <i class="fas fa-tasks w-5 text-center text-[#b8895e]"></i> Tasks
+            </a>
+            <a href="#" class="sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#6b4f3a] hover:text-[#4a3520] text-sm transition">
+                <i class="fas fa-credit-card w-5 text-center text-[#b8895e]"></i> Payments
+            </a>
+            <a href="#" class="sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#6b4f3a] hover:text-[#4a3520] text-sm transition">
+                <i class="fas fa-chart-line w-5 text-center text-[#b8895e]"></i> Progress & Reports
+            </a>
+            <a href="#" class="sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#6b4f3a] hover:text-[#4a3520] text-sm transition">
+                <i class="fas fa-cog w-5 text-center text-[#b8895e]"></i> WorkSpace
+            </a>
+        </nav>
+        <div class="p-4 border-t border-[#e8dccc] text-xs text-[#8b6f55]">
+            <i class="far fa-circle text-[8px] text-green-500 mr-1"></i> Online
+        </div>
+    </aside>
+
+    <!-- ============================================================ -->
+    <!-- JAVASCRIPT: Mobile sidebar toggle                            -->
+    <!-- ============================================================ -->
+    <script>
+        function openSidebar() {
+            document.getElementById('mobileSidebar').classList.remove('-translate-x-full');
+            document.getElementById('mobileSidebarOverlay').classList.remove('hidden');
+        }
+
+        function closeSidebar() {
+            document.getElementById('mobileSidebar').classList.add('-translate-x-full');
+            document.getElementById('mobileSidebarOverlay').classList.add('hidden');
+        }
+
+        document.getElementById('sidebarToggle').addEventListener('click', function(e) {
+            e.stopPropagation();
+            const sidebar = document.getElementById('mobileSidebar');
+            if (sidebar.classList.contains('-translate-x-full')) {
+                openSidebar();
+            } else {
+                closeSidebar();
+            }
+        });
+
+        // Close sidebar on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeSidebar();
+        });
+    </script>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>
