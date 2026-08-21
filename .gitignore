@@ -33,3 +33,7 @@ htmlcov/
 build/
 dist/
 *.egg-info/
+
+
+.env
+db.sqlite3
