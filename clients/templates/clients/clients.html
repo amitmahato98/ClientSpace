@@ -1,73 +1,137 @@
-{% extends "base.html" %}
-
-{% block title %}Clients — ClientSpace{% endblock %}
-{% block page_heading %}Clients{% endblock %}
-
-{% block content %}
-<div class="flex justify-between items-center mb-6">
-    <div>
-        <h2 class="text-lg font-semibold text-[#4a3520]">Clients</h2>
-        <p class="text-sm text-[#8b6f55]">9 clients across 14 active projects</p>
-    </div>
-    <div class="flex gap-2">
-        <button class="px-4 py-2 text-sm rounded-lg border border-[#e8dccc] text-[#5a3e2b] hover:bg-[#f5e6d0]">Import CSV</button>
-        <button class="px-4 py-2 text-sm rounded-lg bg-[#d4a373] text-white hover:bg-[#b8895e]">+ New client</button>
-    </div>
+{% extends "base.html" %} {% block title %}Clients — ClientSpace{% endblock %}
+{% block page_heading %}Clients{% endblock %} {% block content %}
+<div
+  class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6"
+>
+  <div>
+    <h2 class="text-lg font-semibold text-[#4a3520]">Clients</h2>
+    <p class="text-sm text-[#8b6f55]">9 clients across 14 active projects</p>
+  </div>
+  <div class="flex flex-wrap gap-2">
+    <button
+      class="px-4 py-2 text-sm rounded-lg border border-[#e8dccc] text-[#5a3e2b] hover:bg-[#f5e6d0]"
+    >
+      Import CSV
+    </button>
+    <button
+      class="px-4 py-2 text-sm rounded-lg bg-[#d4a373] text-white hover:bg-[#b8895e]"
+    >
+      + New client
+    </button>
+  </div>
 </div>
 
-<div class="flex gap-6">
-    <!-- LEFT: client list -->
-    <div class="w-1/3 bg-white rounded-xl border border-[#e8dccc] p-4">
-        <input type="text" placeholder="Search clients…"
-               class="w-full mb-3 px-3 py-2 text-sm rounded-lg border border-[#e8dccc]" />
+<div class="flex flex-col lg:flex-row gap-6">
+  <!-- LEFT: client list -->
+  <div class="w-full lg:w-1/3 bg-white rounded-xl border border-[#e8dccc] p-4">
+    <input
+      type="text"
+      placeholder="Search clients…"
+      class="w-full mb-3 px-3 py-2 text-sm rounded-lg border border-[#e8dccc]"
+    />
 
-        <a href="#" class="flex items-center gap-3 p-3 rounded-lg bg-[#fdeee7] border border-[#f4c9b7]">
-            <div class="w-9 h-9 rounded-full bg-[#d4a373] text-white flex items-center justify-center text-sm font-medium">A</div>
-            <div class="flex-1">
-                <div class="text-sm font-semibold text-[#4a3520]">Alden & Co.</div>
-                <div class="text-xs text-[#8b6f55]">2 active projects</div>
-            </div>
-            <span class="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700">Active</span>
-        </a>
+    <a
+      href="#"
+      class="flex items-center gap-3 p-3 rounded-lg bg-[#fdeee7] border border-[#f4c9b7]"
+    >
+      <div
+        class="w-9 h-9 shrink-0 rounded-full bg-[#d4a373] text-white flex items-center justify-center text-sm font-medium"
+      >
+        A
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="text-sm font-semibold text-[#4a3520] truncate">
+          Alden & Co.
+        </div>
+        <div class="text-xs text-[#8b6f55] truncate">2 active projects</div>
+      </div>
+      <span
+        class="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700 shrink-0"
+        >Active</span
+      >
+    </a>
 
-        <a href="#" class="flex items-center gap-3 p-3 rounded-lg hover:bg-[#faf1e3]">
-            <div class="w-9 h-9 rounded-full bg-[#b8895e] text-white flex items-center justify-center text-sm font-medium">SF</div>
-            <div class="flex-1">
-                <div class="text-sm font-semibold text-[#4a3520]">Solene Foods</div>
-                <div class="text-xs text-[#8b6f55]">3 active projects</div>
-            </div>
-            <span class="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700">Active</span>
-        </a>
+    <a
+      href="#"
+      class="flex items-center gap-3 p-3 rounded-lg hover:bg-[#faf1e3]"
+    >
+      <div
+        class="w-9 h-9 shrink-0 rounded-full bg-[#b8895e] text-white flex items-center justify-center text-sm font-medium"
+      >
+        SF
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="text-sm font-semibold text-[#4a3520] truncate">
+          Solene Foods
+        </div>
+        <div class="text-xs text-[#8b6f55] truncate">3 active projects</div>
+      </div>
+      <span
+        class="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700 shrink-0"
+        >Active</span
+      >
+    </a>
+  </div>
+
+  <!-- RIGHT: client detail -->
+  <div
+    class="w-full lg:flex-1 bg-white rounded-xl border border-[#e8dccc] p-4 sm:p-6"
+  >
+    <div class="flex flex-col sm:flex-row sm:items-start gap-4 mb-5">
+      <div
+        class="w-14 h-14 shrink-0 rounded-2xl bg-[#d4a373] text-white flex items-center justify-center text-lg font-semibold"
+      >
+        A
+      </div>
+      <div class="flex-1 min-w-0">
+        <h3 class="text-lg font-semibold text-[#4a3520] truncate">
+          Alden & Co.
+        </h3>
+        <p class="text-sm text-[#8b6f55]">
+          Boutique law firm · contact: Denise Alden
+        </p>
+      </div>
+      <span
+        class="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700 h-fit shrink-0"
+        >Active</span
+      >
     </div>
 
-    <!-- RIGHT: client detail -->
-    <div class="flex-1 bg-white rounded-xl border border-[#e8dccc] p-6">
-        <div class="flex items-start gap-4 mb-5">
-            <div class="w-14 h-14 rounded-2xl bg-[#d4a373] text-white flex items-center justify-center text-lg font-semibold">A</div>
-            <div class="flex-1">
-                <h3 class="text-lg font-semibold text-[#4a3520]">Alden & Co.</h3>
-                <p class="text-sm text-[#8b6f55]">Boutique law firm · contact: Denise Alden</p>
-            </div>
-            <span class="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700 h-fit">Active</span>
-        </div>
-
-        <div class="grid grid-cols-3 gap-4 mb-6 text-sm">
-            <div><div class="text-[#8b6f55] text-xs">Contact email</div><div class="text-[#4a3520]">denise@aldenco.law</div></div>
-            <div><div class="text-[#8b6f55] text-xs">Client since</div><div class="text-[#4a3520]">Mar 2024</div></div>
-            <div><div class="text-[#8b6f55] text-xs">Lifetime billed</div><div class="text-[#4a3520] font-mono">$64,200</div></div>
-        </div>
-
-        <h4 class="text-sm font-semibold text-[#4a3520] mb-2">Projects</h4>
-        <table class="w-full text-sm">
-            <tr class="text-left text-[#8b6f55] border-b border-[#e8dccc]">
-                <th class="pb-2">Project</th><th class="pb-2">Status</th><th class="pb-2">Value</th>
-            </tr>
-            <tr class="border-b border-[#f2ede4]">
-                <td class="py-2 text-[#4a3520]">Brand identity refresh</td>
-                <td class="py-2"><span class="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700">On track</span></td>
-                <td class="py-2 font-mono text-[#4a3520]">$18,000</td>
-            </tr>
-        </table>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 text-sm">
+      <div>
+        <div class="text-[#8b6f55] text-xs">Contact email</div>
+        <div class="text-[#4a3520] truncate">denise@aldenco.law</div>
+      </div>
+      <div>
+        <div class="text-[#8b6f55] text-xs">Client since</div>
+        <div class="text-[#4a3520]">Mar 2024</div>
+      </div>
+      <div>
+        <div class="text-[#8b6f55] text-xs">Lifetime billed</div>
+        <div class="text-[#4a3520] font-mono">$64,200</div>
+      </div>
     </div>
+
+    <h4 class="text-sm font-semibold text-[#4a3520] mb-2">Projects</h4>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm min-w-125">
+        <tr class="text-left text-[#8b6f55] border-b border-[#e8dccc]">
+          <th class="pb-2">Project</th>
+          <th class="pb-2">Status</th>
+          <th class="pb-2">Value</th>
+        </tr>
+        <tr class="border-b border-[#f2ede4]">
+          <td class="py-2 text-[#4a3520]">Brand identity refresh</td>
+          <td class="py-2">
+            <span
+              class="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700"
+              >On track</span
+            >
+          </td>
+          <td class="py-2 font-mono text-[#4a3520]">$18,000</td>
+        </tr>
+      </table>
+    </div>
+  </div>
 </div>
 {% endblock %}
