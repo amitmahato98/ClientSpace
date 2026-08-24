@@ -9,8 +9,8 @@ urlpatterns = [
     path(
         "forgot-password/",
         auth_views.PasswordResetView.as_view(
-            template_name="login_register/forgot_password.html",
-            email_template_name="login_register/password_reset_email.html",
+            template_name="accounts/forgot_password.html",
+            email_template_name="accounts/password_reset_email.html",
             success_url="/forgot-password/done/",
         ),
         name="password_reset",
@@ -18,14 +18,14 @@ urlpatterns = [
     path(
         "forgot-password/done/",
         auth_views.PasswordResetDoneView.as_view(
-            template_name="login_register/password_reset_done.html"
+            template_name="accounts/password_reset_done.html"
         ),
         name="password_reset_done",
     ),
     path(
         "reset/<uidb64>/<token>/",
         auth_views.PasswordResetConfirmView.as_view(
-            template_name="login_register/password_reset_confirm.html",
+            template_name="accounts/password_reset_confirm.html",
             success_url="/reset/done/",
         ),
         name="password_reset_confirm",
@@ -33,7 +33,7 @@ urlpatterns = [
     path(
         "reset/done/",
         auth_views.PasswordResetCompleteView.as_view(
-            template_name="login_register/password_reset_complete.html"
+            template_name="accounts/password_reset_complete.html"
         ),
         name="password_reset_complete",
     ),
