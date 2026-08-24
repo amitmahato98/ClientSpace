@@ -651,7 +651,7 @@
 
                 <!-- LOGIN FORM -->
 
-                <form method="POST" action="#">
+                <form method="POST" action="">
 
                     {% csrf_token %}
 
@@ -692,7 +692,7 @@
                         </label>
 
 
-                        <a href="/forgot-password/" class="forgot">
+                        <a href="{% url 'password_reset' %}" class="forgot">
                             Forgot password?
                         </a>
 
@@ -710,7 +710,7 @@
 
                     Don't have an account?
 
-                    <a href="/register/">
+                    <a href="{% url 'register' %}">
                         Create your account
                     </a>
 
