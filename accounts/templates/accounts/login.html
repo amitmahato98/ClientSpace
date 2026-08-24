@@ -1,727 +1,668 @@
-{% load static %}
-{% load tailwind_tags %}
-{% load static %}
+{% load static %} {% load tailwind_tags %} {% load static %}
 
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <title>Login | ClientSpace</title>
 
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-        :root {
-            --ghee: #d4a373;
-            --ghee-light: #e8dccc;
-            --brown-dark: #4a3520;
-            --brown: #5a3e2b;
-            --brown-medium: #6b4f3a;
-            --brown-light: #8b6f55;
-            --brown-accent: #b8895e;
-            --cream: #faf8f4;
-            --white: #ffffff;
-            --border: #e8dccc;
-        }
+      :root {
+        --ghee: #d4a373;
+        --ghee-light: #e8dccc;
+        --brown-dark: #4a3520;
+        --brown: #5a3e2b;
+        --brown-medium: #6b4f3a;
+        --brown-light: #8b6f55;
+        --brown-accent: #b8895e;
+        --cream: #faf8f4;
+        --white: #ffffff;
+        --border: #e8dccc;
+      }
 
-        body {
-            font-family:
-                ui-sans-serif,
-                system-ui,
-                -apple-system,
-                BlinkMacSystemFont,
-                "Segoe UI",
-                sans-serif;
+      body {
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
 
-            background: var(--cream);
-            color: var(--brown-dark);
-            min-height: 100vh;
-        }
+        background: var(--cream);
+        color: var(--brown-dark);
+        min-height: 100vh;
+      }
 
-        .auth-container {
-            min-height: 100vh;
-            display: grid;
-            grid-template-columns: 1.05fr 0.95fr;
-        }
+      .auth-container {
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: 1.05fr 0.95fr;
+      }
 
-        /* =========================
+      /* =========================
            LEFT SIDE
         ========================= */
 
-        .left-panel {
-            position: relative;
-            min-height: 100vh;
-            overflow: hidden;
-            padding: 38px 58px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+      .left-panel {
+        position: relative;
+        min-height: 100vh;
+        overflow: hidden;
+        padding: 38px 58px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
 
-            background:
-                radial-gradient(circle at 20% 25%,
-                    rgba(212, 163, 115, 0.28),
-                    transparent 35%),
-                radial-gradient(circle at 80% 75%,
-                    rgba(184, 137, 94, 0.22),
-                    transparent 35%),
-                linear-gradient(135deg,
-                    #30251f 0%,
-                    #201d1b 50%,
-                    #33251f 100%);
-        }
+        background:
+          radial-gradient(
+            circle at 20% 25%,
+            rgba(212, 163, 115, 0.28),
+            transparent 35%
+          ),
+          radial-gradient(
+            circle at 80% 75%,
+            rgba(184, 137, 94, 0.22),
+            transparent 35%
+          ),
+          linear-gradient(135deg, #30251f 0%, #201d1b 50%, #33251f 100%);
+      }
 
-        /* subtle grid */
-        .left-panel::before {
-            content: "";
-            position: absolute;
-            inset: 0;
+      /* subtle grid */
+      .left-panel::before {
+        content: "";
+        position: absolute;
+        inset: 0;
 
-            background-image:
-                linear-gradient(rgba(255, 255, 255, 0.035) 1px,
-                    transparent 1px),
-                linear-gradient(90deg,
-                    rgba(255, 255, 255, 0.035) 1px,
-                    transparent 1px);
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+          linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0.035) 1px,
+            transparent 1px
+          );
 
-            background-size: 48px 48px;
-            pointer-events: none;
-        }
+        background-size: 48px 48px;
+        pointer-events: none;
+      }
 
-        .brand {
-            position: relative;
-            z-index: 2;
+      .brand {
+        position: relative;
+        z-index: 2;
 
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
 
-            color: white;
-            font-size: 17px;
-            font-weight: 700;
-        }
+        color: white;
+        font-size: 17px;
+        font-weight: 700;
+      }
 
-        .brand-icon {
-            width: 26px;
-            height: 26px;
-            border-radius: 6px;
+      .brand-icon {
+        width: 26px;
+        height: 26px;
+        border-radius: 6px;
 
-            background: var(--ghee);
+        background: var(--ghee);
 
-            position: relative;
-            overflow: hidden;
-        }
+        position: relative;
+        overflow: hidden;
+      }
 
-        .brand-icon::after {
-            content: "";
-            position: absolute;
+      .brand-icon::after {
+        content: "";
+        position: absolute;
 
-            width: 16px;
-            height: 16px;
+        width: 16px;
+        height: 16px;
 
-            background: #33251f;
+        background: #33251f;
 
-            top: -7px;
-            right: -7px;
+        top: -7px;
+        right: -7px;
 
-            transform: rotate(45deg);
-        }
+        transform: rotate(45deg);
+      }
 
-        .brand-name span {
-            color: var(--ghee);
-        }
+      .brand-name span {
+        color: var(--ghee);
+      }
 
-        .hero-content {
-            position: relative;
-            z-index: 2;
+      .hero-content {
+        position: relative;
+        z-index: 2;
 
-            max-width: 560px;
-            margin-top: auto;
-            margin-bottom: auto;
-            padding-top: 80px;
-            padding-bottom: 60px;
-        }
+        max-width: 560px;
+        margin-top: auto;
+        margin-bottom: auto;
+        padding-top: 80px;
+        padding-bottom: 60px;
+      }
 
-        .hero-content h1 {
-            color: white;
+      .hero-content h1 {
+        color: white;
 
-            font-size: clamp(38px, 4vw, 58px);
-            line-height: 1.05;
-            letter-spacing: -1.8px;
+        font-size: clamp(38px, 4vw, 58px);
+        line-height: 1.05;
+        letter-spacing: -1.8px;
 
-            font-weight: 700;
+        font-weight: 700;
 
-            max-width: 530px;
-        }
+        max-width: 530px;
+      }
 
-        .hero-content h1 span {
-            color: var(--ghee);
-        }
+      .hero-content h1 span {
+        color: var(--ghee);
+      }
 
-        .hero-content p {
-            margin-top: 24px;
+      .hero-content p {
+        margin-top: 24px;
 
-            color: rgba(255, 255, 255, 0.68);
+        color: rgba(255, 255, 255, 0.68);
 
-            font-size: 15px;
-            line-height: 1.8;
+        font-size: 15px;
+        line-height: 1.8;
 
-            max-width: 510px;
-        }
+        max-width: 510px;
+      }
 
-        .stats {
-            position: relative;
-            z-index: 2;
+      .stats {
+        position: relative;
+        z-index: 2;
 
-            display: flex;
-            gap: 55px;
-        }
+        display: flex;
+        gap: 55px;
+      }
 
-        .stat-number {
-            color: white;
+      .stat-number {
+        color: white;
 
-            font-size: 20px;
-            font-weight: 700;
-        }
+        font-size: 20px;
+        font-weight: 700;
+      }
 
-        .stat-label {
-            margin-top: 5px;
+      .stat-label {
+        margin-top: 5px;
 
-            color: rgba(255, 255, 255, 0.48);
+        color: rgba(255, 255, 255, 0.48);
 
-            font-size: 11px;
-            line-height: 1.5;
-        }
+        font-size: 11px;
+        line-height: 1.5;
+      }
 
-
-        /* =========================
+      /* =========================
            RIGHT SIDE
         ========================= */
 
-        .right-panel {
-            min-height: 100vh;
+      .right-panel {
+        min-height: 100vh;
 
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
 
-            background: var(--cream);
+        background: var(--cream);
 
-            padding: 50px 60px;
-        }
+        padding: 50px 60px;
+      }
 
-        .auth-box {
-            width: 100%;
-            max-width: 470px;
-        }
+      .auth-box {
+        width: 100%;
+        max-width: 470px;
+      }
 
-        .welcome {
-            color: #b45f32;
+      .welcome {
+        color: #b45f32;
 
-            font-size: 11px;
-            font-weight: 700;
+        font-size: 11px;
+        font-weight: 700;
 
-            letter-spacing: 2px;
+        letter-spacing: 2px;
 
-            margin-bottom: 12px;
-        }
+        margin-bottom: 12px;
+      }
 
-        .auth-box h2 {
-            color: #292521;
+      .auth-box h2 {
+        color: #292521;
 
-            font-size: 27px;
-            line-height: 1.3;
+        font-size: 27px;
+        line-height: 1.3;
 
-            font-weight: 700;
+        font-weight: 700;
 
-            margin-bottom: 8px;
-        }
+        margin-bottom: 8px;
+      }
 
-        .subtitle {
-            color: var(--brown-light);
+      .subtitle {
+        color: var(--brown-light);
 
-            font-size: 14px;
-            line-height: 1.6;
+        font-size: 14px;
+        line-height: 1.6;
 
-            margin-bottom: 28px;
-        }
+        margin-bottom: 28px;
+      }
 
-
-        /* =========================
+      /* =========================
            ROLE SELECTOR
         ========================= */
 
-        .role-selector {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
+      .role-selector {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
 
-            background: #eeeae4;
+        background: #eeeae4;
 
-            border-radius: 7px;
+        border-radius: 7px;
 
-            padding: 4px;
+        padding: 4px;
 
-            margin-bottom: 24px;
-        }
+        margin-bottom: 24px;
+      }
 
-        .role-option {
-            position: relative;
-        }
+      .role-option {
+        position: relative;
+      }
 
-        .role-option input {
-            position: absolute;
-            opacity: 0;
-            pointer-events: none;
-        }
+      .role-option input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+      }
 
-        .role-option label {
-            display: block;
+      .role-option label {
+        display: block;
 
-            text-align: center;
+        text-align: center;
 
-            padding: 11px 8px;
+        padding: 11px 8px;
 
-            border-radius: 6px;
+        border-radius: 6px;
 
-            color: var(--brown-medium);
+        color: var(--brown-medium);
 
-            font-size: 12px;
-            font-weight: 500;
+        font-size: 12px;
+        font-weight: 500;
 
-            cursor: pointer;
+        cursor: pointer;
 
-            transition: all 0.2s ease;
-        }
+        transition: all 0.2s ease;
+      }
 
-        .role-option input:checked+label {
-            background: white;
+      .role-option input:checked + label {
+        background: white;
 
-            color: var(--brown-dark);
+        color: var(--brown-dark);
 
-            box-shadow:
-                0 1px 3px rgba(74, 53, 32, 0.10);
-        }
+        box-shadow: 0 1px 3px rgba(74, 53, 32, 0.1);
+      }
 
-
-        /* =========================
+      /* =========================
            FORM
         ========================= */
 
-        .form-group {
-            margin-bottom: 18px;
-        }
+      .form-group {
+        margin-bottom: 18px;
+      }
 
-        .form-group label {
-            display: block;
+      .form-group label {
+        display: block;
 
-            color: #332c27;
+        color: #332c27;
 
-            font-size: 12px;
-            font-weight: 700;
+        font-size: 12px;
+        font-weight: 700;
 
-            margin-bottom: 8px;
-        }
+        margin-bottom: 8px;
+      }
 
-        .form-input {
-            width: 100%;
+      .form-input {
+        width: 100%;
 
-            height: 43px;
+        height: 43px;
 
-            border: 1px solid var(--border);
-            border-radius: 6px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
 
-            background: white;
+        background: white;
 
-            padding: 0 13px;
+        padding: 0 13px;
 
-            color: var(--brown-dark);
+        color: var(--brown-dark);
 
-            font-size: 13px;
+        font-size: 13px;
 
-            outline: none;
+        outline: none;
 
-            transition:
-                border-color 0.2s ease,
-                box-shadow 0.2s ease;
-        }
+        transition:
+          border-color 0.2s ease,
+          box-shadow 0.2s ease;
+      }
 
-        .form-input::placeholder {
-            color: #b2a69a;
-        }
+      .form-input::placeholder {
+        color: #b2a69a;
+      }
 
-        .form-input:focus {
-            border-color: var(--ghee);
+      .form-input:focus {
+        border-color: var(--ghee);
 
-            box-shadow:
-                0 0 0 3px rgba(212, 163, 115, 0.16);
-        }
+        box-shadow: 0 0 0 3px rgba(212, 163, 115, 0.16);
+      }
 
-
-        /* =========================
+      /* =========================
            REMEMBER / FORGOT
         ========================= */
 
-        .form-options {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+      .form-options {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
 
-            margin: 4px 0 22px;
-        }
+        margin: 4px 0 22px;
+      }
 
-        .remember {
-            display: flex;
-            align-items: center;
-            gap: 7px;
+      .remember {
+        display: flex;
+        align-items: center;
+        gap: 7px;
 
-            color: var(--brown-light);
+        color: var(--brown-light);
 
-            font-size: 12px;
-        }
+        font-size: 12px;
+      }
 
-        .remember input {
-            width: 14px;
-            height: 14px;
+      .remember input {
+        width: 14px;
+        height: 14px;
 
-            accent-color: var(--ghee);
+        accent-color: var(--ghee);
 
-            cursor: pointer;
-        }
+        cursor: pointer;
+      }
 
-        .forgot {
-            color: #a85b31;
+      .forgot {
+        color: #a85b31;
 
-            font-size: 12px;
-            font-weight: 600;
+        font-size: 12px;
+        font-weight: 600;
 
-            text-decoration: none;
-        }
+        text-decoration: none;
+      }
 
-        .forgot:hover {
-            color: var(--brown-dark);
-        }
+      .forgot:hover {
+        color: var(--brown-dark);
+      }
 
-
-        /* =========================
+      /* =========================
            BUTTON
         ========================= */
 
-        .submit-btn {
-            width: 100%;
+      .submit-btn {
+        width: 100%;
 
-            height: 43px;
+        height: 43px;
 
-            border: none;
-            border-radius: 6px;
+        border: none;
+        border-radius: 6px;
 
-            background: var(--ghee);
+        background: var(--ghee);
 
-            color: white;
+        color: white;
 
-            font-size: 13px;
-            font-weight: 700;
+        font-size: 13px;
+        font-weight: 700;
 
-            cursor: pointer;
+        cursor: pointer;
 
-            transition:
-                background 0.2s ease,
-                transform 0.2s ease,
-                box-shadow 0.2s ease;
-        }
+        transition:
+          background 0.2s ease,
+          transform 0.2s ease,
+          box-shadow 0.2s ease;
+      }
 
-        .submit-btn:hover {
-            background: #bd8b5e;
+      .submit-btn:hover {
+        background: #bd8b5e;
 
-            box-shadow:
-                0 5px 14px rgba(212, 163, 115, 0.25);
+        box-shadow: 0 5px 14px rgba(212, 163, 115, 0.25);
 
-            transform: translateY(-1px);
-        }
+        transform: translateY(-1px);
+      }
 
-        .submit-btn:active {
-            transform: translateY(0);
-        }
+      .submit-btn:active {
+        transform: translateY(0);
+      }
 
-
-        /* =========================
+      /* =========================
            REGISTER LINK
         ========================= */
 
-        .bottom-text {
-            margin-top: 28px;
+      .bottom-text {
+        margin-top: 28px;
 
-            text-align: center;
+        text-align: center;
 
-            color: var(--brown-light);
+        color: var(--brown-light);
 
-            font-size: 12px;
-        }
+        font-size: 12px;
+      }
 
-        .bottom-text a {
-            color: #a85b31;
+      .bottom-text a {
+        color: #a85b31;
 
-            font-weight: 700;
+        font-weight: 700;
 
-            text-decoration: none;
-        }
+        text-decoration: none;
+      }
 
-        .bottom-text a:hover {
-            color: var(--brown-dark);
-        }
+      .bottom-text a:hover {
+        color: var(--brown-dark);
+      }
 
-
-        /* =========================
+      /* =========================
            RESPONSIVE
         ========================= */
 
-        @media (max-width: 900px) {
-            .auth-container {
-                grid-template-columns: 1fr;
-            }
-
-            .left-panel {
-                min-height: 430px;
-                padding: 30px 35px;
-            }
-
-            .hero-content {
-                padding-top: 50px;
-                padding-bottom: 35px;
-            }
-
-            .hero-content h1 {
-                font-size: 40px;
-            }
-
-            .stats {
-                gap: 35px;
-            }
-
-            .right-panel {
-                min-height: auto;
-                padding: 50px 30px;
-            }
+      @media (max-width: 900px) {
+        .auth-container {
+          grid-template-columns: 1fr;
         }
 
-        @media (max-width: 500px) {
-            .left-panel {
-                padding: 25px 22px;
-            }
-
-            .hero-content h1 {
-                font-size: 34px;
-            }
-
-            .hero-content p {
-                font-size: 14px;
-            }
-
-            .stats {
-                gap: 22px;
-            }
-
-            .stat-number {
-                font-size: 17px;
-            }
-
-            .right-panel {
-                padding: 40px 20px;
-            }
-
-            .auth-box h2 {
-                font-size: 24px;
-            }
+        .left-panel {
+          min-height: 430px;
+          padding: 30px 35px;
         }
+
+        .hero-content {
+          padding-top: 50px;
+          padding-bottom: 35px;
+        }
+
+        .hero-content h1 {
+          font-size: 40px;
+        }
+
+        .stats {
+          gap: 35px;
+        }
+
+        .right-panel {
+          min-height: auto;
+          padding: 50px 30px;
+        }
+      }
+
+      @media (max-width: 500px) {
+        .left-panel {
+          padding: 25px 22px;
+        }
+
+        .hero-content h1 {
+          font-size: 34px;
+        }
+
+        .hero-content p {
+          font-size: 14px;
+        }
+
+        .stats {
+          gap: 22px;
+        }
+
+        .stat-number {
+          font-size: 17px;
+        }
+
+        .right-panel {
+          padding: 40px 20px;
+        }
+
+        .auth-box h2 {
+          font-size: 24px;
+        }
+      }
     </style>
-</head>
+  </head>
 
-<body>
-
+  <body>
     <div class="auth-container">
-
-        <!-- =========================
+      <!-- =========================
          LEFT PANEL
     ========================== -->
 
-        <section class="left-panel">
+      <section class="left-panel">
+        <div class="brand">
+          <div class="brand-icon"></div>
 
-            <div class="brand">
-                <div class="brand-icon"></div>
+          <div class="brand-name">Client<span>Space</span></div>
+        </div>
 
-                <div class="brand-name">
-                    Client<span>Space</span>
-                </div>
-            </div>
+        <div class="hero-content">
+          <h1>
+            Every client, project, and task —
+            <span>one shared space.</span>
+          </h1>
 
+          <p>
+            Manage clients, projects, tasks and payments from a single workspace
+            with ClientSpace. Keep your work organized and your clients
+            connected.
+          </p>
+        </div>
 
-            <div class="hero-content">
+        <div class="stats">
+          <div>
+            <div class="stat-number">128</div>
+            <div class="stat-label">Active projects</div>
+          </div>
 
-                <h1>
-                    Every client, project, and task —
-                    <span>one shared space.</span>
-                </h1>
+          <div>
+            <div class="stat-number">$482K</div>
+            <div class="stat-label">Projects this year</div>
+          </div>
 
-                <p>
-                    Manage clients, projects, tasks and payments
-                    from a single workspace with ClientSpace.
-                    Keep your work organized and your clients connected.
-                </p>
+          <div>
+            <div class="stat-number">4.9/5</div>
+            <div class="stat-label">Client satisfaction</div>
+          </div>
+        </div>
+      </section>
 
-            </div>
-
-
-            <div class="stats">
-
-                <div>
-                    <div class="stat-number">128</div>
-                    <div class="stat-label">
-                        Active projects
-                    </div>
-                </div>
-
-                <div>
-                    <div class="stat-number">$482K</div>
-                    <div class="stat-label">
-                        Projects this year
-                    </div>
-                </div>
-
-                <div>
-                    <div class="stat-number">4.9/5</div>
-                    <div class="stat-label">
-
-                        Client satisfaction
-                    </div>
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- =========================
+      <!-- =========================
          RIGHT PANEL
     ========================== -->
 
-        <section class="right-panel">
+      <section class="right-panel">
+        <div class="auth-box">
+          <div class="welcome">WELCOME BACK</div>
 
-            <div class="auth-box">
+          <h2>Sign in to your workspace</h2>
 
-                <div class="welcome">
-                    WELCOME BACK
-                </div>
+          <p class="subtitle">Enter your details to access ClientSpace.</p>
 
-                <h2>
-                    Sign in to your workspace
-                </h2>
+          <!-- ROLE SELECTOR -->
 
-                <p class="subtitle">
-                    Enter your details to access ClientSpace.
-                </p>
+          <div class="role-selector">
+            <div class="role-option">
+              <input
+                type="radio"
+                id="client"
+                name="role"
+                value="client"
+                checked
+              />
 
-
-                <!-- ROLE SELECTOR -->
-
-                <div class="role-selector">
-
-                    <div class="role-option">
-                        <input type="radio" id="client" name="role" value="client" checked>
-
-                        <label for="client">
-                            Client
-                        </label>
-                    </div>
-
-                    <div class="role-option">
-                        <input type="radio" id="admin" name="role" value="admin">
-
-                        <label for="admin">
-                            Admin
-                        </label>
-                    </div>
-
-                </div>
-
-
-                <!-- LOGIN FORM -->
-
-                <form method="POST" action="">
-
-                    {% csrf_token %}
-
-                    <div class="form-group">
-
-                        <label for="email">
-                            Email address
-                        </label>
-
-                        <input class="form-input" type="email" id="email" name="email"
-                            placeholder="Enter your email address" autocomplete="email" required>
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label for="password">
-                            Password
-                        </label>
-
-                        <input class="form-input" type="password" id="password" name="password"
-                            placeholder="Enter your password" autocomplete="current-password" required>
-
-                    </div>
-
-
-                    <div class="form-options">
-
-                        <label class="remember">
-
-                            <input type="checkbox" name="remember">
-
-                            <span>
-                                Keep me signed in
-                            </span>
-
-                        </label>
-
-
-                        <a href="{% url 'password_reset' %}" class="forgot">
-                            Forgot password?
-                        </a>
-
-                    </div>
-
-
-                    <button type="submit" class="submit-btn">
-                        Sign in
-                    </button>
-
-                </form>
-
-
-                <div class="bottom-text">
-
-                    Don't have an account?
-
-                    <a href="{% url 'register' %}">
-                        Create your account
-                    </a>
-
-                </div>
-
+              <label for="client"> Client </label>
             </div>
 
-        </section>
+            <div class="role-option">
+              <input type="radio" id="admin" name="role" value="admin" />
 
+              <label for="admin"> Admin </label>
+            </div>
+          </div>
+
+          <!-- LOGIN FORM -->
+
+          <form method="POST" action="">
+            {% csrf_token %}
+
+            <div class="form-group">
+              <label for="email"> Email address </label>
+
+              <input
+                class="form-input"
+                type="email"
+                id="email"
+                name="email"
+                placeholder="Enter your email address"
+                autocomplete="email"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="password"> Password </label>
+
+              <input
+                class="form-input"
+                type="password"
+                id="password"
+                name="password"
+                placeholder="Enter your password"
+                autocomplete="current-password"
+                required
+              />
+            </div>
+
+            <div class="form-options">
+              <label class="remember">
+                <input type="checkbox" name="remember" />
+
+                <span> Keep me signed in </span>
+              </label>
+
+              <a href="{% url 'password_reset' %}" class="forgot">
+                Forgot password?
+              </a>
+            </div>
+
+            <button type="submit" class="submit-btn">Sign in</button>
+          </form>
+
+          <div class="bottom-text">
+            Don't have an account?
+
+            <a href="{% url 'register' %}"> Create your account </a>
+          </div>
+        </div>
+      </section>
     </div>
-
-</body>
-
+  </body>
 </html>
