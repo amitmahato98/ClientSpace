@@ -1,0 +1,312 @@
+{% extends 'base.html' %}
+
+{% block title %}Settings - ClientSpace{% endblock %}
+{% block page_heading %}Settings{% endblock %}
+
+{% block extra_head %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'settings.css' %}">
+{% endblock %}
+
+
+{% block content %}
+<div class="sett-wrapper">
+
+    <h1 class="sett-title">Settings</h1>
+
+    <div class="sett-layout">
+
+        <!-- ── Sidebar Navigation ── -->
+        <nav class="sett-nav">
+            <button class="sett-tab-btn active" id="tab-btn-profile" onclick="settSwitch('profile')">Profile</button>
+            <button class="sett-tab-btn"        id="tab-btn-portal"  onclick="settSwitch('portal')">Client Portal</button>
+            <button class="sett-tab-btn"        id="tab-btn-billing" onclick="settSwitch('billing')">Billing &amp; Plan</button>
+        </nav>
+
+        <!-- ── Panel Area ── -->
+        <div>
+
+            <!-- ════════════ PROFILE ════════════ -->
+            <div id="panel-profile" class="sett-panel">
+
+                <h2 class="sett-panel-title">Profile</h2>
+
+                <form method="POST" action="" onsubmit="event.preventDefault(); settToast('Profile updated successfully!');">
+                    {% csrf_token %}
+
+                    <!-- Avatar -->
+                    <div class="sett-avatar">
+                        <div id="avatarPreview">AR</div>
+                        <div>
+                            <input type="file" id="photoInput" class="hidden" accept="image/*" onchange="settPreviewPhoto(event)">
+                            <button type="button" class="btn-outline" onclick="document.getElementById('photoInput').click()">
+                                Change photo
+                            </button>
+                            <p class="sett-avatar-hint">PNG, JPG up to 2MB</p>
+                        </div>
+                    </div>
+
+                    <!-- Full name & Display name -->
+                    <div class="sett-field-grid">
+                        <div>
+                            <label class="sett-label">Full name</label>
+                            <input class="sett-input" type="text" name="full_name" placeholder="Full Name" required>
+                        </div>
+                        <div>
+                            <label class="sett-label">Display name</label>
+                            <input class="sett-input" type="text" name="display_name" placeholder="Display name" required>
+                        </div>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="sett-field">
+                        <label class="sett-label">Email</label>
+                        <input class="sett-input" type="email" name="email" placeholder="abcd@gmail.com" required>
+                    </div>
+
+                    <!-- New password -->
+                    <div class="sett-field">
+                        <label class="sett-label">New password</label>
+                        <input class="sett-input" type="password" name="new_password" placeholder="Enter your new password">
+                    </div>
+
+                    <!-- Confirm password -->
+                    <div class="sett-field">
+                        <label class="sett-label">Confirm new password</label>
+                        <input class="sett-input" type="password" name="confirm_password" placeholder="Repeat password">
+                    </div>
+
+                    <button type="submit" class="btn-primary">Save Profile</button>
+                </form>
+
+            </div>
+
+
+            <!-- ════════════ CLIENT PORTAL ════════════ -->
+            <div id="panel-portal" class="sett-panel" style="display:none;">
+
+                <h2 class="sett-panel-title">Client Portal Settings</h2>
+
+                <form onsubmit="event.preventDefault(); settToast('Portal settings saved!');">
+
+                    <!-- Portal header message -->
+                    <label class="sett-label-light">Portal header message</label>
+                    <input class="sett-input" type="text" value="Welcome to your Rivera Studio project portal.">
+
+                    <hr class="sett-divider">
+
+                    <!-- Toggle list -->
+                    <div class="sett-toggle-list">
+
+                        <div class="sett-toggle-row">
+                            <div>
+                                <p class="sett-toggle-label">Show task list to clients</p>
+                                <p class="sett-toggle-hint">Clients can see project tasks (read-only)</p>
+                            </div>
+                            <label class="toggle">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="sett-toggle-row">
+                            <div>
+                                <p class="sett-toggle-label">Show payment status</p>
+                                <p class="sett-toggle-hint">Clients can see what they've paid and owe</p>
+                            </div>
+                            <label class="toggle">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="sett-toggle-row">
+                            <div>
+                                <p class="sett-toggle-label">Show files</p>
+                                <p class="sett-toggle-hint">Clients can download shared files</p>
+                            </div>
+                            <label class="toggle">
+                                <input type="checkbox">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="sett-toggle-row">
+                            <div>
+                                <p class="sett-toggle-label">Allow client comments</p>
+                                <p class="sett-toggle-hint">Clients can post comments on notes</p>
+                            </div>
+                            <label class="toggle">
+                                <input type="checkbox">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                    </div>
+
+                    <div class="sett-btn-row">
+                        <button type="submit" class="btn-primary">Save Portal Settings</button>
+                        <button type="button" class="btn-outline" onclick="settToast('Opening portal preview…')">Preview Portal</button>
+                    </div>
+
+                </form>
+
+            </div>
+
+
+            <!-- ════════════ BILLING & PLAN ════════════ -->
+            <div id="panel-billing" class="sett-panel" style="display:none;">
+
+                <h2 class="sett-panel-title">Billing &amp; Plan</h2>
+
+                <!-- Warning alert -->
+                <div class="sett-alert">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                         fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                         style="flex-shrink:0;">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    <p>You're using 5 clients on a Free plan (limit: 3). Upgrade to unlock unlimited clients.</p>
+                </div>
+
+                <!-- Usage stats -->
+                <div class="sett-stats">
+                    <div class="sett-stat-row">
+                        <span class="sett-stat-label indigo">Current plan</span>
+                        <span class="sett-stat-value">Free</span>
+                    </div>
+                    <div class="sett-stat-row">
+                        <span class="sett-stat-label">Clients</span>
+                        <span class="sett-stat-value danger">5 / 3 &nbsp;<span style="font-weight:500;">(over limit)</span></span>
+                    </div>
+                    <div class="sett-stat-row">
+                        <span class="sett-stat-label">Team members</span>
+                        <span class="sett-stat-value">2 / 2</span>
+                    </div>
+                    <div class="sett-stat-row">
+                        <span class="sett-stat-label">Invoices sent this month</span>
+                        <span class="sett-stat-value">3 / 5</span>
+                    </div>
+                </div>
+
+                <!-- CTA buttons -->
+                <div class="sett-btn-row">
+                    <button class="btn-primary" onclick="settToast('Redirecting to upgrade…')">Upgrade to Pro &mdash; NPR 999/mo</button>
+                    <button class="btn-outline" onclick="showAllPlans()">See all plans</button>
+                </div>
+
+                <!-- All plans (expandable) -->
+                <div class="sett-plans-grid" id="all-plans-modal">
+                    <div class="sett-plans-cols">
+
+                        <!-- Starter -->
+                        <div class="sett-plan-col">
+                            <p class="sett-plan-name">Starter</p>
+                            <p class="sett-plan-price">Free</p>
+                            <p class="sett-plan-period">Forever free</p>
+                            <ul class="sett-plan-features">
+                                <li>✓ &nbsp;3 clients</li>
+                                <li>✓ &nbsp;1 seat</li>
+                                <li>✓ &nbsp;5 invoices/mo</li>
+                                <li class="disabled">✗ &nbsp;Custom branding</li>
+                                <li class="disabled">✗ &nbsp;Priority support</li>
+                            </ul>
+                            <button class="btn-outline" style="width:100%; opacity:.6; cursor:default;">Current plan</button>
+                        </div>
+
+                        <!-- Pro -->
+                        <div class="sett-plan-col highlighted">
+                            <span class="sett-plan-badge">Popular</span>
+                            <p class="sett-plan-name indigo">Pro</p>
+                            <p class="sett-plan-price">NPR 999</p>
+                            <p class="sett-plan-period">per month</p>
+                            <ul class="sett-plan-features">
+                                <li>✓ &nbsp;Unlimited clients</li>
+                                <li>✓ &nbsp;5 seats</li>
+                                <li>✓ &nbsp;Unlimited invoices</li>
+                                <li>✓ &nbsp;Custom branding</li>
+                                <li>✓ &nbsp;Priority support</li>
+                            </ul>
+                            <button class="btn-primary" style="width:100%;" onclick="settToast('Redirecting to checkout…')">Upgrade to Pro</button>
+                        </div>
+
+                        <!-- Business -->
+                        <div class="sett-plan-col">
+                            <p class="sett-plan-name">Business</p>
+                            <p class="sett-plan-price">NPR 2,499</p>
+                            <p class="sett-plan-period">per month</p>
+                            <ul class="sett-plan-features">
+                                <li>✓ &nbsp;Unlimited clients</li>
+                                <li>✓ &nbsp;20 seats</li>
+                                <li>✓ &nbsp;Unlimited invoices</li>
+                                <li>✓ &nbsp;White-label portal</li>
+                                <li>✓ &nbsp;Dedicated support</li>
+                            </ul>
+                            <button class="btn-outline" style="width:100%;" onclick="settToast('Contact sales for Business plan.')">Contact Sales</button>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+            <!-- /panels -->
+
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div id="sett-toast">
+    <i class="fas fa-check-circle" style="color:#4ade80;"></i>
+    <span id="sett-toast-msg">Saved!</span>
+</div>
+{% endblock %}
+
+
+{% block extra_scripts %}
+
+<script>
+    // Tab switching
+    function settSwitch(tab) {
+        ['profile', 'portal', 'billing'].forEach(t => {
+            document.getElementById('panel-' + t).style.display = 'none';
+            document.getElementById('tab-btn-' + t).classList.remove('active');
+        });
+        document.getElementById('panel-' + tab).style.display = 'block';
+        document.getElementById('tab-btn-' + tab).classList.add('active');
+    }
+
+    // Photo preview
+    function settPreviewPhoto(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+            const av = document.getElementById('avatarPreview');
+            av.style.backgroundImage = `url(${e.target.result})`;
+            av.style.backgroundSize = 'cover';
+            av.style.backgroundPosition = 'center';
+            av.textContent = '';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // Toast notification
+    function settToast(msg) {
+        const toast = document.getElementById('sett-toast');
+        document.getElementById('sett-toast-msg').textContent = msg || 'Saved!';
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    // Toggle "See all plans" section
+    function showAllPlans() {
+        const el = document.getElementById('all-plans-modal');
+        if (!el) return;
+        el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    }
+</script>
+
+{% endblock %}

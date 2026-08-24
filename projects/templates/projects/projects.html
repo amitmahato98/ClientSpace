@@ -1,0 +1,265 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Projects - ClientSpace{% endblock %}
+
+{% block navbar %}
+<!-- Top Header Navigation -->
+<div class="flex items-center justify-between w-full">
+    <!-- Left: Mobile Menu + Title -->
+    <div class="flex items-center gap-4">
+        <button id="sidebarToggle" class="md:hidden text-[#5a3e2b] text-xl hover:text-[#b8895e] transition">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div>
+            <h1 class="text-lg font-bold text-gray-900 leading-tight">Projects</h1>
+            <p class="text-xs text-gray-500">Every active and recently completed engagement</p>
+        </div>
+    </div>
+
+    <!-- Right: Search Bar & Actions -->
+    <div class="flex items-center gap-3">
+        <div class="relative hidden sm:block">
+            <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+            <input type="text" placeholder="Search clients, projects, tasks..." 
+                class="pl-9 pr-4 py-1.5 text-xs rounded-full bg-gray-100/80 text-gray-700 placeholder-gray-400 border border-transparent focus:bg-white focus:border-gray-300 focus:outline-none w-64 transition">
+        </div>
+        <button class="w-8 h-8 rounded-full border border-gray-200 bg-white/80 flex items-center justify-center text-gray-500 hover:bg-white text-xs transition">
+            <i class="far fa-bell"></i>
+        </button>
+        <button class="w-8 h-8 rounded-full border border-gray-200 bg-white/80 flex items-center justify-center text-gray-500 hover:bg-white text-xs transition">
+            <i class="far fa-question-circle"></i>
+        </button>
+        <div class="w-8 h-8 rounded-full bg-[#d34527] text-white text-xs font-semibold flex items-center justify-center">
+            MP
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto space-y-6">
+
+    <!-- Section Header & Controls -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-2">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Projects</h2>
+            <p class="text-xs text-gray-500 mt-1 font-medium">14 active · 3 at risk or blocked</p>
+        </div>
+        <div class="flex items-center gap-2.5">
+            <button class="px-4 py-2 bg-white/80 hover:bg-white text-gray-700 text-xs font-medium rounded-lg border border-gray-200 shadow-sm transition">
+                Filter
+            </button>
+            <button class="px-4 py-2 bg-[#e0532e] hover:bg-[#c84625] text-white text-xs font-medium rounded-lg shadow-sm transition flex items-center gap-1.5">
+                <i class="fas fa-plus text-[10px]"></i> New project
+            </button>
+        </div>
+    </div>
+
+    <!-- Projects Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        
+        <!-- Card 1: Brand identity refresh -->
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow">
+            <div>
+                <div class="flex items-start justify-between gap-2">
+                    <div>
+                        <h3 class="font-bold text-gray-900 text-sm leading-snug">Brand identity refresh</h3>
+                        <p class="text-xs text-gray-400 mt-1">Alden & Co.</p>
+                    </div>
+                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#e6f4ea] text-[#137333] shrink-0">
+                        <span class="text-base leading-none">·</span> On track
+                    </span>
+                </div>
+                <div class="mt-6">
+                    <div class="flex items-center justify-between text-xs mb-1.5">
+                        <span class="text-gray-400">Progress</span>
+                        <span class="text-gray-500 font-medium">72%</span>
+                    </div>
+                    <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                        <div class="h-full bg-[#e0532e] rounded-full w-[72%]"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center justify-between mt-6 pt-2">
+                <div class="flex -space-x-1 overflow-hidden">
+                    <div class="w-6 h-6 rounded-full bg-[#1b8755] text-white text-[10px] font-medium flex items-center justify-center ring-2 ring-white">PN</div>
+                    <div class="w-6 h-6 rounded-full bg-[#6f42c1] text-white text-[10px] font-medium flex items-center justify-center ring-2 ring-white">JK</div>
+                </div>
+                <div class="text-xs text-right">
+                    <span class="font-bold text-gray-900">$12,960</span>
+                    <span class="text-gray-400 font-normal"> / $18,000</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 2: Marketing site rebuild -->
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow">
+            <div>
+                <div class="flex items-start justify-between gap-2">
+                    <div>
+                        <h3 class="font-bold text-gray-900 text-sm leading-snug">Marketing site rebuild</h3>
+                        <p class="text-xs text-gray-400 mt-1">Solene Foods</p>
+                    </div>
+                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#fef7e0] text-[#b06000] shrink-0">
+                        <span class="text-base leading-none">·</span> At risk
+                    </span>
+                </div>
+                <div class="mt-6">
+                    <div class="flex items-center justify-between text-xs mb-1.5">
+                        <span class="text-gray-400">Progress</span>
+                        <span class="text-gray-500 font-medium">38%</span>
+                    </div>
+                    <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                        <div class="h-full bg-[#b45309] rounded-full w-[38%]"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center justify-between mt-6 pt-2">
+                <div class="flex -space-x-1 overflow-hidden">
+                    <div class="w-6 h-6 rounded-full bg-[#335c67] text-white text-[10px] font-medium flex items-center justify-center ring-2 ring-white">TR</div>
+                </div>
+                <div class="text-xs text-right">
+                    <span class="font-bold text-gray-900">$5,320</span>
+                    <span class="text-gray-400 font-normal"> / $14,000</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 3: Q3 investor deck -->
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow">
+            <div>
+                <div class="flex items-start justify-between gap-2">
+                    <div>
+                        <h3 class="font-bold text-gray-900 text-sm leading-snug">Q3 investor deck</h3>
+                        <p class="text-xs text-gray-400 mt-1">Verdant Capital</p>
+                    </div>
+                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#e6f4ea] text-[#137333] shrink-0">
+                        <span class="text-base leading-none">·</span> On track
+                    </span>
+                </div>
+                <div class="mt-6">
+                    <div class="flex items-center justify-between text-xs mb-1.5">
+                        <span class="text-gray-400">Progress</span>
+                        <span class="text-gray-500 font-medium">94%</span>
+                    </div>
+                    <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                        <div class="h-full bg-[#e0532e] rounded-full w-[94%]"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center justify-between mt-6 pt-2">
+                <div class="flex -space-x-1 overflow-hidden">
+                    <div class="w-6 h-6 rounded-full bg-[#d34527] text-white text-[10px] font-medium flex items-center justify-center ring-2 ring-white">MP</div>
+                </div>
+                <div class="text-xs text-right">
+                    <span class="font-bold text-gray-900">$7,050</span>
+                    <span class="text-gray-400 font-normal"> / $7,500</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 4: Product photography -->
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow">
+            <div>
+                <div class="flex items-start justify-between gap-2">
+                    <div>
+                        <h3 class="font-bold text-gray-900 text-sm leading-snug">Product photography</h3>
+                        <p class="text-xs text-gray-400 mt-1">Solene Foods</p>
+                    </div>
+                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#fce8e6] text-[#c5221f] shrink-0">
+                        <span class="text-base leading-none">·</span> Blocked
+                    </span>
+                </div>
+                <div class="mt-6">
+                    <div class="flex items-center justify-between text-xs mb-1.5">
+                        <span class="text-gray-400">Progress</span>
+                        <span class="text-gray-500 font-medium">15%</span>
+                    </div>
+                    <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                        <div class="h-full bg-[#e0532e] rounded-full w-[15%]"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center justify-between mt-6 pt-2">
+                <div class="flex -space-x-1 overflow-hidden">
+                    <div class="w-6 h-6 rounded-full bg-[#a35e00] text-white text-[10px] font-medium flex items-center justify-center ring-2 ring-white">TR</div>
+                </div>
+                <div class="text-xs text-right">
+                    <span class="font-bold text-gray-900">$780</span>
+                    <span class="text-gray-400 font-normal"> / $5,200</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 5: Office signage system -->
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow">
+            <div>
+                <div class="flex items-start justify-between gap-2">
+                    <div>
+                        <h3 class="font-bold text-gray-900 text-sm leading-snug">Office signage system</h3>
+                        <p class="text-xs text-gray-400 mt-1">Alden & Co.</p>
+                    </div>
+                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#e8f0fe] text-[#1a73e8] shrink-0">
+                        <span class="text-base leading-none">·</span> Planning
+                    </span>
+                </div>
+                <div class="mt-6">
+                    <div class="flex items-center justify-between text-xs mb-1.5">
+                        <span class="text-gray-400">Progress</span>
+                        <span class="text-gray-500 font-medium">8%</span>
+                    </div>
+                    <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                        <div class="h-full bg-[#2563eb] rounded-full w-[8%]"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center justify-between mt-6 pt-2">
+                <div class="flex -space-x-1 overflow-hidden">
+                    <div class="w-6 h-6 rounded-full bg-[#1b8755] text-white text-[10px] font-medium flex items-center justify-center ring-2 ring-white">PN</div>
+                </div>
+                <div class="text-xs text-right">
+                    <span class="font-bold text-gray-900">$510</span>
+                    <span class="text-gray-400 font-normal"> / $6,400</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 6: Onboarding flow redesign -->
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 flex flex-col justify-between hover:shadow-md transition-shadow">
+            <div>
+                <div class="flex items-start justify-between gap-2">
+                    <div>
+                        <h3 class="font-bold text-gray-900 text-sm leading-snug">Onboarding flow redesign</h3>
+                        <p class="text-xs text-gray-400 mt-1">Halcyon Labs</p>
+                    </div>
+                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#e6f4ea] text-[#137333] shrink-0">
+                        <span class="text-base leading-none">·</span> On track
+                    </span>
+                </div>
+                <div class="mt-6">
+                    <div class="flex items-center justify-between text-xs mb-1.5">
+                        <span class="text-gray-400">Progress</span>
+                        <span class="text-gray-500 font-medium">55%</span>
+                    </div>
+                    <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                        <div class="h-full bg-[#e0532e] rounded-full w-[55%]"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center justify-between mt-6 pt-2">
+                <div class="flex -space-x-1 overflow-hidden">
+                    <div class="w-6 h-6 rounded-full bg-[#6f42c1] text-white text-[10px] font-medium flex items-center justify-center ring-2 ring-white">JK</div>
+                    <div class="w-6 h-6 rounded-full bg-[#2b3a4a] text-white text-[10px] font-medium flex items-center justify-center ring-2 ring-white">TR</div>
+                </div>
+                <div class="text-xs text-right">
+                    <span class="font-bold text-gray-900">$9,900</span>
+                    <span class="text-gray-400 font-normal"> / $18,000</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
