@@ -735,7 +735,7 @@
 
                 <!-- REGISTER FORM -->
 
-                <form method="POST" action="#">
+                <form method="POST" action="">
 
                     {% csrf_token %}
 
@@ -849,7 +849,7 @@
 
                     Already have an account?
 
-                    <a href="/login/">
+                    <a href="{% url 'login' %}">
                         Sign in
                     </a>
 

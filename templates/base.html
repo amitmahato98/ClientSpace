@@ -1,4 +1,4 @@
-{% load static %}\
+{% load static %}
 {% load tailwind_tags %}
 
 <!doctype html>
@@ -59,6 +59,7 @@
     <!-- MAIN WRAPPER: SIDEBAR + CONTENT                              -->
     <!-- ============================================================ -->
     <div class="flex h-screen overflow-hidden">
+
       <!-- ========== DESKTOP SIDEBAR ========== -->
       <aside
         class="sidebar-bg w-64 shrink-0 hidden md:flex flex-col h-full border-r border-[#e8dccc] shadow-sm overflow-y-auto"
@@ -79,75 +80,53 @@
         <!-- Sidebar Navigation -->
         <nav class="flex-1 p-4 space-y-1">
           {% block sidebar %}
-          <!-- Dashboard -->
-          <a
-            href="#"
-            data-nav="dashboard"
-            class="sidebar-link sidebar-active flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition"
-          >
-            <i class="fas fa-th-large w-5 text-center text-[#b8895e]"></i>
-            <span>Dashboard</span>
-          </a>
+            <!-- Dashboard -->
+            <a href="{% url 'home' %}" data-nav="dashboard" class="sidebar-link sidebar-active flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#4a3520] font-medium text-sm transition">
+              <i class="fas fa-th-large w-5 text-center text-[#b8895e]"></i>
+              <span>Dashboard</span>
+            </a>
 
-          <!-- Clients -->
-          <a
-            href="{% url 'clients' %}"
-            data-nav="clients"
-            class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition"
-          >
-            <i class="fas fa-users w-5 text-center text-[#b8895e]"></i>
-            <span>Clients</span>
-          </a>
+            <!-- Clients -->
+            <a href="{% url 'clients' %}" data-nav="clients" class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#6b4f3a] hover:text-[#4a3520] text-sm transition">
+              <i class="fas fa-users w-5 text-center text-[#b8895e]"></i>
+              <span>Clients</span>
+            </a>
 
-          <!-- Projects -->
-          <a
-            href="{% url 'projects:project_view' %}"
-            data-nav="projects"
-            class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition"
-          >
-            <i class="fas fa-folder-open w-5 text-center text-[#b8895e]"></i>
-            <span>Projects</span>
-          </a>
+            <!-- Projects -->
+            <a href="{% url 'projects:project_view' %}" data-nav="projects" class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#6b4f3a] hover:text-[#4a3520] text-sm transition">
+              <i class="fas fa-folder-open w-5 text-center text-[#b8895e]"></i>
+              <span>Projects</span>
+            </a>
 
-          <!-- Tasks -->
-          <a
-            href="#"
-            data-nav="tasks"
-            class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition"
-          >
-            <i class="fas fa-tasks w-5 text-center text-[#b8895e]"></i>
-            <span>Tasks</span>
-          </a>
+            <!-- Tasks -->
+            <a href="#" data-nav="tasks" class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#6b4f3a] hover:text-[#4a3520] text-sm transition">
+              <i class="fas fa-tasks w-5 text-center text-[#b8895e]"></i>
+              <span>Tasks</span>
+            </a>
 
-          <!-- Payments -->
-          <a
-            href="#"
-            data-nav="payments"
-            class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition"
-          >
-            <i class="fas fa-credit-card w-5 text-center text-[#b8895e]"></i>
-            <span>Payments</span>
-          </a>
+            <!-- Payments -->
+            <a href="#" data-nav="payments" class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#6b4f3a] hover:text-[#4a3520] text-sm transition">
+              <i class="fas fa-credit-card w-5 text-center text-[#b8895e]"></i>
+              <span>Payments</span>
+            </a>
 
-          <!-- Progress & Reports -->
-          <a
-            href="#"
-            data-nav="reports"
-            class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition"
-          >
-            <i class="fas fa-chart-line w-5 text-center text-[#b8895e]"></i>
-            <span>Progress & Reports</span>
-          </a>
+            <!-- Progress & Reports -->
+            <a href="#" data-nav="reports" class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#6b4f3a] hover:text-[#4a3520] text-sm transition">
+              <i class="fas fa-chart-line w-5 text-center text-[#b8895e]"></i>
+              <span>Progress &amp; Reports</span>
+            </a>
 
-          <!-- WorkSpace -->
-          <a
-            href="#"
-            data-nav="workspace"
-            class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition"
-          >
-            <i class="fas fa-cog w-5 text-center text-[#b8895e]"></i>
-            <span>WorkSpace</span>
-          </a>
+            <!-- WorkSpace -->
+            <a href="#" data-nav="workspace" class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#6b4f3a] hover:text-[#4a3520] text-sm transition">
+              <i class="fas fa-cog w-5 text-center text-[#b8895e]"></i>
+              <span>WorkSpace</span>
+            </a>
+
+            <!-- Settings -->
+            <a href="{% url 'settings' %}" data-nav="settings" class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#6b4f3a] hover:text-[#4a3520] text-sm transition">
+              <i class="fas fa-cog w-5 text-center text-[#b8895e]"></i>
+              <span>Settings</span>
+            </a>
           {% endblock %}
         </nav>
 
@@ -159,6 +138,7 @@
 
       <!-- ========== MAIN CONTENT ========== -->
       <div class="flex-1 flex flex-col h-full overflow-hidden content-bg">
+
         <!-- ===== NAVBAR ===== -->
         <header
           class="bg-white/70 backdrop-blur-sm border-b border-[#e8dccc] px-6 py-3 flex items-center justify-between shrink-0"
@@ -233,7 +213,7 @@
       </div>
       <nav class="flex-1 p-4 space-y-1">
         <a
-          href="#"
+          href="{% url 'home' %}"
           data-nav="dashboard"
           class="sidebar-link sidebar-active flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition"
         >
@@ -278,7 +258,7 @@
           class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition"
         >
           <i class="fas fa-chart-line w-5 text-center text-[#b8895e]"></i>
-          <span>Progress & Reports</span>
+          <span>Progress &amp; Reports</span>
         </a>
         <a
           href="#"
@@ -288,6 +268,14 @@
           <i class="fas fa-cog w-5 text-center text-[#b8895e]"></i>
           <span>WorkSpace</span>
         </a>
+        <a
+          href="{% url 'settings' %}"
+          data-nav="settings"
+          class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition"
+        >
+          <i class="fas fa-cog w-5 text-center text-[#b8895e]"></i>
+          <span>Settings</span>
+        </a>
       </nav>
       <div class="p-4 border-t border-[#e8dccc] text-xs text-[#8b6f55]">
         <i class="far fa-circle text-[8px] text-green-500 mr-1"></i> Online
@@ -295,7 +283,7 @@
     </aside>
 
     <!-- ============================================================ -->
-    <!-- JAVASCRIPT: Active states & Mobile toggle                     -->
+    <!-- JAVASCRIPT: Active states & Mobile toggle                    -->
     <!-- ============================================================ -->
     <script>
       // 1. Mobile Sidebar Toggle Logic
