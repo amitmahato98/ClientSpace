@@ -25,4 +25,5 @@ urlpatterns = [
     path('clients/', include('clients.urls')),
     path('settings/', include('sett.urls')),
     path('', TemplateView.as_view(template_name='base.html'), name='home'),
+    path('dashboard/',include('dashboard.urls')),
 ]
