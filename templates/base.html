@@ -132,7 +132,15 @@
 
         <!-- Sidebar Footer -->
         <div class="p-4 border-t border-[#e8dccc] text-xs text-[#8b6f55]">
-          <i class="far fa-circle text-[8px] text-green-500 mr-1"></i> Online
+          {% if user.is_authenticated %}
+            <div class="flex items-center gap-2">
+              <i class="far fa-circle text-[8px] text-green-500"></i>
+              <span class="truncate">{{ user.get_full_name|default:user.username }}</span>
+              <span class="ml-auto uppercase text-[10px] bg-[#f5e6d0] text-[#6b4f3a] px-1.5 py-0.5 rounded">{{ user.role }}</span>
+            </div>
+          {% else %}
+            <i class="far fa-circle text-[8px] text-gray-400 mr-1"></i> Not signed in
+          {% endif %}
         </div>
       </aside>
 
@@ -160,17 +168,21 @@
 
           <!-- Right: User / actions -->
           <div class="flex items-center gap-4 text-[#5a3e2b]">
-            <span class="text-sm hidden sm:inline text-[#8b6f55]">
-              Wednesday, 20 August
-            </span>
-            <i
-              class="fas fa-bell text-lg hover:text-[#b8895e] cursor-pointer transition"
-            ></i>
-            <div
-              class="w-8 h-8 rounded-full bg-[#d4a373] flex items-center justify-center text-white text-sm font-medium"
-            >
-              JD
-            </div>
+            <i class="fas fa-bell text-lg hover:text-[#b8895e] cursor-pointer transition"></i>
+            {% if user.is_authenticated %}
+              <!-- User avatar initials -->
+              <div class="w-8 h-8 rounded-full bg-[#d4a373] flex items-center justify-center text-white text-sm font-medium" title="{{ user.get_full_name|default:user.username }}">
+                {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+              </div>
+              <!-- Logout -->
+              <form method="POST" action="{% url 'accounts:logout' %}" style="margin:0">
+                {% csrf_token %}
+                <button type="submit" title="Sign out"
+                  class="text-sm text-[#8b6f55] hover:text-[#4a3520] transition font-medium focus:outline-none">
+                  <i class="fas fa-sign-out-alt"></i>
+                </button>
+              </form>
+            {% endif %}
           </div>
           {% endblock %}
         </header>
@@ -278,7 +290,11 @@
         </a>
       </nav>
       <div class="p-4 border-t border-[#e8dccc] text-xs text-[#8b6f55]">
-        <i class="far fa-circle text-[8px] text-green-500 mr-1"></i> Online
+        {% if user.is_authenticated %}
+          <i class="far fa-circle text-[8px] text-green-500 mr-1"></i> {{ user.get_full_name|default:user.username }}
+        {% else %}
+          <i class="far fa-circle text-[8px] text-gray-400 mr-1"></i> Not signed in
+        {% endif %}
       </div>
     </aside>
 

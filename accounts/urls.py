@@ -1,40 +1,28 @@
 from django.urls import path
-from django.contrib.auth import views as auth_views
 from . import views
 
+app_name = "accounts"
+
 urlpatterns = [
-    path("login/", views.login_view, name="login"),
-    path("register/", views.register, name="register"),
+    # ── Authentication ───────────────────────────────────────────────────────
+    path("login/",   views.login_view,   name="login"),
+    path("logout/",  views.logout_view,  name="logout"),
+
+    # ── Registration ─────────────────────────────────────────────────────────
+    path("register/",     views.register_view,     name="register"),
+    path("register/otp/", views.register_otp_view, name="register_otp"),
+
+    # ── Organization onboarding (post-registration) ──────────────────────────
+    path("create-organization/", views.create_organization_view, name="create_organization"),
+
+    # ── Password reset (OTP-based) ────────────────────────────────────────────
+    path("forgot-password/",       views.forgot_password_view,     name="forgot_password"),
+    path("forgot-password/otp/",   views.forgot_password_otp_view, name="forgot_password_otp"),
+    path("forgot-password/reset/", views.set_new_password_view,    name="set_new_password"),
+
+    # ── Google OAuth placeholder ─────────────────────────────────────────────
     path("google/", views.google_login, name="google_login"),
-    path(
-        "forgot-password/",
-        auth_views.PasswordResetView.as_view(
-            template_name="accounts/forgot_password.html",
-            email_template_name="accounts/password_reset_email.html",
-            success_url="/forgot-password/done/",
-        ),
-        name="password_reset",
-    ),
-    path(
-        "forgot-password/done/",
-        auth_views.PasswordResetDoneView.as_view(
-            template_name="accounts/password_reset_done.html"
-        ),
-        name="password_reset_done",
-    ),
-    path(
-        "reset/<uidb64>/<token>/",
-        auth_views.PasswordResetConfirmView.as_view(
-            template_name="accounts/password_reset_confirm.html",
-            success_url="/reset/done/",
-        ),
-        name="password_reset_confirm",
-    ),
-    path(
-        "reset/done/",
-        auth_views.PasswordResetCompleteView.as_view(
-            template_name="accounts/password_reset_complete.html"
-        ),
-        name="password_reset_complete",
-    ),
+
+    # ── Dashboard (authenticated landing) ────────────────────────────────────
+    path("dashboard/", views.dashboard_view, name="dashboard"),
 ]
