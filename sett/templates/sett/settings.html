@@ -19,11 +19,12 @@
         <!-- ── Sidebar Navigation ── -->
         <nav class="sett-nav">
             <button class="sett-tab-btn active" id="tab-btn-profile" onclick="settSwitch('profile')">Profile</button>
+            <button class="sett-tab-btn"        id="tab-btn-workspace" onclick="settSwitch('workspace')">Workspace</button>
+            <button class="sett-tab-btn"        id="tab-btn-notification" onclick="settSwitch('notification')">Notifications</button>
             <button class="sett-tab-btn"        id="tab-btn-portal"  onclick="settSwitch('portal')">Client Portal</button>
             <button class="sett-tab-btn"        id="tab-btn-billing" onclick="settSwitch('billing')">Billing &amp; Plan</button>
         </nav>
 
-        <!-- ── Panel Area ── -->
         <div>
 
             <!-- ════════════ PROFILE ════════════ -->
@@ -50,11 +51,11 @@
                     <div class="sett-field-grid">
                         <div>
                             <label class="sett-label">Full name</label>
-                            <input class="sett-input" type="text" name="full_name" placeholder="Full Name" required>
+                            <input class="sett-input" type="text" name="full_name" placeholder="Enter your Full Name" required>
                         </div>
                         <div>
                             <label class="sett-label">Display name</label>
-                            <input class="sett-input" type="text" name="display_name" placeholder="Display name" required>
+                            <input class="sett-input" type="text" name="display_name" placeholder="Enter your Display name" required>
                         </div>
                     </div>
 
@@ -73,10 +74,44 @@
                     <!-- Confirm password -->
                     <div class="sett-field">
                         <label class="sett-label">Confirm new password</label>
-                        <input class="sett-input" type="password" name="confirm_password" placeholder="Repeat password">
+                        <input class="sett-input" type="password" name="confirm_password" placeholder="Enter confirm password">
                     </div>
 
                     <button type="submit" class="btn-primary">Save Profile</button>
+                </form>
+
+            </div>
+
+
+            <!-- ════════════ WORKSPACE ════════════ -->
+            <div id="panel-workspace" class="sett-panel" style="display:none;">
+
+                <h2 class="sett-panel-title">Workspace</h2>
+
+                <form onsubmit="event.preventDefault(); settToast('Workspace saved successfully!');">
+                    <!-- Workspace Name -->
+                    <div class="sett-field">
+                        <label class="sett-label">Studio / Workspace name</label>
+                        <input class="sett-input" type="text" name="workspace_name" value="Rivera Studio" required>
+                    </div>
+
+                    <!-- Role -->
+                    <div class="sett-field">
+                        <label class="sett-label">Your role</label>
+                        <input class="sett-input" type="text" name="role" value="Freelance Designer & Developer" required>
+                    </div>
+
+                    <!-- Currency -->
+                    <div class="sett-field">
+                        <label class="sett-label">Currency</label>
+                        <select class="sett-input" name="currency" required>
+                            <option value="INR" selected>₹ INR — Indian Rupee</option>
+                            <option value="USD">$ USD</option>
+                            <option value="EUR">€ EUR</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn-primary" style="margin-top: 10px;">Save Workspace</button>
                 </form>
 
             </div>
@@ -91,7 +126,7 @@
 
                     <!-- Portal header message -->
                     <label class="sett-label-light">Portal header message</label>
-                    <input class="sett-input" type="text" value="Welcome to your Rivera Studio project portal.">
+                    <input class="sett-input" type="text" placeholder="Enter your Portal header message here ">
 
                     <hr class="sett-divider">
 
@@ -251,6 +286,84 @@
                 </div>
 
             </div>
+
+            <!-- ════════════ NOTIFICATIONS ════════════ -->
+            <div id="panel-notification" class="sett-panel" style="display:none;">
+                <div style="background: #fff; border: 1px solid #f3f4f6; border-radius: 12px; padding: 24px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                    <h3 style="font-size: 16px; font-weight: 700; color: #111827; margin: 0 0 4px 0;">Email Notifications</h3>
+                    <p style="font-size: 14px; color: #6b7280; margin: 0 0 24px 0;"></p>
+
+                    <div class="sett-toggle-list">
+
+                        <div class="sett-toggle-row" style="border-bottom: 1px solid #f3f4f6; padding-bottom: 16px; margin-bottom: 16px;">
+                            <div>
+                                <p class="sett-toggle-label" style="font-weight: 600; color: #111827;">Payment received</p>
+                                <p class="sett-toggle-hint" style="color: #6b7280;">When a client payment is recorded</p>
+                            </div>
+                            <label class="toggle">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="sett-toggle-row" style="border-bottom: 1px solid #f3f4f6; padding-bottom: 16px; margin-bottom: 16px;">
+                            <div>
+                                <p class="sett-toggle-label" style="font-weight: 600; color: #111827;">Deadline reminder</p>
+                                <p class="sett-toggle-hint" style="color: #6b7280;">2 days before a project is due</p>
+                            </div>
+                            <label class="toggle">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="sett-toggle-row" style="border-bottom: 1px solid #f3f4f6; padding-bottom: 16px; margin-bottom: 16px;">
+                            <div>
+                                <p class="sett-toggle-label" style="font-weight: 600; color: #111827;">Overdue alert</p>
+                                <p class="sett-toggle-hint" style="color: #6b7280;">When a project passes its deadline</p>
+                            </div>
+                            <label class="toggle">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="sett-toggle-row" style="border-bottom: 1px solid #f3f4f6; padding-bottom: 16px; margin-bottom: 16px;">
+                            <div>
+                                <p class="sett-toggle-label" style="font-weight: 600; color: #111827;">Client portal viewed</p>
+                                <p class="sett-toggle-hint" style="color: #6b7280;">When a client opens their portal</p>
+                            </div>
+                            <label class="toggle">
+                                <input type="checkbox">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="sett-toggle-row" style="border-bottom: 1px solid #f3f4f6; padding-bottom: 16px; margin-bottom: 16px;">
+                            <div>
+                                <p class="sett-toggle-label" style="font-weight: 600; color: #111827;">Team member joined</p>
+                                <p class="sett-toggle-hint" style="color: #6b7280;">When an invite is accepted</p>
+                            </div>
+                            <label class="toggle">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="sett-toggle-row" style="padding-bottom: 4px;">
+                            <div>
+                                <p class="sett-toggle-label" style="font-weight: 600; color: #111827;">Weekly summary</p>
+                                <p class="sett-toggle-hint" style="color: #6b7280;">Monday morning recap of the week ahead</p>
+                            </div>
+                            <label class="toggle">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
             <!-- /panels -->
 
         </div>
@@ -270,7 +383,7 @@
 <script>
     // Tab switching
     function settSwitch(tab) {
-        ['profile', 'portal', 'billing'].forEach(t => {
+        ['profile', 'workspace', 'portal', 'billing', 'notification'].forEach(t => {
             document.getElementById('panel-' + t).style.display = 'none';
             document.getElementById('tab-btn-' + t).classList.remove('active');
         });
