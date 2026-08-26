@@ -1,0 +1,341 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block page_heading %}Dashboard{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'dashboard/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-content">
+
+    <!-- TOP HEADER -->
+    <header class="dashboard-header">
+
+        <div>
+          
+                <h1>Hello User🌞</h1>
+                <p>Wednesday, 20 August · 7 active projects</p>
+          
+        </div>
+
+        <div class="header-actions">
+
+            <div class="search-box">
+                <span>⌕</span>
+                <input type="text" placeholder="Search anything... ⌘K">
+            </div>
+
+            <button class="notification">♧</button>
+
+            <button class="new-project">
+                + New Project
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <!-- ALERT -->
+    <div class="alert-box">
+
+        <span class="alert-icon">⊙</span>
+
+        <span>
+            <strong>2 projects are overdue</strong>
+            — E-commerce Store (6 days) and Marketing Site (3 days).
+            Review them below.
+        </span>
+
+        <a href="#">View all →</a>
+
+    </div>
+
+
+    <!-- STATISTICS -->
+    <section class="stats">
+
+        <div class="stat-card purple">
+            <span>ACTIVE PROJECTS</span>
+            <h2>7</h2>
+            <p>across 5 clients</p>
+        </div>
+
+        <div class="stat-card red">
+            <span>OVERDUE</span>
+            <h2>2</h2>
+            <p>needs attention</p>
+        </div>
+
+        <div class="stat-card orange">
+            <span>DUE THIS WEEK</span>
+            <h2>3</h2>
+            <p>next: Logo Design, Aug 22</p>
+        </div>
+
+        <div class="stat-card blue">
+            <span>PENDING PAYMENTS</span>
+            <h2>₹64,500</h2>
+            <p>4 invoices outstanding</p>
+        </div>
+
+        <div class="stat-card green">
+            <span>EARNED THIS MONTH</span>
+            <h2>₹1,28,000</h2>
+            <p>↑ 18% vs July</p>
+        </div>
+
+    </section>
+
+
+    <!-- MAIN GRID -->
+    <section class="dashboard-grid">
+
+
+        <!-- RECENT PROJECTS -->
+        <div class="card projects-card">
+
+            <div class="card-header">
+                <h2>Recent Projects</h2>
+                <a href="#">All projects →</a>
+            </div>
+
+
+            <div class="project">
+
+                <div class="project-avatar purple-bg">
+                    RS
+                </div>
+
+                <div class="project-details">
+                    <h3>Website Redesign</h3>
+                    <p>Rahul Sharma · 8/12 tasks</p>
+                </div>
+
+                <span class="status progress">
+                    ● In Progress
+                </span>
+
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <span style="width: 67%;"></span>
+                    </div>
+                    <small>67%</small>
+                </div>
+
+                <div class="deadline">
+                    <small>DUE</small>
+                    <strong>Sep 2</strong>
+                </div>
+
+            </div>
+
+
+            <div class="project">
+
+                <div class="project-avatar orange-bg">
+                    MK
+                </div>
+
+                <div class="project-details">
+                    <h3>Logo Design</h3>
+                    <p>Meera Kapoor · 4/5 tasks</p>
+                </div>
+
+                <span class="status progress">
+                    ● In Progress
+                </span>
+
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <span style="width: 80%;"></span>
+                    </div>
+                    <small>80%</small>
+                </div>
+
+                <div class="deadline">
+                    <small>DUE</small>
+                    <strong class="orange-text">Aug 22</strong>
+                </div>
+
+            </div>
+
+
+            <div class="project">
+
+                <div class="project-avatar red-bg">
+                    PN
+                </div>
+
+                <div class="project-details">
+                    <h3>E-commerce Store</h3>
+                    <p>Priya Nair · 6/20 tasks</p>
+                </div>
+
+                <span class="status overdue">
+                    ● Overdue
+                </span>
+
+                <div class="progress-container">
+                    <div class="progress-bar red-bar">
+                        <span style="width: 30%;"></span>
+                    </div>
+                    <small>30%</small>
+                </div>
+
+                <div class="deadline">
+                    <small>DUE</small>
+                    <strong class="red-text">Aug 14</strong>
+                </div>
+
+            </div>
+
+
+            <div class="project">
+
+                <div class="project-avatar green-bg">
+                    DO
+                </div>
+
+                <div class="project-details">
+                    <h3>Brand Identity</h3>
+                    <p>Bright Path Nonprofit · 9/9 tasks</p>
+                </div>
+
+                <span class="status completed">
+                    ● Completed
+                </span>
+
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <span style="width: 100%;"></span>
+                    </div>
+                    <small>100%</small>
+                </div>
+
+                <div class="deadline">
+                    <small>DUE</small>
+                    <strong>Aug 10</strong>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ACTIVITY FEED -->
+        <div class="card activity-card">
+
+            <div class="card-header">
+                <h2>Activity Feed</h2>
+            </div>
+
+
+            <div class="activity">
+
+                <span class="dot green-dot"></span>
+
+                <div>
+                    <h3>Marked Brand Identity as Completed</h3>
+                    <p>Today, 9:12 AM</p>
+                </div>
+
+            </div>
+
+
+            <div class="activity">
+
+                <span class="dot blue-dot"></span>
+
+                <div>
+                    <h3>Payment ₹40,000 from Rahul Sharma</h3>
+                    <p>Today, 8:40 AM</p>
+                </div>
+
+            </div>
+
+
+            <div class="activity">
+
+                <span class="dot purple-dot"></span>
+
+                <div>
+                    <h3>New task added in Logo Design</h3>
+                    <p>Yesterday, 5:02 PM</p>
+                </div>
+
+            </div>
+
+
+            <div class="activity">
+
+                <span class="dot red-dot"></span>
+
+                <div>
+                    <h3>E-commerce Store deadline passed</h3>
+                    <p>Aug 14, 12:00 AM</p>
+                </div>
+
+            </div>
+
+
+            <div class="activity">
+
+                <span class="dot blue-dot"></span>
+
+                <div>
+                    <h3>Invited Sana Iqbal to the team</h3>
+                    <p>Aug 13, 3:20 PM</p>
+                </div>
+
+            </div>
+
+
+            <div class="activity">
+
+                <span class="dot purple-dot"></span>
+
+                <div>
+                    <h3>Invoice INV-009 sent to Meera Kapoor</h3>
+                    <p>Aug 5, 10:00 AM</p>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- EARNINGS -->
+        <div class="card earnings-card">
+
+            <div class="card-header">
+                <h2>Earnings — Last 6 Months</h2>
+            </div>
+
+            <div class="chart">
+
+                <div class="chart-line"></div>
+
+                <div class="chart-months">
+                    <span>Mar</span>
+                    <span>Apr</span>
+                    <span>May</span>
+                    <span>Jun</span>
+                    <span>Jul</span>
+                    <span>Aug</span>
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</div>
+
+{% endblock %}

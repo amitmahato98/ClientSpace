@@ -25,9 +25,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", "False") == "True"
+DEBUG = os.getenv("Debug", os.getenv("DEBUG", "False")) == "True"
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
 
 # Application definition
@@ -46,7 +46,10 @@ INSTALLED_APPS = [
     'clients',
     'projects',
     'sett',
+    'dashboard',
 ]
+
+AUTH_USER_MODEL = "accounts.User"
 
 TAILWIND_APP_NAME = 'theme'
 
@@ -60,6 +63,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # Must come AFTER AuthenticationMiddleware so request.user is available.
+    'ClientSpace.middleware.LoginRequiredMiddleware',
 ]
 
 ROOT_URLCONF = 'ClientSpace.urls'
@@ -133,11 +138,25 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
 
+# Media files (user-uploaded content — organization logos, etc.)
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
-# Email
-# https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# ── Email / Gmail SMTP ────────────────────────────────────────────────────────
+# Credentials are loaded exclusively from .env — nothing is hard-coded here.
+# For Gmail you must use an App Password (not your account password):
+#   Google Account → Security → 2-Step Verification → App passwords
+# ──────────────────────────────────────────────────────────────────────────────
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", os.getenv("EMAIL_HOST_USER", ""))
+
 
 LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/"
@@ -146,3 +165,6 @@ LOGOUT_REDIRECT_URL = "/login/"
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
+
+# Default primary key field type
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
