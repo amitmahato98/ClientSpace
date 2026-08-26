@@ -1,3 +1,8 @@
 from django.contrib import admin
+from .models import Client, Project, Payment, Note, ClientActivity
 
-# Register your models here.
+admin.site.register(Client)
+admin.site.register(Project)
+admin.site.register(Payment)
+admin.site.register(Note)
+admin.site.register(ClientActivity)

@@ -30,108 +30,156 @@
       class="w-full mb-3 px-3 py-2 text-sm rounded-lg border border-[#e8dccc]"
     />
 
+    {% for c in clients %}
     <a
-      href="#"
-      class="flex items-center gap-3 p-3 rounded-lg bg-[#fdeee7] border border-[#f4c9b7]"
+      href="?client={{ c.id }}"
+      class="flex items-center gap-3 p-3 rounded-lg {% if selected.id == c.id %}bg-[#fdeee7] border border-[#f4c9b7]{% else %}hover:bg-[#faf1e3]{% endif %}"
     >
       <div
         class="w-9 h-9 shrink-0 rounded-full bg-[#d4a373] text-white flex items-center justify-center text-sm font-medium"
       >
-        A
+        {{ c.initials }}
       </div>
       <div class="flex-1 min-w-0">
         <div class="text-sm font-semibold text-[#4a3520] truncate">
-          Alden & Co.
+          {{ c.name }}
         </div>
-        <div class="text-xs text-[#8b6f55] truncate">2 active projects</div>
+        <div class="text-xs text-[#8b6f55] truncate">
+          {{ c.projects.count }} active projects
+        </div>
       </div>
       <span
         class="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700 shrink-0"
-        >Active</span
       >
+        {{ c.get_status_display }}
+      </span>
     </a>
-
-    <a
-      href="#"
-      class="flex items-center gap-3 p-3 rounded-lg hover:bg-[#faf1e3]"
-    >
-      <div
-        class="w-9 h-9 shrink-0 rounded-full bg-[#b8895e] text-white flex items-center justify-center text-sm font-medium"
-      >
-        SF
-      </div>
-      <div class="flex-1 min-w-0">
-        <div class="text-sm font-semibold text-[#4a3520] truncate">
-          Solene Foods
-        </div>
-        <div class="text-xs text-[#8b6f55] truncate">3 active projects</div>
-      </div>
-      <span
-        class="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700 shrink-0"
-        >Active</span
-      >
-    </a>
+    {% endfor %}
   </div>
 
   <!-- RIGHT: client detail -->
   <div
     class="w-full lg:flex-1 bg-white rounded-xl border border-[#e8dccc] p-4 sm:p-6"
   >
+    {% if selected %}
     <div class="flex flex-col sm:flex-row sm:items-start gap-4 mb-5">
       <div
         class="w-14 h-14 shrink-0 rounded-2xl bg-[#d4a373] text-white flex items-center justify-center text-lg font-semibold"
       >
-        A
+        {{ selected.initials }}
       </div>
       <div class="flex-1 min-w-0">
         <h3 class="text-lg font-semibold text-[#4a3520] truncate">
-          Alden & Co.
+          {{ selected.name }}
         </h3>
         <p class="text-sm text-[#8b6f55]">
-          Boutique law firm · contact: Denise Alden
+          {{ selected.company }} · {{ selected.contact_email }} · {{selected.contact_phone }}
         </p>
       </div>
       <span
         class="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700 h-fit shrink-0"
-        >Active</span
       >
+        {{ selected.get_status_display }}
+      </span>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 text-sm">
-      <div>
-        <div class="text-[#8b6f55] text-xs">Contact email</div>
-        <div class="text-[#4a3520] truncate">denise@aldenco.law</div>
-      </div>
-      <div>
-        <div class="text-[#8b6f55] text-xs">Client since</div>
-        <div class="text-[#4a3520]">Mar 2024</div>
-      </div>
-      <div>
-        <div class="text-[#8b6f55] text-xs">Lifetime billed</div>
-        <div class="text-[#4a3520] font-mono">$64,200</div>
-      </div>
-    </div>
-
+    <!-- Projects -->
     <h4 class="text-sm font-semibold text-[#4a3520] mb-2">Projects</h4>
-    <div class="overflow-x-auto">
+    <div class="overflow-x-auto mb-6">
       <table class="w-full text-sm min-w-125">
         <tr class="text-left text-[#8b6f55] border-b border-[#e8dccc]">
           <th class="pb-2">Project</th>
           <th class="pb-2">Status</th>
           <th class="pb-2">Value</th>
         </tr>
+        {% for p in selected.projects.all %}
         <tr class="border-b border-[#f2ede4]">
-          <td class="py-2 text-[#4a3520]">Brand identity refresh</td>
+          <td class="py-2 text-[#4a3520]">{{ p.name }}</td>
           <td class="py-2">
             <span
               class="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700"
-              >On track</span
+              >{{ p.get_status_display }}</span
             >
           </td>
-          <td class="py-2 font-mono text-[#4a3520]">$18,000</td>
+          <td class="py-2 font-mono text-[#4a3520]">₹{{ p.value }}</td>
         </tr>
+        {% endfor %}
       </table>
     </div>
+
+    <!-- Financial Summary -->
+    <h4 class="text-sm font-semibold text-[#4a3520] mb-2">Financial Summary</h4>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 text-sm">
+      <div>
+        <div class="text-[#8b6f55] text-xs">Total Billed</div>
+        <div class="text-[#4a3520] font-mono">₹{{ selected.total_billed }}</div>
+      </div>
+      <div>
+        <div class="text-[#8b6f55] text-xs">Total Paid</div>
+        <div class="text-[#4a3520] font-mono">₹{{ selected.total_paid }}</div>
+      </div>
+      <div>
+        <div class="text-[#8b6f55] text-xs">Outstanding</div>
+        <div class="text-[#4a3520] font-mono">₹{{ selected.outstanding }}</div>
+      </div>
+    </div>
+
+    <!-- Payment History -->
+    <h4 class="text-sm font-semibold text-[#4a3520] mb-2">Payment History</h4>
+    <div class="overflow-x-auto mb-6">
+      <table class="w-full text-sm min-w-125">
+        <tr class="text-left text-[#8b6f55] border-b border-[#e8dccc]">
+          <th class="pb-2">Date</th>
+          <th class="pb-2">Project</th>
+          <th class="pb-2">Amount</th>
+          <th class="pb-2">Status</th>
+        </tr>
+        {% for pay in selected.payments.all %}
+        <tr class="border-b border-[#f2ede4]">
+          <td class="py-2 text-[#4a3520]">{{ pay.date }}</td>
+          <td class="py-2 text-[#4a3520]">
+            {{ pay.project.name|default:"—" }}
+          </td>
+          <td class="py-2 font-mono text-[#4a3520]">₹{{ pay.amount }}</td>
+          <td class="py-2">
+            <span
+              class="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700"
+              >{{ pay.get_status_display }}</span
+            >
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+
+    <!-- Private Notes -->
+    <h4 class="text-sm font-semibold text-[#4a3520] mb-2">Private Notes</h4>
+    <div class="space-y-3 mb-6">
+      {% for note in selected.notes.all %}
+      <div class="p-3 rounded-lg bg-[#faf1e3] text-sm">
+        <div class="flex justify-between text-xs text-[#8b6f55] mb-1">
+          <span>{{ note.author|default:"Unknown" }}</span>
+          <span>{{ note.created_at|date:"M j" }}</span>
+        </div>
+        <div class="text-[#4a3520]">{{ note.body }}</div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Client Activity -->
+    <h4 class="text-sm font-semibold text-[#4a3520] mb-2">Client Activity</h4>
+    <div class="space-y-2">
+      {% for act in selected.activities.all %}
+      <div class="flex items-center gap-2 text-sm">
+        <span class="w-1.5 h-1.5 rounded-full bg-[#d4a373] shrink-0"></span>
+        <span class="text-[#4a3520]">{{ act.description }}</span>
+        <span class="text-xs text-[#8b6f55] ml-auto"
+          >{{ act.timestamp|date:"M j, g:i A" }}</span
+        >
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
   </div>
 </div>
 {% endblock %}
