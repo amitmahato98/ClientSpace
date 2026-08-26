@@ -1,0 +1,342 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Set Up Your Organization | ClientSpace</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --ghee:#d4a373;--ghee-light:#e8dccc;
+      --brown-dark:#4a3520;--brown:#5a3e2b;--brown-medium:#6b4f3a;
+      --brown-light:#8b6f55;--brown-accent:#b8895e;
+      --cream:#faf8f4;--white:#ffffff;--border:#e8dccc;
+    }
+    body{font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+         background:var(--cream);color:var(--brown-dark);min-height:100vh}
+
+    /* ── Layout ─────────────────────────────────────────────────────── */
+    .auth-container{min-height:100vh;display:grid;grid-template-columns:1.05fr 0.95fr}
+
+    /* ── Left panel ─────────────────────────────────────────────────── */
+    .left-panel{
+      position:relative;min-height:100vh;overflow:hidden;
+      padding:38px 58px;display:flex;flex-direction:column;justify-content:space-between;
+      background:
+        radial-gradient(circle at 20% 25%,rgba(212,163,115,.28),transparent 35%),
+        radial-gradient(circle at 80% 75%,rgba(184,137,94,.22),transparent 35%),
+        linear-gradient(135deg,#30251f 0%,#201d1b 50%,#33251f 100%)
+    }
+    .left-panel::before{
+      content:"";position:absolute;inset:0;pointer-events:none;
+      background-image:
+        linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);
+      background-size:48px 48px
+    }
+    .brand{position:relative;z-index:2;display:flex;align-items:center;gap:10px;
+           color:#fff;font-size:17px;font-weight:700}
+    .brand-icon{width:26px;height:26px;border-radius:6px;background:var(--ghee);
+                position:relative;overflow:hidden}
+    .brand-icon::after{content:"";position:absolute;width:16px;height:16px;
+                       background:#33251f;top:-7px;right:-7px;transform:rotate(45deg)}
+    .brand-name span{color:var(--ghee)}
+
+    .hero-content{position:relative;z-index:2;max-width:560px;
+                  margin-top:auto;margin-bottom:auto;padding-top:80px;padding-bottom:60px}
+    .hero-content h1{color:#fff;font-size:clamp(36px,3.8vw,54px);line-height:1.08;
+                     letter-spacing:-1.6px;font-weight:700;max-width:520px}
+    .hero-content h1 span{color:var(--ghee)}
+    .hero-content p{margin-top:22px;color:rgba(255,255,255,.68);
+                    font-size:15px;line-height:1.8;max-width:490px}
+
+    .steps{position:relative;z-index:2;display:flex;flex-direction:column;gap:14px;
+           padding-bottom:8px}
+    .step{display:flex;align-items:center;gap:12px}
+    .step-dot{width:24px;height:24px;border-radius:50%;display:flex;
+              align-items:center;justify-content:center;
+              font-size:11px;font-weight:700;flex-shrink:0}
+    .step-dot.done{background:var(--ghee);color:#fff}
+    .step-dot.active{background:#fff;color:var(--brown-dark)}
+    .step-dot.upcoming{background:rgba(255,255,255,.18);color:rgba(255,255,255,.5)}
+    .step-label{font-size:12px;font-weight:600}
+    .step-label.done{color:rgba(255,255,255,.6)}
+    .step-label.active{color:#fff}
+    .step-label.upcoming{color:rgba(255,255,255,.4)}
+
+    /* ── Right panel ─────────────────────────────────────────────────── */
+    .right-panel{min-height:100vh;display:flex;align-items:flex-start;
+                 justify-content:center;background:var(--cream);padding:48px 60px;
+                 overflow-y:auto}
+    .auth-box{width:100%;max-width:520px;padding-top:8px}
+
+    .welcome{color:#b45f32;font-size:11px;font-weight:700;letter-spacing:2px;margin-bottom:12px}
+    .auth-box h2{color:#292521;font-size:26px;line-height:1.3;font-weight:700;margin-bottom:8px}
+    .subtitle{color:var(--brown-light);font-size:13px;line-height:1.6;margin-bottom:28px}
+
+    /* ── Form ────────────────────────────────────────────────────────── */
+    .section-label{font-size:10px;font-weight:700;letter-spacing:1.5px;
+                   color:var(--brown-light);text-transform:uppercase;
+                   margin:24px 0 14px;padding-bottom:6px;
+                   border-bottom:1px solid var(--border)}
+    .section-label:first-of-type{margin-top:0}
+
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .form-group{margin-bottom:16px}
+    .form-group label{display:block;color:#332c27;font-size:12px;
+                      font-weight:700;margin-bottom:7px}
+    .required-star{color:#dc2626;margin-left:2px}
+    .form-input{
+      width:100%;border:1px solid var(--border);border-radius:6px;
+      background:#fff;padding:9px 12px;color:var(--brown-dark);
+      font-size:13px;font-family:inherit;outline:none;
+      transition:border-color .2s ease,box-shadow .2s ease;
+      resize:vertical
+    }
+    input.form-input{height:42px;resize:none}
+    .form-input::placeholder{color:#b2a69a}
+    .form-input:focus{border-color:var(--ghee);box-shadow:0 0 0 3px rgba(212,163,115,.16)}
+    .form-input.error-field{border-color:#dc2626}
+
+    /* Logo upload */
+    .logo-upload{
+      border:1.5px dashed var(--border);border-radius:8px;
+      padding:18px 16px;background:#fff;text-align:center;cursor:pointer;
+      transition:border-color .2s
+    }
+    .logo-upload:hover{border-color:var(--ghee)}
+    .logo-upload input[type="file"]{display:none}
+    .logo-upload-label{cursor:pointer;display:flex;flex-direction:column;
+                       align-items:center;gap:6px}
+    .logo-icon{font-size:22px;color:var(--brown-light)}
+    .logo-text{font-size:12px;color:var(--brown-light)}
+    .logo-text strong{color:var(--brown-medium)}
+
+    /* Messages */
+    .messages-list{list-style:none;margin-bottom:18px}
+    .messages-list li{padding:10px 13px;border-radius:6px;font-size:12px;margin-bottom:6px}
+    .messages-list .error{background:#fef2f2;color:#b91c1c;border:1px solid #fecaca}
+    .messages-list .success{background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0}
+    .messages-list .info{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}
+    .field-error{color:#dc2626;font-size:11px;margin-top:4px}
+
+    /* Submit */
+    .form-actions{margin-top:28px;display:flex;gap:12px;align-items:center}
+    .submit-btn{
+      flex:1;height:44px;border:none;border-radius:6px;
+      background:var(--ghee);color:#fff;font-size:13px;font-weight:700;
+      cursor:pointer;transition:background .2s ease,transform .2s ease,box-shadow .2s ease
+    }
+    .submit-btn:hover{background:#bd8b5e;box-shadow:0 5px 14px rgba(212,163,115,.25);
+                      transform:translateY(-1px)}
+    .submit-btn:active{transform:translateY(0)}
+    .skip-hint{font-size:11px;color:var(--brown-light);text-align:center;margin-top:14px}
+
+    /* ── Responsive ──────────────────────────────────────────────────── */
+    @media(max-width:1000px){
+      .auth-container{grid-template-columns:1fr}
+      .left-panel{min-height:auto;padding:30px 35px}
+      .hero-content{padding-top:40px;padding-bottom:30px}
+      .hero-content h1{font-size:38px}
+      .right-panel{min-height:auto;padding:44px 35px}
+    }
+    @media(max-width:600px){
+      .form-row{grid-template-columns:1fr;gap:0}
+      .left-panel{padding:22px 20px}
+      .hero-content h1{font-size:32px}
+      .right-panel{padding:36px 20px}
+      .auth-box h2{font-size:22px}
+    }
+  </style>
+</head>
+<body>
+<div class="auth-container">
+
+  <!-- ── LEFT PANEL ────────────────────────────────────────────────────────── -->
+  <section class="left-panel">
+    <div class="brand">
+      <div class="brand-icon"></div>
+      <div class="brand-name">Client<span>Space</span></div>
+    </div>
+
+    <div class="hero-content">
+      <h1>You're one step away from your <span>workspace.</span></h1>
+      <p>
+        Create your organization to start managing projects, clients, and
+        your team — all from one central workspace.
+      </p>
+    </div>
+
+    <!-- Progress steps -->
+    <div class="steps">
+      <div class="step">
+        <div class="step-dot done">✓</div>
+        <span class="step-label done">Account created &amp; verified</span>
+      </div>
+      <div class="step">
+        <div class="step-dot active">2</div>
+        <span class="step-label active">Set up your organization</span>
+      </div>
+      <div class="step">
+        <div class="step-dot upcoming">3</div>
+        <span class="step-label upcoming">Invite team &amp; clients</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── RIGHT PANEL ───────────────────────────────────────────────────────── -->
+  <section class="right-panel">
+    <div class="auth-box">
+      <div class="welcome">ORGANIZATION SETUP</div>
+      <h2>Set up your organization</h2>
+      <p class="subtitle">
+        Your account has been verified. Now create the organization you manage.
+        Only the name is required — everything else can be updated later.
+      </p>
+
+      {% if messages %}
+        <ul class="messages-list">
+          {% for msg in messages %}
+            <li class="{{ msg.tags }}">{{ msg }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+
+      <form method="POST" action="{% url 'accounts:create_organization' %}"
+            enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+
+        <!-- Required -->
+        <div class="section-label">Organization details</div>
+
+        <div class="form-group">
+          <label for="id_name">
+            Organization name <span class="required-star">*</span>
+          </label>
+          <input
+            class="form-input {% if form.name.errors %}error-field{% endif %}"
+            type="text"
+            id="id_name"
+            name="name"
+            value="{{ form.name.value|default:'' }}"
+            placeholder="Your company or team name"
+            autofocus
+            required
+          >
+          {% for e in form.name.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+        </div>
+
+        <div class="form-group">
+          <label for="id_description">Description</label>
+          <textarea
+            class="form-input {% if form.description.errors %}error-field{% endif %}"
+            id="id_description"
+            name="description"
+            placeholder="Brief description of your organization (optional)"
+            rows="3"
+          >{{ form.description.value|default:'' }}</textarea>
+          {% for e in form.description.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+        </div>
+
+        <!-- Contact info -->
+        <div class="section-label">Contact information</div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="id_email">Organization email</label>
+            <input
+              class="form-input {% if form.email.errors %}error-field{% endif %}"
+              type="email"
+              id="id_email"
+              name="email"
+              value="{{ form.email.value|default:'' }}"
+              placeholder="contact@yourorg.com"
+            >
+            {% for e in form.email.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+          </div>
+          <div class="form-group">
+            <label for="id_phone">Phone</label>
+            <input
+              class="form-input {% if form.phone.errors %}error-field{% endif %}"
+              type="text"
+              id="id_phone"
+              name="phone"
+              value="{{ form.phone.value|default:'' }}"
+              placeholder="+1 555 000 0000"
+            >
+            {% for e in form.phone.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="id_website">Website</label>
+          <input
+            class="form-input {% if form.website.errors %}error-field{% endif %}"
+            type="url"
+            id="id_website"
+            name="website"
+            value="{{ form.website.value|default:'' }}"
+            placeholder="https://yourwebsite.com"
+          >
+          {% for e in form.website.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+        </div>
+
+        <div class="form-group">
+          <label for="id_address">Address</label>
+          <textarea
+            class="form-input {% if form.address.errors %}error-field{% endif %}"
+            id="id_address"
+            name="address"
+            placeholder="Office address (optional)"
+            rows="2"
+          >{{ form.address.value|default:'' }}</textarea>
+          {% for e in form.address.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+        </div>
+
+        <!-- Logo -->
+        <div class="section-label">Logo</div>
+
+        <div class="form-group">
+          <div class="logo-upload" id="logo-drop">
+            <label class="logo-upload-label" for="id_logo">
+              <span class="logo-icon">🖼</span>
+              <span class="logo-text">
+                <strong>Click to upload</strong> your organization logo
+              </span>
+              <span class="logo-text" style="font-size:11px">
+                PNG, JPG, SVG — optional
+              </span>
+            </label>
+            <input
+              type="file"
+              id="id_logo"
+              name="logo"
+              accept="image/*"
+              onchange="document.getElementById('logo-filename').textContent = this.files[0]?.name || ''"
+            >
+          </div>
+          <div id="logo-filename"
+               style="margin-top:6px;font-size:11px;color:var(--brown-light)"></div>
+          {% for e in form.logo.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+        </div>
+
+        {% for e in form.non_field_errors %}
+          <div class="field-error" style="margin-bottom:10px">{{ e }}</div>
+        {% endfor %}
+
+        <div class="form-actions">
+          <button type="submit" class="submit-btn">
+            Create organization &amp; go to dashboard →
+          </button>
+        </div>
+        <p class="skip-hint">
+          You can update all optional details from your organization settings later.
+        </p>
+      </form>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>
