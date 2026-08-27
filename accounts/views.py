@@ -322,7 +322,7 @@ def create_organization_view(request):
     """
     # Already onboarded → skip straight to dashboard.
     if user_has_organization(request.user):
-        return redirect(reverse("accounts:dashboard"))
+        return redirect(reverse("dashboard"))
 
     form = OrganizationCreationForm(
         request.POST or None,
