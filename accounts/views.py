@@ -355,7 +355,7 @@ def create_organization_view(request):
             f"Welcome to ClientSpace! Your organization \"{org.name}\" "
             f"has been created.",
         )
-        return redirect(reverse("accounts:dashboard"))
+        return redirect(reverse("dashboard"))
 
     return render(request, "accounts/create_organization.html", {"form": form})
 

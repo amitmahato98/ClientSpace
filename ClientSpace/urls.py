@@ -21,7 +21,7 @@ def home_view(request):
     if not OrganizationMembership.objects.filter(user=request.user).exists():
         return redirect("accounts:create_organization")
 
-    return redirect("accounts:dashboard")
+    return redirect("dashboard")
 
 
 urlpatterns = [
