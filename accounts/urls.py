@@ -24,5 +24,5 @@ urlpatterns = [
     path("google/", views.google_login, name="google_login"),
 
     # ── Dashboard (authenticated landing) ────────────────────────────────────
-    path("dashboard/", views.dashboard_view, name="dashboard"),
+    
 ]
