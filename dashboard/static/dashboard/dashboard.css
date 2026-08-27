@@ -142,7 +142,7 @@
     border: none;
     border-radius: 9px;
 
-    background: #5149df;
+    background:#d4a373;
     color: white;
 
     padding: 0 22px;
@@ -156,7 +156,7 @@
 }
 
 .dashboard-content .new-project:hover {
-    background: #4038c9;
+    background:#b8895e;
 
     transform: translateY(-2px);
 

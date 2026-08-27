@@ -65,25 +65,12 @@ def get_user_organization(user):
     )
     return membership.organization if membership else None
 
-
 def _post_login_redirect(request, user):
-    """
-    Determine where to send a user immediately after successful login.
-
-    Priority:
-      1. If the user has no organization → onboarding.
-      2. If a safe `next` parameter is present → respect it.
-      3. Otherwise → dashboard.
-
-    Onboarding always wins over `next` so new Managers cannot bypass setup
-    by crafting a ?next=/projects/ URL before finishing onboarding.
-    """
     if not user_has_organization(user):
         return reverse("accounts:create_organization")
 
-    next_url = _safe_next(request, fallback=reverse("accounts:dashboard"))
+    next_url = _safe_next(request, fallback=reverse("dashboard"))
     return next_url
-
 
 def _send_otp_email(otp_obj, subject_prefix):
     """
