@@ -139,14 +139,14 @@
         <a href="{% url 'projects:project_detail' project.pk %}"
             data-project-card
             data-name="{{ project.name }}"
-            data-client="{{ project.client.name|default:'' }}"
+            data-client="{{ project.client_display_name }}"
             data-status="{{ project.status_data_value }}"
             class="block bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer">
             <div>
                 <div class="flex items-start justify-between gap-2">
                     <div>
                         <h3 class="font-bold text-gray-900 text-sm leading-snug">{{ project.name }}</h3>
-                        <p class="text-xs text-gray-400 mt-1">{{ project.client.name|default:"No client" }}</p>
+                        <p class="text-xs text-gray-400 mt-1">{{ project.client_display_name }}</p>
                     </div>
                     <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium shrink-0 {{ project.status_css_class }}">
                         <span class="text-base leading-none">&middot;</span>

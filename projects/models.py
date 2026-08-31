@@ -6,10 +6,13 @@ class Project(models.Model):
     """
     Core project entity for ClientSpace.
 
-    A project belongs to a Client (from the clients app) and is created
-    by a Manager user.  Status and Priority use TextChoices so values are
-    validated at the model level and human-readable labels are available
-    in templates via get_FOO_display().
+    A project is associated with a Client user (accounts.User, role=CLIENT)
+    and is created by a Manager user.  The client FK points directly at
+    the AUTH_USER_MODEL so no separate Client table is needed.
+
+    Status and Priority use TextChoices so values are validated at the model
+    level and human-readable labels are available in templates via
+    get_FOO_display().
     """
 
     class Status(models.TextChoices):
@@ -29,12 +32,26 @@ class Project(models.Model):
 
     description = models.TextField(blank=True)
 
-    client = models.ForeignKey(
-        "clients.Client",
+    # The organisation this project belongs to — derived from the creating
+    # Manager's membership.  SET_NULL so deleting an org record does not
+    # cascade-delete all its projects (data preservation).
+    organization = models.ForeignKey(
+        "accounts.Organization",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name="main_projects",   # avoids clash with clients.Project.client FK
+        related_name="projects",
+    )
+
+    # Points to the CLIENT user created automatically during project creation.
+    # SET_NULL so deleting a client account does not cascade-delete the project.
+    client = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="client_projects",
+        limit_choices_to={"role": "CLIENT"},
     )
 
     status = models.CharField(
@@ -60,6 +77,7 @@ class Project(models.Model):
 
     deadline = models.DateField(null=True, blank=True)
 
+    # The Manager who created this project — set server-side, never from POST.
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
@@ -75,7 +93,7 @@ class Project(models.Model):
         verbose_name_plural = "Projects"
 
     def __str__(self):
-        client_name = self.client.name if self.client else "No client"
+        client_name = self.client.username if self.client else "No client"
         return f"{self.name} ({client_name})"
 
     # ------------------------------------------------------------------ #
@@ -83,11 +101,16 @@ class Project(models.Model):
     # ------------------------------------------------------------------ #
 
     @property
+    def client_display_name(self):
+        """Human-readable client name for templates."""
+        if not self.client:
+            return "No client assigned"
+        full = self.client.get_full_name()
+        return full if full.strip() else self.client.username
+
+    @property
     def status_css_class(self):
-        """
-        Returns the Tailwind badge CSS classes matching the existing UI
-        colour scheme so templates stay clean.
-        """
+        """Tailwind badge CSS classes matching the existing UI colour scheme."""
         return {
             self.Status.PLANNING:    "bg-[#e8f0fe] text-[#1a73e8]",
             self.Status.IN_PROGRESS: "bg-[#e6f4ea] text-[#137333]",
@@ -99,10 +122,7 @@ class Project(models.Model):
 
     @property
     def status_data_value(self):
-        """
-        Returns the lowercase hyphenated value used by the JS filter system
-        in the existing projects.html (data-status attribute).
-        """
+        """Lowercase hyphenated value for the JS filter system (data-status attr)."""
         return {
             self.Status.PLANNING:    "planning",
             self.Status.IN_PROGRESS: "on-track",

@@ -101,7 +101,7 @@
                     <span class="text-xs text-gray-400">
                         Client:
                         <strong class="text-gray-700 font-semibold">
-                            {{ project.client.name|default:"No client assigned" }}
+                            {{ project.client_display_name }}
                         </strong>
                     </span>
 
@@ -245,7 +245,7 @@
                     </div>
                     <div class="flex items-start gap-3">
                         <dt class="w-28 shrink-0 text-[11px] font-medium text-gray-400 uppercase tracking-wide pt-0.5">Client</dt>
-                        <dd class="text-xs text-gray-800">{{ project.client.name|default:"No client assigned" }}</dd>
+                        <dd class="text-xs text-gray-800">{{ project.client_display_name }}</dd>
                     </div>
                     <div class="flex items-start gap-3">
                         <dt class="w-28 shrink-0 text-[11px] font-medium text-gray-400 uppercase tracking-wide pt-0.5">Status</dt>
@@ -311,24 +311,12 @@
                     <h4 class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-3">Client info</h4>
                     <dl class="space-y-2">
                         <div class="flex gap-3">
-                            <dt class="w-24 shrink-0 text-[11px] text-gray-400">Company</dt>
-                            <dd class="text-xs text-gray-700">{{ project.client.company|default:project.client.name }}</dd>
+                            <dt class="w-24 shrink-0 text-[11px] text-gray-400">Username</dt>
+                            <dd class="text-xs text-gray-700">{{ project.client.username }}</dd>
                         </div>
-                        {% if project.client.contact_email %}
                         <div class="flex gap-3">
                             <dt class="w-24 shrink-0 text-[11px] text-gray-400">Email</dt>
-                            <dd class="text-xs text-gray-700">{{ project.client.contact_email }}</dd>
-                        </div>
-                        {% endif %}
-                        {% if project.client.contact_phone %}
-                        <div class="flex gap-3">
-                            <dt class="w-24 shrink-0 text-[11px] text-gray-400">Phone</dt>
-                            <dd class="text-xs text-gray-700">{{ project.client.contact_phone }}</dd>
-                        </div>
-                        {% endif %}
-                        <div class="flex gap-3">
-                            <dt class="w-24 shrink-0 text-[11px] text-gray-400">Status</dt>
-                            <dd class="text-xs text-gray-700 capitalize">{{ project.client.status }}</dd>
+                            <dd class="text-xs text-gray-700">{{ project.client.email }}</dd>
                         </div>
                     </dl>
                 </div>
