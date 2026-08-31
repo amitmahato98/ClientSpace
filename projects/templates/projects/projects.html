@@ -3,59 +3,43 @@
 
 {% block title %}Projects - ClientSpace{% endblock %}
 
-{% block navbar %}
-<!-- Top Header Navigation -->
-<div class="flex items-center justify-between w-full">
-    <!-- Left: Mobile Menu + Title -->
-    <div class="flex items-center gap-4">
-        <button id="sidebarToggle" class="md:hidden text-[#5a3e2b] text-xl hover:text-[#b8895e] transition">
-            <i class="fas fa-bars"></i>
-        </button>
-        <div>
-            <h1 class="text-lg font-bold text-gray-900 leading-tight">Projects</h1>
-            <p class="text-xs text-gray-500">Every active and recently completed engagement</p>
-        </div>
-    </div>
+{% block page_heading %}Projects{% endblock %}
+{% block page_subheading %}Every active and recently completed engagement{% endblock %}
 
-    <!-- Right: Search Bar & Actions -->
-    <div class="flex items-center gap-3">
-        <div class="relative hidden sm:block">
-            <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-            <input type="text" id="projectSearchInput" placeholder="Search clients, projects, tasks..."
-                autocomplete="off"
-                class="pl-9 pr-8 py-1.5 text-xs rounded-full bg-gray-100/80 text-gray-700 placeholder-gray-400 border border-transparent focus:bg-white focus:border-gray-300 focus:outline-none w-64 transition">
-            <button type="button" id="clearSearchButton"
-                class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-[10px] w-4 h-4 rounded-full items-center justify-center">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <button
-            class="w-8 h-8 rounded-full border border-gray-200 bg-white/80 flex items-center justify-center text-gray-500 hover:bg-white text-xs transition">
-            <i class="far fa-bell"></i>
-        </button>
-        <button
-            class="w-8 h-8 rounded-full border border-gray-200 bg-white/80 flex items-center justify-center text-gray-500 hover:bg-white text-xs transition">
-            <i class="far fa-question-circle"></i>
-        </button>
-        <div
-            class="w-8 h-8 rounded-full bg-[#d34527] text-white text-xs font-semibold flex items-center justify-center">
-            MP
-        </div>
-    </div>
-</div>
-
-<!-- Mobile search (shown under the header on small screens where the input above is hidden) -->
-<div class="sm:hidden mt-3">
-    <div class="relative">
-        <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-        <input type="text" id="projectSearchInputMobile" placeholder="Search clients, projects, tasks..."
-            autocomplete="off"
-            class="pl-9 pr-4 py-2 text-xs rounded-full bg-gray-100/80 text-gray-700 placeholder-gray-400 border border-transparent focus:bg-white focus:border-gray-300 focus:outline-none w-full transition">
-    </div>
-</div>
-{% endblock %}
+{# The base.html navbar search input is wired to the JS filter below via id="projectSearchInput" #}
+{# We override the search input id inside the base navbar by targeting it with JS. #}
 
 {% block content %}
+
+<!-- Mobile search row (only shown on small screens) -->
+<div class="sm:hidden mb-3 -mt-2">
+    <div class="relative">
+        <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
+        <input type="text" id="projectSearchInputMobile" placeholder="Search projects, clients..."
+            autocomplete="off"
+            class="pl-9 pr-4 py-2 text-xs rounded-full bg-gray-100/80 text-gray-700 placeholder-gray-400
+                   border border-transparent focus:bg-white focus:border-gray-300 focus:outline-none
+                   w-full transition">
+    </div>
+</div>
+
+<!-- =========================================================
+     DJANGO MESSAGES
+     ========================================================= -->
+{% if messages %}
+<div class="max-w-7xl mx-auto mb-2">
+    {% for message in messages %}
+    <div class="flex items-center gap-2.5 px-4 py-3 rounded-lg text-xs font-medium
+        {% if message.tags == 'success' %}bg-[#e6f4ea] text-[#137333] border border-[#b7dfbe]
+        {% elif message.tags == 'error' %}bg-[#fce8e6] text-[#c5221f] border border-[#f5c2be]
+        {% else %}bg-[#e8f0fe] text-[#1a73e8] border border-[#c5d8fb]{% endif %}">
+        <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %}"></i>
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
 <div class="max-w-7xl mx-auto space-y-6">
 
     <!-- Section Header & Controls -->
@@ -63,321 +47,115 @@
         <div>
             <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Projects</h2>
             <p class="text-xs text-gray-500 mt-1 font-medium" id="projectSummaryText">
-                14 active &middot; 3 at risk or blocked
+                {{ projects.count }} project{{ projects.count|pluralize }}
             </p>
         </div>
         <div class="flex items-center gap-2.5">
 
             <!-- Filter -->
             <div class="relative" id="filterWrapper">
-
                 <button type="button" id="filterButton"
                     class="px-4 py-2 bg-white/80 hover:bg-white text-gray-700 text-xs font-medium rounded-lg border border-gray-200 shadow-sm transition flex items-center gap-1.5">
                     <i class="fas fa-sliders-h text-[10px]"></i>
                     Filter
                 </button>
-
                 <div id="filterDropdown"
                     class="hidden absolute right-0 sm:right-auto sm:left-0 top-[calc(100%+8px)] w-56 bg-white rounded-xl shadow-lg border border-gray-100 p-4 z-40">
-
                     <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-2">Status</p>
-
                     <div class="space-y-2">
-
                         <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer">
-                            <input type="checkbox" value="on-track"
-                                class="filter-status-checkbox w-3.5 h-3.5 rounded border-gray-300 text-[#d4a373] focus:ring-[#d4a373]/40">
-                            <span class="inline-block w-2 h-2 rounded-full bg-[#137333]"></span>
-                            On track
+                            <input type="checkbox" value="on-track" class="filter-status-checkbox w-3.5 h-3.5 rounded border-gray-300 text-[#d4a373] focus:ring-[#d4a373]/40">
+                            <span class="inline-block w-2 h-2 rounded-full bg-[#137333]"></span> On track
                         </label>
-
                         <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer">
-                            <input type="checkbox" value="at-risk"
-                                class="filter-status-checkbox w-3.5 h-3.5 rounded border-gray-300 text-[#d4a373] focus:ring-[#d4a373]/40">
-                            <span class="inline-block w-2 h-2 rounded-full bg-[#b06000]"></span>
-                            At risk
+                            <input type="checkbox" value="at-risk" class="filter-status-checkbox w-3.5 h-3.5 rounded border-gray-300 text-[#d4a373] focus:ring-[#d4a373]/40">
+                            <span class="inline-block w-2 h-2 rounded-full bg-[#b06000]"></span> At risk
                         </label>
-
                         <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer">
-                            <input type="checkbox" value="blocked"
-                                class="filter-status-checkbox w-3.5 h-3.5 rounded border-gray-300 text-[#d4a373] focus:ring-[#d4a373]/40">
-                            <span class="inline-block w-2 h-2 rounded-full bg-[#c5221f]"></span>
-                            Blocked
+                            <input type="checkbox" value="blocked" class="filter-status-checkbox w-3.5 h-3.5 rounded border-gray-300 text-[#d4a373] focus:ring-[#d4a373]/40">
+                            <span class="inline-block w-2 h-2 rounded-full bg-[#c5221f]"></span> Blocked
                         </label>
-
                         <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer">
-                            <input type="checkbox" value="planning"
-                                class="filter-status-checkbox w-3.5 h-3.5 rounded border-gray-300 text-[#d4a373] focus:ring-[#d4a373]/40">
-                            <span class="inline-block w-2 h-2 rounded-full bg-[#1a73e8]"></span>
-                            Planning
+                            <input type="checkbox" value="planning" class="filter-status-checkbox w-3.5 h-3.5 rounded border-gray-300 text-[#d4a373] focus:ring-[#d4a373]/40">
+                            <span class="inline-block w-2 h-2 rounded-full bg-[#1a73e8]"></span> Planning
                         </label>
-
                     </div>
-
                     <button type="button" id="clearFiltersButton"
                         class="mt-4 w-full text-center text-[11px] font-medium text-[#b8895e] hover:text-[#8b6f55] transition">
                         Clear filters
                     </button>
-
                 </div>
-
             </div>
 
-            <!-- New project -->
-            <button type="button" id="newProjectButton"
+            <!-- New project button — MANAGER only -->
+            {% if request.user.is_manager %}
+            <a href="{% url 'projects:project_create' %}"
                 class="px-4 py-2 bg-[#e0532e] hover:bg-[#c84625] text-white text-xs font-medium rounded-lg shadow-sm transition flex items-center gap-1.5">
                 <i class="fas fa-plus text-[10px]"></i> New project
-            </button>
+            </a>
+            {% endif %}
 
         </div>
     </div>
 
-    <!-- Projects Grid -->
+    <!-- =========================================================
+         PROJECTS GRID — real database data
+         ========================================================= -->
+    {% if projects %}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="projectsGrid">
 
-        <!-- Card 1: Brand identity refresh -->
-        <a href="{% url 'projects:project_detail' 'brand-identity-refresh' %}" data-project-card
-            data-name="Brand identity refresh" data-client="Alden & Co." data-status="on-track" data-progress="72"
+        {% for project in projects %}
+        <a href="{% url 'projects:project_detail' project.pk %}"
+            data-project-card
+            data-name="{{ project.name }}"
+            data-client="{{ project.client_display_name }}"
+            data-status="{{ project.status_data_value }}"
             class="block bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer">
             <div>
                 <div class="flex items-start justify-between gap-2">
                     <div>
-                        <h3 class="font-bold text-gray-900 text-sm leading-snug">Brand identity refresh</h3>
-                        <p class="text-xs text-gray-400 mt-1">Alden & Co.</p>
+                        <h3 class="font-bold text-gray-900 text-sm leading-snug">{{ project.name }}</h3>
+                        <p class="text-xs text-gray-400 mt-1">{{ project.client_display_name }}</p>
                     </div>
-                    <span
-                        class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#e6f4ea] text-[#137333] shrink-0">
-                        <span class="text-base leading-none">&middot;</span> On track
+                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium shrink-0 {{ project.status_css_class }}">
+                        <span class="text-base leading-none">&middot;</span>
+                        {{ project.get_status_display }}
                     </span>
                 </div>
-                <div class="mt-6">
-                    <div class="flex items-center justify-between text-xs mb-1.5">
-                        <span class="text-gray-400">Progress</span>
-                        <span class="text-gray-500 font-medium" data-progress-label>0%</span>
-                    </div>
-                    <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-                        <div class="h-full bg-[#e0532e] rounded-full transition-all duration-700 ease-out"
-                            data-progress-bar style="width: 0%;"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="flex items-center justify-between mt-6 pt-2">
-                <div class="flex -space-x-1 overflow-hidden">
-                    <div
-                        class="w-6 h-6 rounded-full bg-[#1b8755] text-white text-[10px] font-medium flex items-center justify-center ring-2 ring-white">
-                        PN</div>
-                    <div
-                        class="w-6 h-6 rounded-full bg-[#6f42c1] text-white text-[10px] font-medium flex items-center justify-center ring-2 ring-white">
-                        JK</div>
-                </div>
-                <div class="text-xs text-right">
-                    <span class="font-bold text-gray-900">$12,960</span>
-                    <span class="text-gray-400 font-normal"> / $18,000</span>
-                </div>
-            </div>
-        </a>
 
-        <!-- Card 2: Marketing site rebuild -->
-        <a href="{% url 'projects:project_detail' 'marketing-site-rebuild' %}" data-project-card
-            data-name="Marketing site rebuild" data-client="Solene Foods" data-status="at-risk" data-progress="38"
-            class="block bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer">
-            <div>
-                <div class="flex items-start justify-between gap-2">
-                    <div>
-                        <h3 class="font-bold text-gray-900 text-sm leading-snug">Marketing site rebuild</h3>
-                        <p class="text-xs text-gray-400 mt-1">Solene Foods</p>
-                    </div>
-                    <span
-                        class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#fef7e0] text-[#b06000] shrink-0">
-                        <span class="text-base leading-none">&middot;</span> At risk
+                <!-- Priority badge -->
+                <div class="mt-3">
+                    <span class="text-[10px] font-medium px-2 py-0.5 rounded-md
+                        {% if project.priority == 'HIGH' %}bg-[#fce8e6] text-[#c5221f]
+                        {% elif project.priority == 'MEDIUM' %}bg-[#fef7e0] text-[#b06000]
+                        {% else %}bg-[#edf0f4] text-[#657084]{% endif %}">
+                        {{ project.get_priority_display }} priority
                     </span>
                 </div>
-                <div class="mt-6">
-                    <div class="flex items-center justify-between text-xs mb-1.5">
-                        <span class="text-gray-400">Progress</span>
-                        <span class="text-gray-500 font-medium" data-progress-label>0%</span>
-                    </div>
-                    <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-                        <div class="h-full bg-[#b45309] rounded-full transition-all duration-700 ease-out"
-                            data-progress-bar style="width: 0%;"></div>
-                    </div>
-                </div>
             </div>
-            <div class="flex items-center justify-between mt-6 pt-2">
-                <div class="flex -space-x-1 overflow-hidden">
-                    <div
-                        class="w-6 h-6 rounded-full bg-[#335c67] text-white text-[10px] font-medium flex items-center justify-center ring-2 ring-white">
-                        TR</div>
-                </div>
-                <div class="text-xs text-right">
-                    <span class="font-bold text-gray-900">$5,320</span>
-                    <span class="text-gray-400 font-normal"> / $14,000</span>
-                </div>
-            </div>
-        </a>
 
-        <!-- Card 3: Q3 investor deck -->
-        <a href="{% url 'projects:project_detail' 'q3-investor-deck' %}" data-project-card data-name="Q3 investor deck"
-            data-client="Verdant Capital" data-status="on-track" data-progress="94"
-            class="block bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer">
-            <div>
-                <div class="flex items-start justify-between gap-2">
-                    <div>
-                        <h3 class="font-bold text-gray-900 text-sm leading-snug">Q3 investor deck</h3>
-                        <p class="text-xs text-gray-400 mt-1">Verdant Capital</p>
-                    </div>
-                    <span
-                        class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#e6f4ea] text-[#137333] shrink-0">
-                        <span class="text-base leading-none">&middot;</span> On track
-                    </span>
-                </div>
-                <div class="mt-6">
-                    <div class="flex items-center justify-between text-xs mb-1.5">
-                        <span class="text-gray-400">Progress</span>
-                        <span class="text-gray-500 font-medium" data-progress-label>0%</span>
-                    </div>
-                    <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-                        <div class="h-full bg-[#e0532e] rounded-full transition-all duration-700 ease-out"
-                            data-progress-bar style="width: 0%;"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="flex items-center justify-between mt-6 pt-2">
+            <div class="flex items-center justify-between mt-5 pt-2">
+                <!-- Created by initials -->
                 <div class="flex -space-x-1 overflow-hidden">
-                    <div
-                        class="w-6 h-6 rounded-full bg-[#d34527] text-white text-[10px] font-medium flex items-center justify-center ring-2 ring-white">
-                        MP</div>
+                    <div class="w-6 h-6 rounded-full bg-[#d34527] text-white text-[10px] font-medium flex items-center justify-center ring-2 ring-white"
+                        title="{{ project.created_by.get_full_name|default:project.created_by.username }}">
+                        {{ project.created_by.first_name|first|upper }}{{ project.created_by.last_name|first|upper }}
+                    </div>
                 </div>
                 <div class="text-xs text-right">
-                    <span class="font-bold text-gray-900">$7,050</span>
-                    <span class="text-gray-400 font-normal"> / $7,500</span>
+                    {% if project.deadline %}
+                    <span class="text-gray-400">Due <strong class="text-gray-700">{{ project.deadline|date:"M j" }}</strong></span>
+                    {% else %}
+                    <span class="text-gray-400">No deadline set</span>
+                    {% endif %}
                 </div>
             </div>
         </a>
-
-        <!-- Card 4: Product photography -->
-        <a href="{% url 'projects:project_detail' 'product-photography' %}" data-project-card
-            data-name="Product photography" data-client="Solene Foods" data-status="blocked" data-progress="15"
-            class="block bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer">
-            <div>
-                <div class="flex items-start justify-between gap-2">
-                    <div>
-                        <h3 class="font-bold text-gray-900 text-sm leading-snug">Product photography</h3>
-                        <p class="text-xs text-gray-400 mt-1">Solene Foods</p>
-                    </div>
-                    <span
-                        class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#fce8e6] text-[#c5221f] shrink-0">
-                        <span class="text-base leading-none">&middot;</span> Blocked
-                    </span>
-                </div>
-                <div class="mt-6">
-                    <div class="flex items-center justify-between text-xs mb-1.5">
-                        <span class="text-gray-400">Progress</span>
-                        <span class="text-gray-500 font-medium" data-progress-label>0%</span>
-                    </div>
-                    <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-                        <div class="h-full bg-[#e0532e] rounded-full transition-all duration-700 ease-out"
-                            data-progress-bar style="width: 0%;"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="flex items-center justify-between mt-6 pt-2">
-                <div class="flex -space-x-1 overflow-hidden">
-                    <div
-                        class="w-6 h-6 rounded-full bg-[#a35e00] text-white text-[10px] font-medium flex items-center justify-center ring-2 ring-white">
-                        TR</div>
-                </div>
-                <div class="text-xs text-right">
-                    <span class="font-bold text-gray-900">$780</span>
-                    <span class="text-gray-400 font-normal"> / $5,200</span>
-                </div>
-            </div>
-        </a>
-
-        <!-- Card 5: Office signage system -->
-        <a href="{% url 'projects:project_detail' 'office-signage-system' %}" data-project-card
-            data-name="Office signage system" data-client="Alden & Co." data-status="planning" data-progress="8"
-            class="block bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer">
-            <div>
-                <div class="flex items-start justify-between gap-2">
-                    <div>
-                        <h3 class="font-bold text-gray-900 text-sm leading-snug">Office signage system</h3>
-                        <p class="text-xs text-gray-400 mt-1">Alden & Co.</p>
-                    </div>
-                    <span
-                        class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#e8f0fe] text-[#1a73e8] shrink-0">
-                        <span class="text-base leading-none">&middot;</span> Planning
-                    </span>
-                </div>
-                <div class="mt-6">
-                    <div class="flex items-center justify-between text-xs mb-1.5">
-                        <span class="text-gray-400">Progress</span>
-                        <span class="text-gray-500 font-medium" data-progress-label>0%</span>
-                    </div>
-                    <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-                        <div class="h-full bg-[#2563eb] rounded-full transition-all duration-700 ease-out"
-                            data-progress-bar style="width: 0%;"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="flex items-center justify-between mt-6 pt-2">
-                <div class="flex -space-x-1 overflow-hidden">
-                    <div
-                        class="w-6 h-6 rounded-full bg-[#1b8755] text-white text-[10px] font-medium flex items-center justify-center ring-2 ring-white">
-                        PN</div>
-                </div>
-                <div class="text-xs text-right">
-                    <span class="font-bold text-gray-900">$510</span>
-                    <span class="text-gray-400 font-normal"> / $6,400</span>
-                </div>
-            </div>
-        </a>
-
-        <!-- Card 6: Onboarding flow redesign -->
-        <a href="{% url 'projects:project_detail' 'onboarding-flow-redesign' %}" data-project-card
-            data-name="Onboarding flow redesign" data-client="Halcyon Labs" data-status="on-track" data-progress="55"
-            class="block bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer">
-            <div>
-                <div class="flex items-start justify-between gap-2">
-                    <div>
-                        <h3 class="font-bold text-gray-900 text-sm leading-snug">Onboarding flow redesign</h3>
-                        <p class="text-xs text-gray-400 mt-1">Halcyon Labs</p>
-                    </div>
-                    <span
-                        class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#e6f4ea] text-[#137333] shrink-0">
-                        <span class="text-base leading-none">&middot;</span> On track
-                    </span>
-                </div>
-                <div class="mt-6">
-                    <div class="flex items-center justify-between text-xs mb-1.5">
-                        <span class="text-gray-400">Progress</span>
-                        <span class="text-gray-500 font-medium" data-progress-label>0%</span>
-                    </div>
-                    <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-                        <div class="h-full bg-[#e0532e] rounded-full transition-all duration-700 ease-out"
-                            data-progress-bar style="width: 0%;"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="flex items-center justify-between mt-6 pt-2">
-                <div class="flex -space-x-1 overflow-hidden">
-                    <div
-                        class="w-6 h-6 rounded-full bg-[#6f42c1] text-white text-[10px] font-medium flex items-center justify-center ring-2 ring-white">
-                        JK</div>
-                    <div
-                        class="w-6 h-6 rounded-full bg-[#2b3a4a] text-white text-[10px] font-medium flex items-center justify-center ring-2 ring-white">
-                        TR</div>
-                </div>
-                <div class="text-xs text-right">
-                    <span class="font-bold text-gray-900">$9,900</span>
-                    <span class="text-gray-400 font-normal"> / $18,000</span>
-                </div>
-            </div>
-        </a>
+        {% endfor %}
 
     </div>
 
-    <!-- No results state -->
+    <!-- No results after filter/search -->
     <div id="noResultsMessage" class="hidden text-center py-16">
         <i class="far fa-folder-open text-[#d4a373] text-3xl"></i>
         <p class="text-sm font-semibold text-gray-700 mt-3">No projects match your search</p>
@@ -388,464 +166,188 @@
         </button>
     </div>
 
-</div>
-
-
-<!-- =========================================================
-     NEW PROJECT FORM (shared, moved into whichever container
-     is active — desktop modal or mobile/tablet full page)
-     ========================================================= -->
-
-<div id="newProjectFormWrapper" class="hidden">
-
-    <form id="newProjectForm" class="space-y-4" novalidate>
-
-        <div>
-            <label for="npName" class="block text-xs font-semibold text-gray-700 mb-1.5">Project name</label>
-            <input type="text" id="npName" name="name" required placeholder="e.g. Website redesign"
-                class="w-full px-3.5 py-2.5 text-sm rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#d4a373]/30 focus:border-[#d4a373] transition">
-        </div>
-
-        <div>
-            <label for="npClient" class="block text-xs font-semibold text-gray-700 mb-1.5">Client</label>
-            <input type="text" id="npClient" name="client" required placeholder="e.g. Alden & Co."
-                class="w-full px-3.5 py-2.5 text-sm rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#d4a373]/30 focus:border-[#d4a373] transition">
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-
-            <div>
-                <label for="npDeadline" class="block text-xs font-semibold text-gray-700 mb-1.5">Deadline</label>
-                <input type="date" id="npDeadline" name="deadline"
-                    class="w-full px-3.5 py-2.5 text-sm rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#d4a373]/30 focus:border-[#d4a373] transition">
-            </div>
-
-            <div>
-                <label for="npPriority" class="block text-xs font-semibold text-gray-700 mb-1.5">Priority</label>
-                <select id="npPriority" name="priority"
-                    class="w-full px-3.5 py-2.5 text-sm rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#d4a373]/30 focus:border-[#d4a373] transition">
-                    <option value="Low">Low</option>
-                    <option value="Medium" selected>Medium</option>
-                    <option value="High">High</option>
-                </select>
-            </div>
-
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-
-            <div>
-                <label for="npBudget" class="block text-xs font-semibold text-gray-700 mb-1.5">Budget ($)</label>
-                <input type="number" id="npBudget" name="budget" min="0" step="1" placeholder="0"
-                    class="w-full px-3.5 py-2.5 text-sm rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#d4a373]/30 focus:border-[#d4a373] transition">
-            </div>
-
-            <div>
-                <label for="npStatus" class="block text-xs font-semibold text-gray-700 mb-1.5">Status</label>
-                <select id="npStatus" name="status"
-                    class="w-full px-3.5 py-2.5 text-sm rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#d4a373]/30 focus:border-[#d4a373] transition">
-                    <option value="planning" selected>Planning</option>
-                    <option value="on-track">On track</option>
-                    <option value="at-risk">At risk</option>
-                    <option value="blocked">Blocked</option>
-                </select>
-            </div>
-
-        </div>
-
-        <div>
-            <label for="npNotes" class="block text-xs font-semibold text-gray-700 mb-1.5">Notes (optional)</label>
-            <textarea id="npNotes" name="notes" rows="3" placeholder="Anything the team should know..."
-                class="w-full px-3.5 py-2.5 text-sm rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#d4a373]/30 focus:border-[#d4a373] transition resize-none"></textarea>
-        </div>
-
-        <p class="text-[11px] text-gray-400 leading-relaxed">
-            This is a frontend-only preview. Connect this form to your backend to actually save the project.
+    {% else %}
+    <!-- Empty state — no projects in database yet -->
+    <div class="text-center py-20">
+        <i class="far fa-folder-open text-[#d4a373] text-4xl"></i>
+        <p class="text-sm font-semibold text-gray-700 mt-4">No projects yet</p>
+        <p class="text-xs text-gray-400 mt-1">
+            {% if request.user.is_manager %}
+                Create your first project to get started.
+            {% else %}
+                No projects have been created yet.
+            {% endif %}
         </p>
-
-        <div class="flex items-center justify-end gap-2 pt-2 pb-1">
-            <button type="button"
-                class="new-project-cancel px-4 py-2.5 bg-white hover:bg-gray-50 text-gray-700 text-xs font-medium rounded-lg border border-gray-200 transition">
-                Cancel
-            </button>
-            <button type="submit"
-                class="px-4 py-2.5 bg-[#e0532e] hover:bg-[#c84625] text-white text-xs font-medium rounded-lg shadow-sm transition">
-                Create project
-            </button>
-        </div>
-
-    </form>
-
-</div>
-
-
-<!-- =========================================================
-     NEW PROJECT — DESKTOP FLOATING MODAL (>= lg screens)
-     ========================================================= -->
-
-<div id="newProjectModalDesktop"
-    class="fixed inset-0 z-50 hidden items-center justify-center bg-black/30 backdrop-blur-[2px] px-4">
-
-    <div class="bg-white rounded-xl shadow-xl border border-gray-100 w-full max-w-lg max-h-[85vh] overflow-y-auto p-6">
-
-        <div class="flex items-center justify-between mb-5">
-            <div>
-                <h3 class="text-base font-bold text-gray-900">New project</h3>
-                <p class="text-[11px] text-gray-400 mt-0.5">Set up a new client engagement</p>
-            </div>
-            <button type="button" id="closeNewProjectDesktop"
-                class="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-500 flex items-center justify-center transition shrink-0">
-                <i class="fas fa-times text-xs"></i>
-            </button>
-        </div>
-
-        <div id="desktopFormSlot"></div>
-
+        {% if request.user.is_manager %}
+        <a href="{% url 'projects:project_create' %}"
+            class="inline-flex items-center gap-1.5 mt-5 px-4 py-2 bg-[#e0532e] hover:bg-[#c84625] text-white text-xs font-medium rounded-lg shadow-sm transition">
+            <i class="fas fa-plus text-[10px]"></i> New project
+        </a>
+        {% endif %}
     </div>
+    {% endif %}
 
 </div>
-
-
-<!-- =========================================================
-     NEW PROJECT — FULL-SCREEN PAGE (tablet & mobile, < lg)
-     ========================================================= -->
-
-<div id="newProjectPanelMobile"
-    class="fixed inset-0 z-50 bg-white translate-x-full transition-transform duration-300 ease-out flex flex-col">
-
-    <div class="flex items-center gap-3 px-4 py-4 border-b border-gray-100 sticky top-0 bg-white z-10">
-        <button type="button" id="closeNewProjectMobile"
-            class="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-500 flex items-center justify-center transition shrink-0">
-            <i class="fas fa-arrow-left text-xs"></i>
-        </button>
-        <div>
-            <h3 class="text-sm font-bold text-gray-900">New project</h3>
-            <p class="text-[11px] text-gray-400">Set up a new client engagement</p>
-        </div>
-    </div>
-
-    <div class="flex-1 overflow-y-auto px-4 py-5" id="mobileFormSlot"></div>
-
-</div>
-
-
-<!-- =========================================================
-     TOAST
-     ========================================================= -->
-
-<div id="toast"
-    class="hidden fixed bottom-4 right-4 left-4 sm:left-auto sm:w-80 z-[60] items-start gap-2.5 bg-gray-900 text-white text-xs rounded-xl shadow-lg px-4 py-3 opacity-0 translate-y-2 transition-all duration-300">
-    <i class="fas fa-check-circle text-[#7fd99a] mt-0.5"></i>
-    <span id="toastMessage" class="leading-relaxed"></span>
-</div>
-
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () {
 
-        /* =====================================================
-           ELEMENTS
-           ===================================================== */
+    const cards = Array.from(document.querySelectorAll('#projectsGrid [data-project-card]'));
+    const noResults = document.getElementById('noResultsMessage');
+    const summaryText = document.getElementById('projectSummaryText');
 
-        const cards = Array.from(document.querySelectorAll('#projectsGrid [data-project-card]'));
-        const noResults = document.getElementById('noResultsMessage');
-        const summaryText = document.getElementById('projectSummaryText');
+    const searchInputDesktop = document.getElementById('projectSearchInput');
+    const searchInputMobile  = document.getElementById('projectSearchInputMobile');
+    const clearSearchButton  = document.getElementById('clearSearchButton');
 
-        const searchInputDesktop = document.getElementById('projectSearchInput');
-        const searchInputMobile = document.getElementById('projectSearchInputMobile');
-        const clearSearchButton = document.getElementById('clearSearchButton');
+    const filterButton    = document.getElementById('filterButton');
+    const filterDropdown  = document.getElementById('filterDropdown');
+    const filterCheckboxes = Array.from(document.querySelectorAll('.filter-status-checkbox'));
+    const clearFiltersButton   = document.getElementById('clearFiltersButton');
+    const resetSearchFromEmpty = document.getElementById('resetSearchFromEmpty');
 
-        const filterButton = document.getElementById('filterButton');
-        const filterDropdown = document.getElementById('filterDropdown');
-        const filterCheckboxes = Array.from(document.querySelectorAll('.filter-status-checkbox'));
-        const clearFiltersButton = document.getElementById('clearFiltersButton');
-        const resetSearchFromEmpty = document.getElementById('resetSearchFromEmpty');
+    /* ── search helpers ────────────────────────────────────── */
 
-        const newProjectButton = document.getElementById('newProjectButton');
-        const newProjectModalDesktop = document.getElementById('newProjectModalDesktop');
-        const newProjectPanelMobile = document.getElementById('newProjectPanelMobile');
-        const desktopFormSlot = document.getElementById('desktopFormSlot');
-        const mobileFormSlot = document.getElementById('mobileFormSlot');
-        const newProjectForm = document.getElementById('newProjectForm');
-        const closeNewProjectDesktop = document.getElementById('closeNewProjectDesktop');
-        const closeNewProjectMobile = document.getElementById('closeNewProjectMobile');
-        const cancelButtons = document.querySelectorAll('.new-project-cancel');
+    function getQuery() {
+        return ((searchInputDesktop ? searchInputDesktop.value : '') ||
+                (searchInputMobile  ? searchInputMobile.value  : '') || '').trim().toLowerCase();
+    }
 
-        const toast = document.getElementById('toast');
-        const toastMessage = document.getElementById('toastMessage');
+    function getActiveStatuses() {
+        return filterCheckboxes.filter(cb => cb.checked).map(cb => cb.value);
+    }
 
-        const DESKTOP_QUERY = '(min-width: 1024px)';
-
-
-        /* =====================================================
-           PROGRESS BARS + SUMMARY — CALCULATED CLIENT-SIDE
-           ===================================================== */
-
-        function initProgressBars() {
-            cards.forEach(function (card) {
-                const bar = card.querySelector('[data-progress-bar]');
-                const label = card.querySelector('[data-progress-label]');
-                const pct = Math.max(0, Math.min(100, parseInt(card.dataset.progress, 10) || 0));
-
-                if (label) label.textContent = pct + '%';
-
-                if (bar) {
-                    bar.style.width = '0%';
-                    requestAnimationFrame(function () {
-                        requestAnimationFrame(function () {
-                            bar.style.width = pct + '%';
-                        });
-                    });
-                }
-            });
-        }
-
-        function updateSummary() {
-            const total = cards.length;
-            const atRiskOrBlocked = cards.filter(function (card) {
-                return card.dataset.status === 'at-risk' || card.dataset.status === 'blocked';
-            }).length;
-
-            summaryText.textContent = total + ' active \u00b7 ' + atRiskOrBlocked + ' at risk or blocked';
-        }
-
-        initProgressBars();
-        updateSummary();
-
-
-        /* =====================================================
-           SEARCH + FILTER
-           ===================================================== */
-
-        function getQuery() {
-            const desktopVal = searchInputDesktop ? searchInputDesktop.value : '';
-            const mobileVal = searchInputMobile ? searchInputMobile.value : '';
-            return (desktopVal || mobileVal || '').trim().toLowerCase();
-        }
-
-        function getActiveStatuses() {
-            return filterCheckboxes.filter(function (cb) { return cb.checked; })
-                .map(function (cb) { return cb.value; });
-        }
-
-        function syncSearchInputs(value) {
-            if (searchInputDesktop) searchInputDesktop.value = value;
-            if (searchInputMobile) searchInputMobile.value = value;
-            if (clearSearchButton) {
-                clearSearchButton.classList.toggle('hidden', value.length === 0);
-                clearSearchButton.classList.toggle('flex', value.length > 0);
-            }
-        }
-
-        function updateFilterBadge(count) {
-            let badge = filterButton.querySelector('.filter-badge');
-            if (count > 0) {
-                if (!badge) {
-                    badge = document.createElement('span');
-                    badge.className = 'filter-badge inline-flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-[#e0532e] text-white text-[9px] font-bold';
-                    filterButton.appendChild(badge);
-                }
-                badge.textContent = count;
-            } else if (badge) {
-                badge.remove();
-            }
-        }
-
-        function applyFilters() {
-            const query = getQuery();
-            const activeStatuses = getActiveStatuses();
-            let visibleCount = 0;
-
-            cards.forEach(function (card) {
-                const name = (card.dataset.name || '').toLowerCase();
-                const client = (card.dataset.client || '').toLowerCase();
-                const status = card.dataset.status;
-
-                const matchesQuery = !query || name.includes(query) || client.includes(query);
-                const matchesStatus = activeStatuses.length === 0 || activeStatuses.indexOf(status) !== -1;
-                const visible = matchesQuery && matchesStatus;
-
-                card.classList.toggle('hidden', !visible);
-                if (visible) visibleCount++;
-            });
-
-            noResults.classList.toggle('hidden', visibleCount !== 0);
-            updateFilterBadge(activeStatuses.length);
-        }
-
-        if (searchInputDesktop) {
-            searchInputDesktop.addEventListener('input', function () {
-                syncSearchInputs(this.value);
-                applyFilters();
-            });
-        }
-
-        if (searchInputMobile) {
-            searchInputMobile.addEventListener('input', function () {
-                syncSearchInputs(this.value);
-                applyFilters();
-            });
-        }
-
+    function syncSearchInputs(value) {
+        if (searchInputDesktop) searchInputDesktop.value = value;
+        if (searchInputMobile)  searchInputMobile.value  = value;
         if (clearSearchButton) {
-            clearSearchButton.addEventListener('click', function () {
-                syncSearchInputs('');
-                applyFilters();
-                (searchInputDesktop || searchInputMobile).focus();
-            });
+            clearSearchButton.classList.toggle('hidden', value.length === 0);
+            clearSearchButton.classList.toggle('flex',   value.length > 0);
         }
+    }
 
-        filterCheckboxes.forEach(function (cb) {
-            cb.addEventListener('change', applyFilters);
-        });
-
-        if (clearFiltersButton) {
-            clearFiltersButton.addEventListener('click', function () {
-                filterCheckboxes.forEach(function (cb) { cb.checked = false; });
-                applyFilters();
-            });
-        }
-
-        if (resetSearchFromEmpty) {
-            resetSearchFromEmpty.addEventListener('click', function () {
-                syncSearchInputs('');
-                filterCheckboxes.forEach(function (cb) { cb.checked = false; });
-                applyFilters();
-            });
-        }
-
-        if (filterButton) {
-            filterButton.addEventListener('click', function (event) {
-                event.stopPropagation();
-                filterDropdown.classList.toggle('hidden');
-            });
-        }
-
-        document.addEventListener('click', function (event) {
-            if (!filterDropdown.classList.contains('hidden') &&
-                !filterDropdown.contains(event.target) &&
-                event.target !== filterButton) {
-                filterDropdown.classList.add('hidden');
+    function updateFilterBadge(count) {
+        let badge = filterButton ? filterButton.querySelector('.filter-badge') : null;
+        if (count > 0) {
+            if (!badge) {
+                badge = document.createElement('span');
+                badge.className = 'filter-badge inline-flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-[#e0532e] text-white text-[9px] font-bold';
+                filterButton.appendChild(badge);
             }
+            badge.textContent = count;
+        } else if (badge) {
+            badge.remove();
+        }
+    }
+
+    function applyFilters() {
+        if (!cards.length) return;
+        const query = getQuery();
+        const activeStatuses = getActiveStatuses();
+        let visibleCount = 0;
+
+        cards.forEach(function (card) {
+            const name   = (card.dataset.name   || '').toLowerCase();
+            const client = (card.dataset.client || '').toLowerCase();
+            const status = card.dataset.status;
+
+            const matchesQuery  = !query || name.includes(query) || client.includes(query);
+            const matchesStatus = activeStatuses.length === 0 || activeStatuses.includes(status);
+            const visible = matchesQuery && matchesStatus;
+
+            card.classList.toggle('hidden', !visible);
+            if (visible) visibleCount++;
         });
 
-        document.addEventListener('keydown', function (event) {
-            if (event.key === 'Escape') {
-                filterDropdown.classList.add('hidden');
-            }
+        if (noResults) noResults.classList.toggle('hidden', visibleCount !== 0);
+        updateFilterBadge(activeStatuses.length);
+
+        // Update summary count
+        if (summaryText) {
+            const total = cards.length;
+            const atRiskOrBlocked = cards.filter(c =>
+                c.dataset.status === 'at-risk' || c.dataset.status === 'blocked'
+            ).length;
+            summaryText.textContent = total + ' project' + (total !== 1 ? 's' : '') +
+                (atRiskOrBlocked ? ' \u00b7 ' + atRiskOrBlocked + ' at risk or blocked' : '');
+        }
+    }
+
+    if (searchInputDesktop) {
+        searchInputDesktop.addEventListener('input', function () {
+            syncSearchInputs(this.value);
+            applyFilters();
         });
+    }
 
-
-        /* =====================================================
-           NEW PROJECT — MODAL (desktop) / FULL PAGE (tablet+mobile)
-           ===================================================== */
-
-        function isDesktopViewport() {
-            return window.matchMedia(DESKTOP_QUERY).matches;
-        }
-
-        function isNewProjectOpen() {
-            return !newProjectModalDesktop.classList.contains('hidden') ||
-                !newProjectPanelMobile.classList.contains('translate-x-full');
-        }
-
-        function openNewProject() {
-            if (isDesktopViewport()) {
-                desktopFormSlot.appendChild(newProjectForm);
-                newProjectModalDesktop.classList.remove('hidden');
-                newProjectModalDesktop.classList.add('flex');
-            } else {
-                mobileFormSlot.appendChild(newProjectForm);
-                newProjectPanelMobile.classList.remove('translate-x-full');
-            }
-
-            document.body.classList.add('overflow-hidden');
-
-            const firstField = newProjectForm.querySelector('input, select, textarea');
-            if (firstField) {
-                window.setTimeout(function () { firstField.focus(); }, 150);
-            }
-        }
-
-        function closeNewProject() {
-            newProjectModalDesktop.classList.add('hidden');
-            newProjectModalDesktop.classList.remove('flex');
-            newProjectPanelMobile.classList.add('translate-x-full');
-            document.body.classList.remove('overflow-hidden');
-        }
-
-        if (newProjectButton) {
-            newProjectButton.addEventListener('click', openNewProject);
-        }
-
-        if (closeNewProjectDesktop) {
-            closeNewProjectDesktop.addEventListener('click', closeNewProject);
-        }
-
-        if (closeNewProjectMobile) {
-            closeNewProjectMobile.addEventListener('click', closeNewProject);
-        }
-
-        cancelButtons.forEach(function (btn) {
-            btn.addEventListener('click', closeNewProject);
+    if (searchInputMobile) {
+        searchInputMobile.addEventListener('input', function () {
+            syncSearchInputs(this.value);
+            applyFilters();
         });
+    }
 
-        newProjectModalDesktop.addEventListener('click', function (event) {
-            if (event.target === newProjectModalDesktop) closeNewProject();
+    if (clearSearchButton) {
+        clearSearchButton.addEventListener('click', function () {
+            syncSearchInputs('');
+            applyFilters();
         });
+    }
 
-        document.addEventListener('keydown', function (event) {
-            if (event.key === 'Escape' && isNewProjectOpen()) closeNewProject();
+    filterCheckboxes.forEach(cb => cb.addEventListener('change', applyFilters));
+
+    if (clearFiltersButton) {
+        clearFiltersButton.addEventListener('click', function () {
+            filterCheckboxes.forEach(cb => cb.checked = false);
+            applyFilters();
         });
+    }
 
-        /* If the viewport crosses the desktop breakpoint while open, switch representation cleanly */
-        let lastIsDesktop = isDesktopViewport();
-        window.addEventListener('resize', function () {
-            const nowDesktop = isDesktopViewport();
-            if (nowDesktop !== lastIsDesktop && isNewProjectOpen()) {
-                closeNewProject();
-                openNewProject();
-            }
-            lastIsDesktop = nowDesktop;
+    if (resetSearchFromEmpty) {
+        resetSearchFromEmpty.addEventListener('click', function () {
+            syncSearchInputs('');
+            filterCheckboxes.forEach(cb => cb.checked = false);
+            applyFilters();
         });
+    }
 
-        newProjectForm.addEventListener('submit', function (event) {
-            event.preventDefault();
-            // Frontend-only preview: nothing is persisted or added to the grid.
-            const name = document.getElementById('npName').value.trim() || 'New project';
-            closeNewProject();
-            newProjectForm.reset();
-            showToast('"' + name + '" created (preview only) \u2014 connect a backend to save it.');
+    if (filterButton) {
+        filterButton.addEventListener('click', function (e) {
+            e.stopPropagation();
+            filterDropdown.classList.toggle('hidden');
         });
+    }
 
-
-        /* =====================================================
-           TOAST
-           ===================================================== */
-
-        let toastTimeout;
-
-        function showToast(message) {
-            toastMessage.textContent = message;
-            toast.classList.remove('hidden');
-            toast.classList.add('flex');
-
-            window.clearTimeout(toastTimeout);
-
-            requestAnimationFrame(function () {
-                toast.classList.remove('opacity-0', 'translate-y-2');
-            });
-
-            toastTimeout = window.setTimeout(function () {
-                toast.classList.add('opacity-0', 'translate-y-2');
-                window.setTimeout(function () {
-                    toast.classList.add('hidden');
-                    toast.classList.remove('flex');
-                }, 300);
-            }, 3800);
+    document.addEventListener('click', function (e) {
+        if (filterDropdown && !filterDropdown.classList.contains('hidden') &&
+            !filterDropdown.contains(e.target) && e.target !== filterButton) {
+            filterDropdown.classList.add('hidden');
         }
-
     });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && filterDropdown) filterDropdown.classList.add('hidden');
+    });
+
+    // Run once on load to set summary correctly
+    applyFilters();
+});
 </script>
 
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+/* Wire the base navbar search input (rendered by base.html) to the
+   projects filter JS so typing in the header searches projects.
+   We assign the ID before DOMContentLoaded so the filter script can
+   find it by ID when it initialises. */
+(function () {
+    var navInput = document.querySelector('header input[type="text"]');
+    if (navInput && !navInput.id) {
+        navInput.id = 'projectSearchInput';
+        navInput.placeholder = 'Search projects, clients\u2026';
+    }
+})();
+</script>
 {% endblock %}

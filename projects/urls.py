@@ -2,19 +2,26 @@ from django.urls import path
 
 from . import views
 
-
 app_name = "projects"
 
-
 urlpatterns = [
+    # /projects/
     path(
         "",
-        views.project_view,
-        name="project_view",
+        views.project_list,
+        name="project_list",
     ),
 
+    # /projects/create/
     path(
-        "<slug:slug>/",
+        "create/",
+        views.project_create,
+        name="project_create",
+    ),
+
+    # /projects/<pk>/
+    path(
+        "<int:pk>/",
         views.project_detail,
         name="project_detail",
     ),

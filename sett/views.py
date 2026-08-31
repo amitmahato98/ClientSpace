@@ -1,17 +1,19 @@
 from django.contrib import messages
-from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth import update_session_auth_hash, get_user_model
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
-from accounts.decorators import manager_required
-from accounts.models import User
+from accounts.decorators import manager_required, staff_or_above
+
+User = get_user_model()
 
 
-@login_required
+@staff_or_above
 def settings_page(request):
     """
     Application settings page.
-    Currently accessible to any authenticated user (profile settings).
+    Restricted to MANAGER and STAFF — CLIENT users are blocked by middleware
+    Stage 3 and by this decorator as a second line of defence.
     Management-level settings should use @manager_required when added.
     """
     user = request.user

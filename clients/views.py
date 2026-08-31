@@ -1,17 +1,16 @@
-from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
 
-from accounts.decorators import manager_required, staff_or_above
+from accounts.decorators import staff_or_above
 
 from .models import Client
 
 
-@login_required
+@staff_or_above
 def clients_page(request):
     """
     Client list page.
     MANAGER and STAFF can see all clients.
-    CLIENT users will only see their own profile once role-based filtering is added.
+    CLIENT users are blocked by middleware Stage 3 and by this decorator.
     """
     clients = Client.objects.all()
     selected = clients.first()
