@@ -26,20 +26,35 @@
         </nav>
 
         <div>
+            <!-- Django Messages -->
+            {% if messages %}
+                <div style="margin-bottom: 20px;">
+                    {% for message in messages %}
+                        <div style="padding: 12px 16px; border-radius: 8px; margin-bottom: 8px; font-size: 14px; font-weight: 500;
+                            {% if message.tags == 'error' %}background-color: #fef2f2; color: #dc2626; border: 1px solid #fecaca;
+                            {% else %}background-color: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0;{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
 
             <!-- ════════════ PROFILE ════════════ -->
             <div id="panel-profile" class="sett-panel">
 
                 <h2 class="sett-panel-title">Profile</h2>
 
-                <form method="POST" action="" onsubmit="event.preventDefault(); settToast('Profile updated successfully!');">
+                <form method="POST" action="{% url 'sett:settings' %}" enctype="multipart/form-data">
                     {% csrf_token %}
+                    <input type="hidden" name="action" value="profile">
 
                     <!-- Avatar -->
                     <div class="sett-avatar">
-                        <div id="avatarPreview">AR</div>
+                        <div id="avatarPreview" style="{% if user.profile_picture %}background-image: url('{{ user.profile_picture.url }}'); background-size: cover; background-position: center; font-size: 0;{% endif %}">
+                            {% if not user.profile_picture %}{{ user.initials }}{% endif %}
+                        </div>
                         <div>
-                            <input type="file" id="photoInput" class="hidden" accept="image/*" onchange="settPreviewPhoto(event)">
+                            <input type="file" id="photoInput" name="profile_picture" class="hidden" accept="image/*" onchange="settPreviewPhoto(event)">
                             <button type="button" class="btn-outline" onclick="document.getElementById('photoInput').click()">
                                 Change photo
                             </button>
@@ -51,18 +66,18 @@
                     <div class="sett-field-grid">
                         <div>
                             <label class="sett-label">Full name</label>
-                            <input class="sett-input" type="text" name="full_name" placeholder="Enter your Full Name" required>
+                            <input class="sett-input" type="text" name="full_name" value="{{ user.get_full_name }}" placeholder="Enter your Full Name">
                         </div>
                         <div>
                             <label class="sett-label">Display name</label>
-                            <input class="sett-input" type="text" name="display_name" placeholder="Enter your Display name" required>
+                            <input class="sett-input" type="text" name="display_name" value="{{ user.display_name|default:user.username }}" placeholder="Enter your Display name" required>
                         </div>
                     </div>
 
                     <!-- Email -->
                     <div class="sett-field">
                         <label class="sett-label">Email</label>
-                        <input class="sett-input" type="email" name="email" placeholder="abcd@gmail.com" required>
+                        <input class="sett-input" type="email" name="email" value="{{ user.email }}" placeholder="abcd@gmail.com" required>
                     </div>
 
                     <!-- New password -->

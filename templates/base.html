@@ -119,7 +119,7 @@
 
 
             <!-- Settings -->
-            <a href="{% url 'settings' %}" data-nav="settings" class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#6b4f3a] hover:text-[#4a3520] text-sm transition">
+            <a href="{% url 'sett:settings' %}" data-nav="settings" class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#6b4f3a] hover:text-[#4a3520] text-sm transition">
               <i class="fas fa-cog w-5 text-center text-[#b8895e]"></i>
               <span>Settings</span>
             </a>
@@ -166,10 +166,14 @@
           <div class="flex items-center gap-4 text-[#5a3e2b]">
             <i class="fas fa-bell text-lg hover:text-[#b8895e] cursor-pointer transition"></i>
             {% if user.is_authenticated %}
-              <!-- User avatar initials -->
-              <div class="w-8 h-8 rounded-full bg-[#d4a373] flex items-center justify-center text-white text-sm font-medium" title="{{ user.get_full_name|default:user.username }}">
-                {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
-              </div>
+              <!-- User avatar / initials -->
+              {% if user.profile_picture %}
+                <img src="{{ user.profile_picture.url }}" class="w-8 h-8 rounded-full object-cover" title="{{ user.display_name|default:user.get_full_name }}">
+              {% else %}
+                <div class="w-8 h-8 rounded-full bg-[#d4a373] flex items-center justify-center text-white text-sm font-medium" title="{{ user.display_name|default:user.get_full_name }}">
+                  {{ user.initials }}
+                </div>
+              {% endif %}
               <!-- Logout -->
               <form method="POST" action="{% url 'accounts:logout' %}" style="margin:0">
                 {% csrf_token %}
@@ -277,7 +281,7 @@
           <span>WorkSpace</span>
         </a>
         <a
-          href="{% url 'settings' %}"
+          href="{% url 'sett:settings' %}"
           data-nav="settings"
           class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition"
         >
