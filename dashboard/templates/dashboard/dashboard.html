@@ -4,336 +4,248 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block page_heading %}Dashboard{% endblock %}
-
-{% block extra_head %}
-<link rel="stylesheet" href="{% static 'dashboard/dashboard.css' %}">
-{% endblock %}
+{% block page_subheading %}Hello {{ user.first_name }} 🌞 · Wednesday, 20 August · 7 active projects{% endblock %}
 
 {% block content %}
 
-<div class="dashboard-content">
+<!-- ALERT -->
+<div class="flex items-center gap-3 px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm hover:bg-red-100 hover:border-red-300 transition mb-5">
+    <span class="text-base">⊙</span>
+    <span>
+        <strong>2 projects are overdue</strong>
+        — E-commerce Store (6 days) and Marketing Site (3 days).
+        Review them below.
+    </span>
+    <a href="#" class="ml-auto text-red-600 font-semibold hover:text-red-800 transition">View all →</a>
+</div>
 
-    <!-- TOP HEADER -->
-    <header class="dashboard-header">
-
-      <div>
-    <h1>Hello {{ user.first_name }} 🌞</h1>
-    <p>Wednesday, 20 August · 7 active projects</p>
+<!-- STATISTICS -->
+<section class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-5">
+    
+    <!-- Active Projects -->
+    <div class="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg hover:-translate-y-1 transition relative overflow-hidden group">
+        <div class="absolute left-0 top-0 bottom-0 w-1 bg-purple-600"></div>
+        <span class="block text-[10px] text-gray-500 font-semibold mb-3 tracking-wide">ACTIVE PROJECTS</span>
+        <h2 class="text-3xl font-bold text-gray-900 group-hover:translate-x-1 transition">7</h2>
+        <p class="text-[11px] text-gray-400 mt-2">across 5 clients</p>
     </div>
 
-        <div class="header-actions">
+    <!-- Overdue -->
+    <div class="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg hover:-translate-y-1 transition relative overflow-hidden group">
+        <div class="absolute left-0 top-0 bottom-0 w-1 bg-red-500"></div>
+        <span class="block text-[10px] text-gray-500 font-semibold mb-3 tracking-wide">OVERDUE</span>
+        <h2 class="text-3xl font-bold text-gray-900 group-hover:translate-x-1 transition">2</h2>
+        <p class="text-[11px] text-gray-400 mt-2">needs attention</p>
+    </div>
 
-            <div class="search-box">
-                <span>⌕</span>
-                <input type="text" placeholder="Search anything... ⌘K">
-            </div>
+    <!-- Due This Week -->
+    <div class="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg hover:-translate-y-1 transition relative overflow-hidden group">
+        <div class="absolute left-0 top-0 bottom-0 w-1 bg-orange-500"></div>
+        <span class="block text-[10px] text-gray-500 font-semibold mb-3 tracking-wide">DUE THIS WEEK</span>
+        <h2 class="text-3xl font-bold text-gray-900 group-hover:translate-x-1 transition">3</h2>
+        <p class="text-[11px] text-gray-400 mt-2">next: Logo Design, Aug 22</p>
+    </div>
 
-            <button class="notification">♧</button>
+    <!-- Pending Payments -->
+    <div class="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg hover:-translate-y-1 transition relative overflow-hidden group">
+        <div class="absolute left-0 top-0 bottom-0 w-1 bg-blue-500"></div>
+        <span class="block text-[10px] text-gray-500 font-semibold mb-3 tracking-wide">PENDING PAYMENTS</span>
+        <h2 class="text-3xl font-bold text-gray-900 group-hover:translate-x-1 transition">₹64,500</h2>
+        <p class="text-[11px] text-gray-400 mt-2">4 invoices outstanding</p>
+    </div>
 
-            <button class="new-project">
-                + New Project
-            </button>
+    <!-- Earned This Month -->
+    <div class="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg hover:-translate-y-1 transition relative overflow-hidden group">
+        <div class="absolute left-0 top-0 bottom-0 w-1 bg-green-500"></div>
+        <span class="block text-[10px] text-gray-500 font-semibold mb-3 tracking-wide">EARNED THIS MONTH</span>
+        <h2 class="text-3xl font-bold text-gray-900 group-hover:translate-x-1 transition">₹1,28,000</h2>
+        <p class="text-[11px] text-gray-400 mt-2">↑ 18% vs July</p>
+    </div>
 
+</section>
+
+<!-- MAIN GRID -->
+<section class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+    <!-- RECENT PROJECTS (spans 2 columns) -->
+    <div class="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg transition lg:col-span-2">
+        
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-base font-semibold text-gray-900">Recent Projects</h2>
+            <a href="{% url 'projects:project_list' %}" class="text-xs text-[#b8895e] hover:text-[#8b6844] transition">All projects →</a>
         </div>
 
-    </header>
+        <!-- Project 1 -->
+        <div class="grid grid-cols-[42px_1.5fr_110px_125px_65px] gap-4 items-center border-t border-gray-100 py-2 px-2 rounded hover:bg-[#fafaff] hover:translate-x-1 transition">
+            <div class="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center text-white text-[11px] font-bold group-hover:scale-110 transition">RS</div>
+            <div>
+                <h3 class="text-sm font-semibold text-gray-900">Website Redesign</h3>
+                <p class="text-[10px] text-gray-400 mt-1">Rahul Sharma · 8/12 tasks</p>
+            </div>
+            <span class="px-2.5 py-1.5 rounded-xl bg-purple-50 text-purple-700 text-[10px] font-semibold w-fit hover:bg-purple-100 transition">● In Progress</span>
+            <div class="flex items-center gap-2">
+                <div class="w-[70px] h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                    <div class="h-full bg-purple-600 rounded-full" style="width: 67%;"></div>
+                </div>
+                <small class="text-[10px] text-gray-400">67%</small>
+            </div>
+            <div class="text-right">
+                <small class="block text-[8px] text-gray-400">DUE</small>
+                <strong class="block text-[11px] text-gray-900 mt-1">Sep 2</strong>
+            </div>
+        </div>
 
+        <!-- Project 2 -->
+        <div class="grid grid-cols-[42px_1.5fr_110px_125px_65px] gap-4 items-center border-t border-gray-100 py-2 px-2 rounded hover:bg-[#fafaff] hover:translate-x-1 transition">
+            <div class="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center text-white text-[11px] font-bold group-hover:scale-110 transition">MK</div>
+            <div>
+                <h3 class="text-sm font-semibold text-gray-900">Logo Design</h3>
+                <p class="text-[10px] text-gray-400 mt-1">Meera Kapoor · 4/5 tasks</p>
+            </div>
+            <span class="px-2.5 py-1.5 rounded-xl bg-purple-50 text-purple-700 text-[10px] font-semibold w-fit hover:bg-purple-100 transition">● In Progress</span>
+            <div class="flex items-center gap-2">
+                <div class="w-[70px] h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                    <div class="h-full bg-purple-600 rounded-full" style="width: 80%;"></div>
+                </div>
+                <small class="text-[10px] text-gray-400">80%</small>
+            </div>
+            <div class="text-right">
+                <small class="block text-[8px] text-gray-400">DUE</small>
+                <strong class="block text-[11px] text-orange-500 mt-1">Aug 22</strong>
+            </div>
+        </div>
 
-    <!-- ALERT -->
-    <div class="alert-box">
+        <!-- Project 3 -->
+        <div class="grid grid-cols-[42px_1.5fr_110px_125px_65px] gap-4 items-center border-t border-gray-100 py-2 px-2 rounded hover:bg-[#fafafff] hover:translate-x-1 transition">
+            <div class="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center text-white text-[11px] font-bold group-hover:scale-110 transition">PN</div>
+            <div>
+                <h3 class="text-sm font-semibold text-gray-900">E-commerce Store</h3>
+                <p class="text-[10px] text-gray-400 mt-1">Priya Nair · 6/20 tasks</p>
+            </div>
+            <span class="px-2.5 py-1.5 rounded-xl bg-red-50 text-red-600 text-[10px] font-semibold w-fit hover:bg-red-100 transition">● Overdue</span>
+            <div class="flex items-center gap-2">
+                <div class="w-[70px] h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                    <div class="h-full bg-red-500 rounded-full" style="width: 30%;"></div>
+                </div>
+                <small class="text-[10px] text-gray-400">30%</small>
+            </div>
+            <div class="text-right">
+                <small class="block text-[8px] text-gray-400">DUE</small>
+                <strong class="block text-[11px] text-red-600 mt-1">Aug 14</strong>
+            </div>
+        </div>
 
-        <span class="alert-icon">⊙</span>
-
-        <span>
-            <strong>2 projects are overdue</strong>
-            — E-commerce Store (6 days) and Marketing Site (3 days).
-            Review them below.
-        </span>
-
-        <a href="#">View all →</a>
+        <!-- Project 4 -->
+        <div class="grid grid-cols-[42px_1.5fr_110px_125px_65px] gap-4 items-center border-t border-gray-100 py-2 px-2 rounded hover:bg-[#fafafff] hover:translate-x-1 transition">
+            <div class="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white text-[11px] font-bold group-hover:scale-110 transition">DO</div>
+            <div>
+                <h3 class="text-sm font-semibold text-gray-900">Brand Identity</h3>
+                <p class="text-[10px] text-gray-400 mt-1">Bright Path Nonprofit · 9/9 tasks</p>
+            </div>
+            <span class="px-2.5 py-1.5 rounded-xl bg-green-50 text-green-700 text-[10px] font-semibold w-fit hover:bg-green-100 transition">● Completed</span>
+            <div class="flex items-center gap-2">
+                <div class="w-[70px] h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                    <div class="h-full bg-purple-600 rounded-full" style="width: 100%;"></div>
+                </div>
+                <small class="text-[10px] text-gray-400">100%</small>
+            </div>
+            <div class="text-right">
+                <small class="block text-[8px] text-gray-400">DUE</small>
+                <strong class="block text-[11px] text-gray-900 mt-1">Aug 10</strong>
+            </div>
+        </div>
 
     </div>
 
-
-    <!-- STATISTICS -->
-    <section class="stats">
-
-        <div class="stat-card purple">
-            <span>ACTIVE PROJECTS</span>
-            <h2>7</h2>
-            <p>across 5 clients</p>
-        </div>
-
-        <div class="stat-card red">
-            <span>OVERDUE</span>
-            <h2>2</h2>
-            <p>needs attention</p>
-        </div>
-
-        <div class="stat-card orange">
-            <span>DUE THIS WEEK</span>
-            <h2>3</h2>
-            <p>next: Logo Design, Aug 22</p>
-        </div>
-
-        <div class="stat-card blue">
-            <span>PENDING PAYMENTS</span>
-            <h2>₹64,500</h2>
-            <p>4 invoices outstanding</p>
-        </div>
-
-        <div class="stat-card green">
-            <span>EARNED THIS MONTH</span>
-            <h2>₹1,28,000</h2>
-            <p>↑ 18% vs July</p>
-        </div>
-
-    </section>
-
-
-    <!-- MAIN GRID -->
-    <section class="dashboard-grid">
-
-
-        <!-- RECENT PROJECTS -->
-        <div class="card projects-card">
-
-            <div class="card-header">
-                <h2>Recent Projects</h2>
-                <a href="#">All projects →</a>
-            </div>
-
-
-            <div class="project">
-
-                <div class="project-avatar purple-bg">
-                    RS
-                </div>
-
-                <div class="project-details">
-                    <h3>Website Redesign</h3>
-                    <p>Rahul Sharma · 8/12 tasks</p>
-                </div>
-
-                <span class="status progress">
-                    ● In Progress
-                </span>
-
-                <div class="progress-container">
-                    <div class="progress-bar">
-                        <span style="width: 67%;"></span>
-                    </div>
-                    <small>67%</small>
-                </div>
-
-                <div class="deadline">
-                    <small>DUE</small>
-                    <strong>Sep 2</strong>
-                </div>
-
-            </div>
-
-
-            <div class="project">
-
-                <div class="project-avatar orange-bg">
-                    MK
-                </div>
-
-                <div class="project-details">
-                    <h3>Logo Design</h3>
-                    <p>Meera Kapoor · 4/5 tasks</p>
-                </div>
-
-                <span class="status progress">
-                    ● In Progress
-                </span>
-
-                <div class="progress-container">
-                    <div class="progress-bar">
-                        <span style="width: 80%;"></span>
-                    </div>
-                    <small>80%</small>
-                </div>
-
-                <div class="deadline">
-                    <small>DUE</small>
-                    <strong class="orange-text">Aug 22</strong>
-                </div>
-
-            </div>
-
-
-            <div class="project">
-
-                <div class="project-avatar red-bg">
-                    PN
-                </div>
-
-                <div class="project-details">
-                    <h3>E-commerce Store</h3>
-                    <p>Priya Nair · 6/20 tasks</p>
-                </div>
-
-                <span class="status overdue">
-                    ● Overdue
-                </span>
-
-                <div class="progress-container">
-                    <div class="progress-bar red-bar">
-                        <span style="width: 30%;"></span>
-                    </div>
-                    <small>30%</small>
-                </div>
-
-                <div class="deadline">
-                    <small>DUE</small>
-                    <strong class="red-text">Aug 14</strong>
-                </div>
-
-            </div>
-
-
-            <div class="project">
-
-                <div class="project-avatar green-bg">
-                    DO
-                </div>
-
-                <div class="project-details">
-                    <h3>Brand Identity</h3>
-                    <p>Bright Path Nonprofit · 9/9 tasks</p>
-                </div>
-
-                <span class="status completed">
-                    ● Completed
-                </span>
-
-                <div class="progress-container">
-                    <div class="progress-bar">
-                        <span style="width: 100%;"></span>
-                    </div>
-                    <small>100%</small>
-                </div>
-
-                <div class="deadline">
-                    <small>DUE</small>
-                    <strong>Aug 10</strong>
-                </div>
-
-            </div>
-
-        </div>
-
+    <!-- ACTIVITY FEED & EARNINGS (right column) -->
+    <div class="space-y-4">
 
         <!-- ACTIVITY FEED -->
-        <div class="card activity-card">
-
-            <div class="card-header">
-                <h2>Activity Feed</h2>
+        <div class="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg transition">
+            
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-base font-semibold text-gray-900">Activity Feed</h2>
             </div>
 
-
-            <div class="activity">
-
-                <span class="dot green-dot"></span>
-
+            <div class="flex gap-3 py-3 px-2 border-t border-gray-100 rounded hover:bg-[#fafafff] hover:pl-3 transition">
+                <span class="w-2 h-2 rounded-full bg-green-500 mt-1.5 flex-shrink-0"></span>
                 <div>
-                    <h3>Marked Brand Identity as Completed</h3>
-                    <p>Today, 9:12 AM</p>
+                    <h3 class="text-[11px] font-medium text-gray-900">Marked Brand Identity as Completed</h3>
+                    <p class="text-[10px] text-gray-400 mt-1">Today, 9:12 AM</p>
                 </div>
-
             </div>
 
-
-            <div class="activity">
-
-                <span class="dot blue-dot"></span>
-
+            <div class="flex gap-3 py-3 px-2 border-t border-gray-100 rounded hover:bg-[#fafafff] hover:pl-3 transition">
+                <span class="w-2 h-2 rounded-full bg-blue-600 mt-1.5 flex-shrink-0"></span>
                 <div>
-                    <h3>Payment ₹40,000 from Rahul Sharma</h3>
-                    <p>Today, 8:40 AM</p>
+                    <h3 class="text-[11px] font-medium text-gray-900">Payment ₹40,000 from Rahul Sharma</h3>
+                    <p class="text-[10px] text-gray-400 mt-1">Today, 8:40 AM</p>
                 </div>
-
             </div>
 
-
-            <div class="activity">
-
-                <span class="dot purple-dot"></span>
-
+            <div class="flex gap-3 py-3 px-2 border-t border-gray-100 rounded hover:bg-[#fafafff] hover:pl-3 transition">
+                <span class="w-2 h-2 rounded-full bg-purple-600 mt-1.5 flex-shrink-0"></span>
                 <div>
-                    <h3>New task added in Logo Design</h3>
-                    <p>Yesterday, 5:02 PM</p>
+                    <h3 class="text-[11px] font-medium text-gray-900">New task added in Logo Design</h3>
+                    <p class="text-[10px] text-gray-400 mt-1">Yesterday, 5:02 PM</p>
                 </div>
-
             </div>
 
-
-            <div class="activity">
-
-                <span class="dot red-dot"></span>
-
+            <div class="flex gap-3 py-3 px-2 border-t border-gray-100 rounded hover:bg-[#fafafff] hover:pl-3 transition">
+                <span class="w-2 h-2 rounded-full bg-red-500 mt-1.5 flex-shrink-0"></span>
                 <div>
-                    <h3>E-commerce Store deadline passed</h3>
-                    <p>Aug 14, 12:00 AM</p>
+                    <h3 class="text-[11px] font-medium text-gray-900">E-commerce Store deadline passed</h3>
+                    <p class="text-[10px] text-gray-400 mt-1">Aug 14, 12:00 AM</p>
                 </div>
-
             </div>
 
-
-            <div class="activity">
-
-                <span class="dot blue-dot"></span>
-
+            <div class="flex gap-3 py-3 px-2 border-t border-gray-100 rounded hover:bg-[#fafafff] hover:pl-3 transition">
+                <span class="w-2 h-2 rounded-full bg-blue-600 mt-1.5 flex-shrink-0"></span>
                 <div>
-                    <h3>Invited Sana Iqbal to the team</h3>
-                    <p>Aug 13, 3:20 PM</p>
+                    <h3 class="text-[11px] font-medium text-gray-900">Invited Sana Iqbal to the team</h3>
+                    <p class="text-[10px] text-gray-400 mt-1">Aug 13, 3:20 PM</p>
                 </div>
-
             </div>
 
-
-            <div class="activity">
-
-                <span class="dot purple-dot"></span>
-
+            <div class="flex gap-3 py-3 px-2 border-t border-gray-100 rounded hover:bg-[#fafafff] hover:pl-3 transition">
+                <span class="w-2 h-2 rounded-full bg-purple-600 mt-1.5 flex-shrink-0"></span>
                 <div>
-                    <h3>Invoice INV-009 sent to Meera Kapoor</h3>
-                    <p>Aug 5, 10:00 AM</p>
+                    <h3 class="text-[11px] font-medium text-gray-900">Invoice INV-009 sent to Meera Kapoor</h3>
+                    <p class="text-[10px] text-gray-400 mt-1">Aug 5, 10:00 AM</p>
                 </div>
-
             </div>
 
         </div>
-
 
         <!-- EARNINGS -->
-        <div class="card earnings-card">
-
-            <div class="card-header">
-                <h2>Earnings — Last 6 Months</h2>
+        <div class="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg transition">
+            
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-base font-semibold text-gray-900">Earnings — Last 6 Months</h2>
             </div>
 
-            <div class="chart">
+            <div class="h-40 relative mt-5 border-b border-gray-200">
+                <!-- Horizontal grid lines -->
+                <div class="absolute left-0 right-0 top-11 border-t border-dashed border-gray-200"></div>
+                <div class="absolute left-0 right-0 top-24 border-t border-dashed border-gray-200"></div>
+                
+                <!-- Trend line -->
+                <div class="absolute w-[70%] h-0.5 bg-purple-600 right-[8%] top-16 -rotate-2 rounded-full shadow-sm"></div>
+            </div>
 
-                <div class="chart-line"></div>
-
-                <div class="chart-months">
-                    <span>Mar</span>
-                    <span>Apr</span>
-                    <span>May</span>
-                    <span>Jun</span>
-                    <span>Jul</span>
-                    <span>Aug</span>
-                </div>
-
+            <div class="flex justify-around mt-6">
+                <span class="text-[10px] text-gray-400">Mar</span>
+                <span class="text-[10px] text-gray-400">Apr</span>
+                <span class="text-[10px] text-gray-400">May</span>
+                <span class="text-[10px] text-gray-400">Jun</span>
+                <span class="text-[10px] text-gray-400">Jul</span>
+                <span class="text-[10px] text-gray-400">Aug</span>
             </div>
 
         </div>
 
-    </section>
+    </div>
 
-</div>
+</section>
 
 {% endblock %}

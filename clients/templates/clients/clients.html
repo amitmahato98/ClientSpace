@@ -1,185 +1,183 @@
-{% extends "base.html" %} {% block title %}Clients — ClientSpace{% endblock %}
-{% block page_heading %}Clients{% endblock %} {% block content %}
-<div
-  class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6"
->
-  <div>
-    <h2 class="text-lg font-semibold text-[#4a3520]">Clients</h2>
-    <p class="text-sm text-[#8b6f55]">9 clients across 14 active projects</p>
-  </div>
-  <div class="flex flex-wrap gap-2">
-    <button
-      class="px-4 py-2 text-sm rounded-lg border border-[#e8dccc] text-[#5a3e2b] hover:bg-[#f5e6d0]"
-    >
-      Import CSV
+{% extends "base.html" %}
+
+{% block title %}Clients — ClientSpace{% endblock %}
+
+{% block page_heading %}Clients{% endblock %}
+{% block page_subheading %}9 clients across 14 active projects{% endblock %}
+
+{% block content %}
+
+<!-- Action Buttons -->
+<div class="flex flex-wrap gap-3 mb-5">
+    <button class="px-4 py-2 text-sm rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 transition">
+        Import CSV
     </button>
-    <button
-      class="px-4 py-2 text-sm rounded-lg bg-[#d4a373] text-white hover:bg-[#b8895e]"
-    >
-      + New client
+    <button class="px-4 py-2 text-sm rounded-lg bg-[#d4a373] text-white hover:bg-[#b8895e] transition">
+        + New client
     </button>
-  </div>
 </div>
 
-<div class="flex flex-col lg:flex-row gap-6">
-  <!-- LEFT: client list -->
-  <div class="w-full lg:w-1/3 bg-white rounded-xl border border-[#e8dccc] p-4">
-    <input
-      type="text"
-      placeholder="Search clients…"
-      class="w-full mb-3 px-3 py-2 text-sm rounded-lg border border-[#e8dccc]"
-    />
+<div class="flex flex-col lg:flex-row gap-5">
+    
+    <!-- LEFT: Client List -->
+    <div class="w-full lg:w-1/3 bg-white rounded-xl border border-gray-200 p-4">
+        <input
+            type="text"
+            placeholder="Search clients…"
+            class="w-full mb-3 px-3 py-2 text-sm rounded-lg border border-gray-200 focus:border-[#b8895e] focus:ring-2 focus:ring-[#b8895e] focus:ring-opacity-20 outline-none transition"
+        />
 
-    {% for c in clients %}
-    <a
-      href="?client={{ c.id }}"
-      class="flex items-center gap-3 p-3 rounded-lg {% if selected.id == c.id %}bg-[#fdeee7] border border-[#f4c9b7]{% else %}hover:bg-[#faf1e3]{% endif %}"
-    >
-      <div
-        class="w-9 h-9 shrink-0 rounded-full bg-[#d4a373] text-white flex items-center justify-center text-sm font-medium"
-      >
-        {{ c.initials }}
-      </div>
-      <div class="flex-1 min-w-0">
-        <div class="text-sm font-semibold text-[#4a3520] truncate">
-          {{ c.name }}
-        </div>
-        <div class="text-xs text-[#8b6f55] truncate">
-          {{ c.projects.count }} active projects
-        </div>
-      </div>
-      <span
-        class="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700 shrink-0"
-      >
-        {{ c.get_status_display }}
-      </span>
-    </a>
-    {% endfor %}
-  </div>
-
-  <!-- RIGHT: client detail -->
-  <div
-    class="w-full lg:flex-1 bg-white rounded-xl border border-[#e8dccc] p-4 sm:p-6"
-  >
-    {% if selected %}
-    <div class="flex flex-col sm:flex-row sm:items-start gap-4 mb-5">
-      <div
-        class="w-14 h-14 shrink-0 rounded-2xl bg-[#d4a373] text-white flex items-center justify-center text-lg font-semibold"
-      >
-        {{ selected.initials }}
-      </div>
-      <div class="flex-1 min-w-0">
-        <h3 class="text-lg font-semibold text-[#4a3520] truncate">
-          {{ selected.name }}
-        </h3>
-        <p class="text-sm text-[#8b6f55]">
-          {{ selected.company }} · {{ selected.contact_email }} · {{selected.contact_phone }}
-        </p>
-      </div>
-      <span
-        class="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700 h-fit shrink-0"
-      >
-        {{ selected.get_status_display }}
-      </span>
-    </div>
-
-    <!-- Projects -->
-    <h4 class="text-sm font-semibold text-[#4a3520] mb-2">Projects</h4>
-    <div class="overflow-x-auto mb-6">
-      <table class="w-full text-sm min-w-125">
-        <tr class="text-left text-[#8b6f55] border-b border-[#e8dccc]">
-          <th class="pb-2">Project</th>
-          <th class="pb-2">Status</th>
-          <th class="pb-2">Value</th>
-        </tr>
-        {% for p in selected.projects.all %}
-        <tr class="border-b border-[#f2ede4]">
-          <td class="py-2 text-[#4a3520]">{{ p.name }}</td>
-          <td class="py-2">
-            <span
-              class="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700"
-              >{{ p.get_status_display }}</span
-            >
-          </td>
-          <td class="py-2 font-mono text-[#4a3520]">₹{{ p.value }}</td>
-        </tr>
-        {% endfor %}
-      </table>
-    </div>
-
-    <!-- Financial Summary -->
-    <h4 class="text-sm font-semibold text-[#4a3520] mb-2">Financial Summary</h4>
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 text-sm">
-      <div>
-        <div class="text-[#8b6f55] text-xs">Total Billed</div>
-        <div class="text-[#4a3520] font-mono">₹{{ selected.total_billed }}</div>
-      </div>
-      <div>
-        <div class="text-[#8b6f55] text-xs">Total Paid</div>
-        <div class="text-[#4a3520] font-mono">₹{{ selected.total_paid }}</div>
-      </div>
-      <div>
-        <div class="text-[#8b6f55] text-xs">Outstanding</div>
-        <div class="text-[#4a3520] font-mono">₹{{ selected.outstanding }}</div>
-      </div>
-    </div>
-
-    <!-- Payment History -->
-    <h4 class="text-sm font-semibold text-[#4a3520] mb-2">Payment History</h4>
-    <div class="overflow-x-auto mb-6">
-      <table class="w-full text-sm min-w-125">
-        <tr class="text-left text-[#8b6f55] border-b border-[#e8dccc]">
-          <th class="pb-2">Date</th>
-          <th class="pb-2">Project</th>
-          <th class="pb-2">Amount</th>
-          <th class="pb-2">Status</th>
-        </tr>
-        {% for pay in selected.payments.all %}
-        <tr class="border-b border-[#f2ede4]">
-          <td class="py-2 text-[#4a3520]">{{ pay.date }}</td>
-          <td class="py-2 text-[#4a3520]">
-            {{ pay.project.name|default:"—" }}
-          </td>
-          <td class="py-2 font-mono text-[#4a3520]">₹{{ pay.amount }}</td>
-          <td class="py-2">
-            <span
-              class="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700"
-              >{{ pay.get_status_display }}</span
-            >
-          </td>
-        </tr>
-        {% endfor %}
-      </table>
-    </div>
-
-    <!-- Private Notes -->
-    <h4 class="text-sm font-semibold text-[#4a3520] mb-2">Private Notes</h4>
-    <div class="space-y-3 mb-6">
-      {% for note in selected.notes.all %}
-      <div class="p-3 rounded-lg bg-[#faf1e3] text-sm">
-        <div class="flex justify-between text-xs text-[#8b6f55] mb-1">
-          <span>{{ note.author|default:"Unknown" }}</span>
-          <span>{{ note.created_at|date:"M j" }}</span>
-        </div>
-        <div class="text-[#4a3520]">{{ note.body }}</div>
-      </div>
-      {% endfor %}
-    </div>
-
-    <!-- Client Activity -->
-    <h4 class="text-sm font-semibold text-[#4a3520] mb-2">Client Activity</h4>
-    <div class="space-y-2">
-      {% for act in selected.activities.all %}
-      <div class="flex items-center gap-2 text-sm">
-        <span class="w-1.5 h-1.5 rounded-full bg-[#d4a373] shrink-0"></span>
-        <span class="text-[#4a3520]">{{ act.description }}</span>
-        <span class="text-xs text-[#8b6f55] ml-auto"
-          >{{ act.timestamp|date:"M j, g:i A" }}</span
+        {% for c in clients %}
+        <a
+            href="?client={{ c.id }}"
+            class="flex items-center gap-3 p-3 rounded-lg mb-1 transition {% if selected.id == c.id %}bg-amber-50 border border-amber-200{% else %}hover:bg-gray-50{% endif %}"
         >
-      </div>
-      {% endfor %}
+            <div class="w-10 h-10 shrink-0 rounded-full bg-[#d4a373] text-white flex items-center justify-center text-sm font-semibold">
+                {{ c.initials }}
+            </div>
+            <div class="flex-1 min-w-0">
+                <div class="text-sm font-semibold text-gray-900 truncate">
+                    {{ c.name }}
+                </div>
+                <div class="text-xs text-gray-500 truncate">
+                    {{ c.projects.count }} active projects
+                </div>
+            </div>
+            <span class="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700 shrink-0">
+                {{ c.get_status_display }}
+            </span>
+        </a>
+        {% endfor %}
     </div>
-    {% endif %}
-  </div>
+
+    <!-- RIGHT: Client Detail -->
+    <div class="w-full lg:flex-1 bg-white rounded-xl border border-gray-200 p-6">
+        {% if selected %}
+        
+        <!-- Client Header -->
+        <div class="flex flex-col sm:flex-row sm:items-start gap-4 pb-5 mb-5 border-b border-gray-200">
+            <div class="w-16 h-16 shrink-0 rounded-2xl bg-[#d4a373] text-white flex items-center justify-center text-xl font-semibold">
+                {{ selected.initials }}
+            </div>
+            <div class="flex-1 min-w-0">
+                <h3 class="text-xl font-bold text-gray-900 truncate mb-1">
+                    {{ selected.name }}
+                </h3>
+                <p class="text-sm text-gray-600">
+                    {{ selected.company }} · {{ selected.contact_email }} · {{ selected.contact_phone }}
+                </p>
+            </div>
+            <span class="text-xs px-2.5 py-1 rounded-full bg-green-100 text-green-700 font-semibold h-fit shrink-0">
+                {{ selected.get_status_display }}
+            </span>
+        </div>
+
+        <!-- Projects Section -->
+        <h4 class="text-sm font-semibold text-gray-900 mb-3">Projects</h4>
+        <div class="overflow-x-auto mb-6">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="text-left text-gray-500 border-b border-gray-200">
+                        <th class="pb-2 font-medium">Project</th>
+                        <th class="pb-2 font-medium">Status</th>
+                        <th class="pb-2 font-medium">Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in selected.projects.all %}
+                    <tr class="border-b border-gray-100">
+                        <td class="py-3 text-gray-900">{{ p.name }}</td>
+                        <td class="py-3">
+                            <span class="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700 font-medium">
+                                {{ p.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="py-3 font-mono text-gray-900">₹{{ p.value }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Financial Summary -->
+        <h4 class="text-sm font-semibold text-gray-900 mb-3">Financial Summary</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            <div class="p-4 rounded-lg bg-gray-50 border border-gray-200">
+                <div class="text-gray-500 text-xs font-medium mb-1">Total Billed</div>
+                <div class="text-gray-900 font-mono font-semibold text-lg">₹{{ selected.total_billed }}</div>
+            </div>
+            <div class="p-4 rounded-lg bg-gray-50 border border-gray-200">
+                <div class="text-gray-500 text-xs font-medium mb-1">Total Paid</div>
+                <div class="text-gray-900 font-mono font-semibold text-lg">₹{{ selected.total_paid }}</div>
+            </div>
+            <div class="p-4 rounded-lg bg-gray-50 border border-gray-200">
+                <div class="text-gray-500 text-xs font-medium mb-1">Outstanding</div>
+                <div class="text-gray-900 font-mono font-semibold text-lg">₹{{ selected.outstanding }}</div>
+            </div>
+        </div>
+
+        <!-- Payment History -->
+        <h4 class="text-sm font-semibold text-gray-900 mb-3">Payment History</h4>
+        <div class="overflow-x-auto mb-6">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="text-left text-gray-500 border-b border-gray-200">
+                        <th class="pb-2 font-medium">Date</th>
+                        <th class="pb-2 font-medium">Project</th>
+                        <th class="pb-2 font-medium">Amount</th>
+                        <th class="pb-2 font-medium">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pay in selected.payments.all %}
+                    <tr class="border-b border-gray-100">
+                        <td class="py-3 text-gray-900">{{ pay.date }}</td>
+                        <td class="py-3 text-gray-900">{{ pay.project.name|default:"—" }}</td>
+                        <td class="py-3 font-mono text-gray-900">₹{{ pay.amount }}</td>
+                        <td class="py-3">
+                            <span class="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700 font-medium">
+                                {{ pay.get_status_display }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Private Notes -->
+        <h4 class="text-sm font-semibold text-gray-900 mb-3">Private Notes</h4>
+        <div class="space-y-3 mb-6">
+            {% for note in selected.notes.all %}
+            <div class="p-4 rounded-lg bg-amber-50 border border-amber-100">
+                <div class="flex justify-between text-xs text-gray-500 mb-2">
+                    <span class="font-medium">{{ note.author|default:"Unknown" }}</span>
+                    <span>{{ note.created_at|date:"M j" }}</span>
+                </div>
+                <div class="text-sm text-gray-900">{{ note.body }}</div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Client Activity -->
+        <h4 class="text-sm font-semibold text-gray-900 mb-3">Client Activity</h4>
+        <div class="space-y-2">
+            {% for act in selected.activities.all %}
+            <div class="flex items-center gap-3 text-sm py-2">
+                <span class="w-2 h-2 rounded-full bg-[#d4a373] shrink-0"></span>
+                <span class="text-gray-900 flex-1">{{ act.description }}</span>
+                <span class="text-xs text-gray-500">{{ act.timestamp|date:"M j, g:i A" }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        
+        {% else %}
+        <div class="text-center py-12 text-gray-500">
+            <p class="text-sm">Select a client from the list to view details</p>
+        </div>
+        {% endif %}
+    </div>
+    
 </div>
+
 {% endblock %}

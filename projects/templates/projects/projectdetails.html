@@ -3,48 +3,8 @@
 
 {% block title %}{{ project.name }} - ClientSpace{% endblock %}
 
-
-{% block navbar %}
-<div class="flex items-center justify-between w-full">
-
-    <!-- Left -->
-    <div class="flex items-center gap-4">
-        <button id="sidebarToggle" class="md:hidden text-[#5a3e2b] text-xl hover:text-[#b8895e] transition">
-            <i class="fas fa-bars"></i>
-        </button>
-        <div>
-            <div class="flex items-center gap-2">
-                <a href="{% url 'projects:project_list' %}"
-                    class="text-gray-400 hover:text-[#b8895e] transition text-xs">
-                    Projects
-                </a>
-                <i class="fas fa-chevron-right text-[9px] text-gray-300"></i>
-                <h1 class="text-lg font-bold text-gray-900 leading-tight">{{ project.name }}</h1>
-            </div>
-            <p class="text-xs text-gray-500">Project details and task progress</p>
-        </div>
-    </div>
-
-    <!-- Right -->
-    <div class="flex items-center gap-3">
-        <div class="relative hidden sm:block">
-            <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-            <input type="text" placeholder="Search..."
-                class="pl-9 pr-4 py-1.5 text-xs rounded-full bg-gray-100/80 text-gray-700 placeholder-gray-400 border border-transparent focus:bg-white focus:border-gray-300 focus:outline-none w-52 transition">
-        </div>
-        <button class="w-8 h-8 rounded-full border border-gray-200 bg-white/80 flex items-center justify-center text-gray-500 hover:bg-white text-xs transition">
-            <i class="far fa-bell"></i>
-        </button>
-        <button class="w-8 h-8 rounded-full border border-gray-200 bg-white/80 flex items-center justify-center text-gray-500 hover:bg-white text-xs transition">
-            <i class="far fa-question-circle"></i>
-        </button>
-        <div class="w-8 h-8 rounded-full bg-[#d34527] text-white text-xs font-semibold flex items-center justify-center">
-            {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
-        </div>
-    </div>
-
-</div>
-{% endblock %}
+{% block page_heading %}<a href="{% url 'projects:project_list' %}" class="text-gray-400 hover:text-[#b8895e] transition font-normal">Projects</a><span class="mx-1.5 text-gray-300 text-sm font-light">/</span>{{ project.name }}{% endblock %}
+{% block page_subheading %}Project details and task progress{% endblock %}
 
 
 {% block content %}

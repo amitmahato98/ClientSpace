@@ -2,186 +2,180 @@
 
 {% block title %}Settings - ClientSpace{% endblock %}
 {% block page_heading %}Settings{% endblock %}
-
-{% block extra_head %}
-{% load static %}
-<link rel="stylesheet" href="{% static 'settings.css' %}">
-{% endblock %}
-
+{% block page_subheading %}Manage your profile, workspace, and preferences{% endblock %}
 
 {% block content %}
-<div class="sett-wrapper">
 
-    <h1 class="sett-title">Settings</h1>
-
-    <div class="sett-layout">
+<div class="max-w-5xl mx-auto">
+    
+    <div class="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-5 items-start">
 
         <!-- ── Sidebar Navigation ── -->
-        <nav class="sett-nav">
-            <button class="sett-tab-btn active" id="tab-btn-profile" onclick="settSwitch('profile')">Profile</button>
-            <button class="sett-tab-btn"        id="tab-btn-workspace" onclick="settSwitch('workspace')">Workspace</button>
-            <button class="sett-tab-btn"        id="tab-btn-notification" onclick="settSwitch('notification')">Notifications</button>
-            <button class="sett-tab-btn"        id="tab-btn-portal"  onclick="settSwitch('portal')">Client Portal</button>
-            <button class="sett-tab-btn"        id="tab-btn-billing" onclick="settSwitch('billing')">Billing &amp; Plan</button>
+        <nav class="flex flex-col gap-1">
+            <button class="sett-tab-btn active w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-transparent border-none cursor-pointer transition hover:bg-gray-100 hover:text-gray-900" id="tab-btn-profile" onclick="settSwitch('profile')">Profile</button>
+            <button class="sett-tab-btn w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-transparent border-none cursor-pointer transition hover:bg-gray-100 hover:text-gray-900" id="tab-btn-workspace" onclick="settSwitch('workspace')">Workspace</button>
+            <button class="sett-tab-btn w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-transparent border-none cursor-pointer transition hover:bg-gray-100 hover:text-gray-900" id="tab-btn-notification" onclick="settSwitch('notification')">Notifications</button>
+            <button class="sett-tab-btn w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-transparent border-none cursor-pointer transition hover:bg-gray-100 hover:text-gray-900" id="tab-btn-portal" onclick="settSwitch('portal')">Client Portal</button>
+            <button class="sett-tab-btn w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-transparent border-none cursor-pointer transition hover:bg-gray-100 hover:text-gray-900" id="tab-btn-billing" onclick="settSwitch('billing')">Billing &amp; Plan</button>
         </nav>
 
         <div>
 
             <!-- ════════════ PROFILE ════════════ -->
-            <div id="panel-profile" class="sett-panel">
+            <div id="panel-profile" class="bg-white rounded-xl p-8 border border-gray-200 shadow-sm">
 
-                <h2 class="sett-panel-title">Profile</h2>
+                <h2 class="text-lg font-bold text-gray-900 mb-6">Profile</h2>
 
                 <form method="POST" action="" onsubmit="event.preventDefault(); settToast('Profile updated successfully!');">
                     {% csrf_token %}
 
                     <!-- Avatar -->
-                    <div class="sett-avatar">
-                        <div id="avatarPreview">AR</div>
+                    <div class="flex items-center gap-4 mb-6">
+                        <div id="avatarPreview" class="w-14 h-14 rounded-2xl bg-[#4338ca] text-white font-bold text-lg flex items-center justify-center flex-shrink-0">AR</div>
                         <div>
                             <input type="file" id="photoInput" class="hidden" accept="image/*" onchange="settPreviewPhoto(event)">
-                            <button type="button" class="btn-outline" onclick="document.getElementById('photoInput').click()">
+                            <button type="button" class="px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition" onclick="document.getElementById('photoInput').click()">
                                 Change photo
                             </button>
-                            <p class="sett-avatar-hint">PNG, JPG up to 2MB</p>
+                            <p class="text-xs text-gray-400 mt-1">PNG, JPG up to 2MB</p>
                         </div>
                     </div>
 
                     <!-- Full name & Display name -->
-                    <div class="sett-field-grid">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         <div>
-                            <label class="sett-label">Full name</label>
-                            <input class="sett-input" type="text" name="full_name" placeholder="Enter your Full Name" required>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Full name</label>
+                            <input class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 outline-none transition focus:bg-white focus:border-[#b8895e] focus:ring-2 focus:ring-[#b8895e] focus:ring-opacity-20" type="text" name="full_name" placeholder="Enter your Full Name" required>
                         </div>
                         <div>
-                            <label class="sett-label">Display name</label>
-                            <input class="sett-input" type="text" name="display_name" placeholder="Enter your Display name" required>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Display name</label>
+                            <input class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 outline-none transition focus:bg-white focus:border-[#b8895e] focus:ring-2 focus:ring-[#b8895e] focus:ring-opacity-20" type="text" name="display_name" placeholder="Enter your Display name" required>
                         </div>
                     </div>
 
                     <!-- Email -->
-                    <div class="sett-field">
-                        <label class="sett-label">Email</label>
-                        <input class="sett-input" type="email" name="email" placeholder="abcd@gmail.com" required>
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Email</label>
+                        <input class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 outline-none transition focus:bg-white focus:border-[#b8895e] focus:ring-2 focus:ring-[#b8895e] focus:ring-opacity-20" type="email" name="email" placeholder="abcd@gmail.com" required>
                     </div>
 
                     <!-- New password -->
-                    <div class="sett-field">
-                        <label class="sett-label">New password</label>
-                        <input class="sett-input" type="password" name="new_password" placeholder="Enter your new password">
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">New password</label>
+                        <input class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 outline-none transition focus:bg-white focus:border-[#b8895e] focus:ring-2 focus:ring-[#b8895e] focus:ring-opacity-20" type="password" name="new_password" placeholder="Enter your new password">
                     </div>
 
                     <!-- Confirm password -->
-                    <div class="sett-field">
-                        <label class="sett-label">Confirm new password</label>
-                        <input class="sett-input" type="password" name="confirm_password" placeholder="Enter confirm password">
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Confirm new password</label>
+                        <input class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 outline-none transition focus:bg-white focus:border-[#b8895e] focus:ring-2 focus:ring-[#b8895e] focus:ring-opacity-20" type="password" name="confirm_password" placeholder="Enter confirm password">
                     </div>
 
-                    <button type="submit" class="btn-primary">Save Profile</button>
+                    <button type="submit" class="px-5 py-2.5 text-sm font-semibold text-white bg-[#4338ca] rounded-lg hover:bg-[#3730a3] transition">Save Profile</button>
                 </form>
 
             </div>
 
 
             <!-- ════════════ WORKSPACE ════════════ -->
-            <div id="panel-workspace" class="sett-panel" style="display:none;">
+            <div id="panel-workspace" class="bg-white rounded-xl p-8 border border-gray-200 shadow-sm" style="display:none;">
 
-                <h2 class="sett-panel-title">Workspace</h2>
+                <h2 class="text-lg font-bold text-gray-900 mb-6">Workspace</h2>
 
                 <form onsubmit="event.preventDefault(); settToast('Workspace saved successfully!');">
                     <!-- Workspace Name -->
-                    <div class="sett-field">
-                        <label class="sett-label">Studio / Workspace name</label>
-                        <input class="sett-input" type="text" name="workspace_name" value="Rivera Studio" required>
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Studio / Workspace name</label>
+                        <input class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 outline-none transition focus:bg-white focus:border-[#b8895e] focus:ring-2 focus:ring-[#b8895e] focus:ring-opacity-20" type="text" name="workspace_name" value="Rivera Studio" required>
                     </div>
 
                     <!-- Role -->
-                    <div class="sett-field">
-                        <label class="sett-label">Your role</label>
-                        <input class="sett-input" type="text" name="role" value="Freelance Designer & Developer" required>
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Your role</label>
+                        <input class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 outline-none transition focus:bg-white focus:border-[#b8895e] focus:ring-2 focus:ring-[#b8895e] focus:ring-opacity-20" type="text" name="role" value="Freelance Designer & Developer" required>
                     </div>
 
                     <!-- Currency -->
-                    <div class="sett-field">
-                        <label class="sett-label">Currency</label>
-                        <select class="sett-input" name="currency" required>
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Currency</label>
+                        <select class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 outline-none transition focus:bg-white focus:border-[#b8895e] focus:ring-2 focus:ring-[#b8895e] focus:ring-opacity-20" name="currency" required>
                             <option value="INR" selected>₹ INR — Indian Rupee</option>
                             <option value="USD">$ USD</option>
                             <option value="EUR">€ EUR</option>
                         </select>
                     </div>
 
-                    <button type="submit" class="btn-primary" style="margin-top: 10px;">Save Workspace</button>
+                    <button type="submit" class="px-5 py-2.5 text-sm font-semibold text-white bg-[#4338ca] rounded-lg hover:bg-[#3730a3] transition">Save Workspace</button>
                 </form>
 
             </div>
 
 
             <!-- ════════════ CLIENT PORTAL ════════════ -->
-            <div id="panel-portal" class="sett-panel" style="display:none;">
+            <div id="panel-portal" class="bg-white rounded-xl p-8 border border-gray-200 shadow-sm" style="display:none;">
 
-                <h2 class="sett-panel-title">Client Portal Settings</h2>
+                <h2 class="text-lg font-bold text-gray-900 mb-6">Client Portal Settings</h2>
 
                 <form onsubmit="event.preventDefault(); settToast('Portal settings saved!');">
 
                     <!-- Portal header message -->
-                    <label class="sett-label-light">Portal header message</label>
-                    <input class="sett-input" type="text" placeholder="Enter your Portal header message here ">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Portal header message</label>
+                    <input class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 outline-none transition focus:bg-white focus:border-[#b8895e] focus:ring-2 focus:ring-[#b8895e] focus:ring-opacity-20" type="text" placeholder="Enter your Portal header message here">
 
-                    <hr class="sett-divider">
+                    <hr class="border-t border-gray-200 my-6">
 
                     <!-- Toggle list -->
-                    <div class="sett-toggle-list">
+                    <div class="flex flex-col border-t border-gray-100">
 
-                        <div class="sett-toggle-row">
+                        <div class="flex items-center justify-between py-4 border-b border-gray-100">
                             <div>
-                                <p class="sett-toggle-label">Show task list to clients</p>
-                                <p class="sett-toggle-hint">Clients can see project tasks (read-only)</p>
+                                <p class="text-sm font-bold text-gray-900 mb-1">Show task list to clients</p>
+                                <p class="text-sm text-[#4338ca]">Clients can see project tasks (read-only)</p>
                             </div>
-                            <label class="toggle">
-                                <input type="checkbox" checked>
-                                <span class="toggle-slider"></span>
+                            <label class="relative w-11 h-6 flex-shrink-0">
+                                <input type="checkbox" checked class="opacity-0 w-0 h-0 peer">
+                                <span class="absolute inset-0 bg-gray-300 rounded-full cursor-pointer transition peer-checked:bg-[#4338ca] before:content-[''] before:absolute before:left-1 before:top-1 before:w-4 before:h-4 before:bg-white before:rounded-full before:shadow before:transition peer-checked:before:translate-x-5"></span>
                             </label>
                         </div>
 
-                        <div class="sett-toggle-row">
+                        <div class="flex items-center justify-between py-4 border-b border-gray-100">
                             <div>
-                                <p class="sett-toggle-label">Show payment status</p>
-                                <p class="sett-toggle-hint">Clients can see what they've paid and owe</p>
+                                <p class="text-sm font-bold text-gray-900 mb-1">Show payment status</p>
+                                <p class="text-sm text-[#4338ca]">Clients can see what they've paid and owe</p>
                             </div>
-                            <label class="toggle">
-                                <input type="checkbox" checked>
-                                <span class="toggle-slider"></span>
+                            <label class="relative w-11 h-6 flex-shrink-0">
+                                <input type="checkbox" checked class="opacity-0 w-0 h-0 peer">
+                                <span class="absolute inset-0 bg-gray-300 rounded-full cursor-pointer transition peer-checked:bg-[#4338ca] before:content-[''] before:absolute before:left-1 before:top-1 before:w-4 before:h-4 before:bg-white before:rounded-full before:shadow before:transition peer-checked:before:translate-x-5"></span>
                             </label>
                         </div>
 
-                        <div class="sett-toggle-row">
+                        <div class="flex items-center justify-between py-4 border-b border-gray-100">
                             <div>
-                                <p class="sett-toggle-label">Show files</p>
-                                <p class="sett-toggle-hint">Clients can download shared files</p>
+                                <p class="text-sm font-bold text-gray-900 mb-1">Show files</p>
+                                <p class="text-sm text-[#4338ca]">Clients can download shared files</p>
                             </div>
-                            <label class="toggle">
-                                <input type="checkbox">
-                                <span class="toggle-slider"></span>
+                            <label class="relative w-11 h-6 flex-shrink-0">
+                                <input type="checkbox" class="opacity-0 w-0 h-0 peer">
+                                <span class="absolute inset-0 bg-gray-300 rounded-full cursor-pointer transition peer-checked:bg-[#4338ca] before:content-[''] before:absolute before:left-1 before:top-1 before:w-4 before:h-4 before:bg-white before:rounded-full before:shadow before:transition peer-checked:before:translate-x-5"></span>
                             </label>
                         </div>
 
-                        <div class="sett-toggle-row">
+                        <div class="flex items-center justify-between py-4">
                             <div>
-                                <p class="sett-toggle-label">Allow client comments</p>
-                                <p class="sett-toggle-hint">Clients can post comments on notes</p>
+                                <p class="text-sm font-bold text-gray-900 mb-1">Allow client comments</p>
+                                <p class="text-sm text-[#4338ca]">Clients can post comments on notes</p>
                             </div>
-                            <label class="toggle">
-                                <input type="checkbox">
-                                <span class="toggle-slider"></span>
+                            <label class="relative w-11 h-6 flex-shrink-0">
+                                <input type="checkbox" class="opacity-0 w-0 h-0 peer">
+                                <span class="absolute inset-0 bg-gray-300 rounded-full cursor-pointer transition peer-checked:bg-[#4338ca] before:content-[''] before:absolute before:left-1 before:top-1 before:w-4 before:h-4 before:bg-white before:rounded-full before:shadow before:transition peer-checked:before:translate-x-5"></span>
                             </label>
                         </div>
 
                     </div>
 
-                    <div class="sett-btn-row">
-                        <button type="submit" class="btn-primary">Save Portal Settings</button>
-                        <button type="button" class="btn-outline" onclick="settToast('Opening portal preview…')">Preview Portal</button>
+                    <div class="flex flex-wrap gap-3 mt-6">
+                        <button type="submit" class="px-5 py-2.5 text-sm font-semibold text-white bg-[#4338ca] rounded-lg hover:bg-[#3730a3] transition">Save Portal Settings</button>
+                        <button type="button" class="px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition" onclick="settToast('Opening portal preview…')">Preview Portal</button>
                     </div>
 
                 </form>
@@ -190,96 +184,96 @@
 
 
             <!-- ════════════ BILLING & PLAN ════════════ -->
-            <div id="panel-billing" class="sett-panel" style="display:none;">
+            <div id="panel-billing" class="bg-white rounded-xl p-8 border border-gray-200 shadow-sm" style="display:none;">
 
-                <h2 class="sett-panel-title">Billing &amp; Plan</h2>
+                <h2 class="text-lg font-bold text-gray-900 mb-6">Billing &amp; Plan</h2>
 
                 <!-- Warning alert -->
-                <div class="sett-alert">
+                <div class="flex items-center gap-3 p-4 bg-amber-50 border border-amber-300 rounded-lg mb-6">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
                          fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                         style="flex-shrink:0;">
+                         class="flex-shrink-0">
                         <circle cx="12" cy="12" r="10"/>
                         <line x1="12" y1="8" x2="12" y2="12"/>
                         <line x1="12" y1="16" x2="12.01" y2="16"/>
                     </svg>
-                    <p>You're using 5 clients on a Free plan (limit: 3). Upgrade to unlock unlimited clients.</p>
+                    <p class="text-sm text-amber-900">You're using 5 clients on a Free plan (limit: 3). Upgrade to unlock unlimited clients.</p>
                 </div>
 
                 <!-- Usage stats -->
-                <div class="sett-stats">
-                    <div class="sett-stat-row">
-                        <span class="sett-stat-label indigo">Current plan</span>
-                        <span class="sett-stat-value">Free</span>
+                <div class="border-t border-gray-100 mb-0">
+                    <div class="flex items-center justify-between py-3.5 border-b border-gray-100">
+                        <span class="text-sm text-[#4338ca] font-medium">Current plan</span>
+                        <span class="text-sm font-bold text-gray-900">Free</span>
                     </div>
-                    <div class="sett-stat-row">
-                        <span class="sett-stat-label">Clients</span>
-                        <span class="sett-stat-value danger">5 / 3 &nbsp;<span style="font-weight:500;">(over limit)</span></span>
+                    <div class="flex items-center justify-between py-3.5 border-b border-gray-100">
+                        <span class="text-sm text-gray-600">Clients</span>
+                        <span class="text-sm font-bold text-red-600">5 / 3 &nbsp;<span class="font-medium">(over limit)</span></span>
                     </div>
-                    <div class="sett-stat-row">
-                        <span class="sett-stat-label">Team members</span>
-                        <span class="sett-stat-value">2 / 2</span>
+                    <div class="flex items-center justify-between py-3.5 border-b border-gray-100">
+                        <span class="text-sm text-gray-600">Team members</span>
+                        <span class="text-sm font-bold text-gray-900">2 / 2</span>
                     </div>
-                    <div class="sett-stat-row">
-                        <span class="sett-stat-label">Invoices sent this month</span>
-                        <span class="sett-stat-value">3 / 5</span>
+                    <div class="flex items-center justify-between py-3.5 border-b border-gray-100">
+                        <span class="text-sm text-gray-600">Invoices sent this month</span>
+                        <span class="text-sm font-bold text-gray-900">3 / 5</span>
                     </div>
                 </div>
 
                 <!-- CTA buttons -->
-                <div class="sett-btn-row">
-                    <button class="btn-primary" onclick="settToast('Redirecting to upgrade…')">Upgrade to Pro &mdash; NPR 999/mo</button>
-                    <button class="btn-outline" onclick="showAllPlans()">See all plans</button>
+                <div class="flex flex-wrap gap-3 mt-6">
+                    <button class="px-5 py-2.5 text-sm font-semibold text-white bg-[#4338ca] rounded-lg hover:bg-[#3730a3] transition" onclick="settToast('Redirecting to upgrade…')">Upgrade to Pro &mdash; NPR 999/mo</button>
+                    <button class="px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition" onclick="showAllPlans()">See all plans</button>
                 </div>
 
                 <!-- All plans (expandable) -->
-                <div class="sett-plans-grid" id="all-plans-modal">
-                    <div class="sett-plans-cols">
+                <div class="hidden mt-7 border border-gray-200 rounded-xl overflow-hidden" id="all-plans-modal">
+                    <div class="grid grid-cols-1 md:grid-cols-3">
 
                         <!-- Starter -->
-                        <div class="sett-plan-col">
-                            <p class="sett-plan-name">Starter</p>
-                            <p class="sett-plan-price">Free</p>
-                            <p class="sett-plan-period">Forever free</p>
-                            <ul class="sett-plan-features">
+                        <div class="p-5 border-r border-gray-200 relative">
+                            <p class="text-sm font-bold text-gray-700 mb-1.5">Starter</p>
+                            <p class="text-2xl font-extrabold text-gray-900 mb-1">Free</p>
+                            <p class="text-xs text-gray-400 mb-4">Forever free</p>
+                            <ul class="text-xs text-gray-600 flex flex-col gap-1.5 mb-4">
                                 <li>✓ &nbsp;3 clients</li>
                                 <li>✓ &nbsp;1 seat</li>
                                 <li>✓ &nbsp;5 invoices/mo</li>
-                                <li class="disabled">✗ &nbsp;Custom branding</li>
-                                <li class="disabled">✗ &nbsp;Priority support</li>
+                                <li class="text-gray-300">✗ &nbsp;Custom branding</li>
+                                <li class="text-gray-300">✗ &nbsp;Priority support</li>
                             </ul>
-                            <button class="btn-outline" style="width:100%; opacity:.6; cursor:default;">Current plan</button>
+                            <button class="w-full px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg opacity-60 cursor-default">Current plan</button>
                         </div>
 
                         <!-- Pro -->
-                        <div class="sett-plan-col highlighted">
-                            <span class="sett-plan-badge">Popular</span>
-                            <p class="sett-plan-name indigo">Pro</p>
-                            <p class="sett-plan-price">NPR 999</p>
-                            <p class="sett-plan-period">per month</p>
-                            <ul class="sett-plan-features">
+                        <div class="p-5 border-r border-gray-200 bg-purple-50 relative">
+                            <span class="absolute top-3.5 right-3.5 bg-[#4338ca] text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">Popular</span>
+                            <p class="text-sm font-bold text-[#4338ca] mb-1.5">Pro</p>
+                            <p class="text-2xl font-extrabold text-gray-900 mb-1">NPR 999</p>
+                            <p class="text-xs text-gray-400 mb-4">per month</p>
+                            <ul class="text-xs text-gray-600 flex flex-col gap-1.5 mb-4">
                                 <li>✓ &nbsp;Unlimited clients</li>
                                 <li>✓ &nbsp;5 seats</li>
                                 <li>✓ &nbsp;Unlimited invoices</li>
                                 <li>✓ &nbsp;Custom branding</li>
                                 <li>✓ &nbsp;Priority support</li>
                             </ul>
-                            <button class="btn-primary" style="width:100%;" onclick="settToast('Redirecting to checkout…')">Upgrade to Pro</button>
+                            <button class="w-full px-5 py-2.5 text-sm font-semibold text-white bg-[#4338ca] rounded-lg hover:bg-[#3730a3] transition" onclick="settToast('Redirecting to checkout…')">Upgrade to Pro</button>
                         </div>
 
                         <!-- Business -->
-                        <div class="sett-plan-col">
-                            <p class="sett-plan-name">Business</p>
-                            <p class="sett-plan-price">NPR 2,499</p>
-                            <p class="sett-plan-period">per month</p>
-                            <ul class="sett-plan-features">
+                        <div class="p-5 relative">
+                            <p class="text-sm font-bold text-gray-700 mb-1.5">Business</p>
+                            <p class="text-2xl font-extrabold text-gray-900 mb-1">NPR 2,499</p>
+                            <p class="text-xs text-gray-400 mb-4">per month</p>
+                            <ul class="text-xs text-gray-600 flex flex-col gap-1.5 mb-4">
                                 <li>✓ &nbsp;Unlimited clients</li>
                                 <li>✓ &nbsp;20 seats</li>
                                 <li>✓ &nbsp;Unlimited invoices</li>
                                 <li>✓ &nbsp;White-label portal</li>
                                 <li>✓ &nbsp;Dedicated support</li>
                             </ul>
-                            <button class="btn-outline" style="width:100%;" onclick="settToast('Contact sales for Business plan.')">Contact Sales</button>
+                            <button class="w-full px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition" onclick="settToast('Contact sales for Business plan.')">Contact Sales</button>
                         </div>
 
                     </div>
@@ -288,98 +282,109 @@
             </div>
 
             <!-- ════════════ NOTIFICATIONS ════════════ -->
-            <div id="panel-notification" class="sett-panel" style="display:none;">
-                <div style="background: #fff; border: 1px solid #f3f4f6; border-radius: 12px; padding: 24px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-                    <h3 style="font-size: 16px; font-weight: 700; color: #111827; margin: 0 0 4px 0;">Email Notifications</h3>
-                    <p style="font-size: 14px; color: #6b7280; margin: 0 0 24px 0;"></p>
+            <div id="panel-notification" class="bg-white rounded-xl p-8 border border-gray-200 shadow-sm" style="display:none;">
+                <h2 class="text-lg font-bold text-gray-900 mb-1">Email Notifications</h2>
+                <p class="text-sm text-gray-600 mb-6"></p>
 
-                    <div class="sett-toggle-list">
+                <div class="flex flex-col border-t border-gray-100">
 
-                        <div class="sett-toggle-row" style="border-bottom: 1px solid #f3f4f6; padding-bottom: 16px; margin-bottom: 16px;">
-                            <div>
-                                <p class="sett-toggle-label" style="font-weight: 600; color: #111827;">Payment received</p>
-                                <p class="sett-toggle-hint" style="color: #6b7280;">When a client payment is recorded</p>
-                            </div>
-                            <label class="toggle">
-                                <input type="checkbox" checked>
-                                <span class="toggle-slider"></span>
-                            </label>
+                    <div class="flex items-center justify-between py-4 border-b border-gray-100">
+                        <div>
+                            <p class="text-sm font-semibold text-gray-900 mb-1">Payment received</p>
+                            <p class="text-sm text-gray-600">When a client payment is recorded</p>
                         </div>
-
-                        <div class="sett-toggle-row" style="border-bottom: 1px solid #f3f4f6; padding-bottom: 16px; margin-bottom: 16px;">
-                            <div>
-                                <p class="sett-toggle-label" style="font-weight: 600; color: #111827;">Deadline reminder</p>
-                                <p class="sett-toggle-hint" style="color: #6b7280;">2 days before a project is due</p>
-                            </div>
-                            <label class="toggle">
-                                <input type="checkbox" checked>
-                                <span class="toggle-slider"></span>
-                            </label>
-                        </div>
-
-                        <div class="sett-toggle-row" style="border-bottom: 1px solid #f3f4f6; padding-bottom: 16px; margin-bottom: 16px;">
-                            <div>
-                                <p class="sett-toggle-label" style="font-weight: 600; color: #111827;">Overdue alert</p>
-                                <p class="sett-toggle-hint" style="color: #6b7280;">When a project passes its deadline</p>
-                            </div>
-                            <label class="toggle">
-                                <input type="checkbox" checked>
-                                <span class="toggle-slider"></span>
-                            </label>
-                        </div>
-
-                        <div class="sett-toggle-row" style="border-bottom: 1px solid #f3f4f6; padding-bottom: 16px; margin-bottom: 16px;">
-                            <div>
-                                <p class="sett-toggle-label" style="font-weight: 600; color: #111827;">Client portal viewed</p>
-                                <p class="sett-toggle-hint" style="color: #6b7280;">When a client opens their portal</p>
-                            </div>
-                            <label class="toggle">
-                                <input type="checkbox">
-                                <span class="toggle-slider"></span>
-                            </label>
-                        </div>
-
-                        <div class="sett-toggle-row" style="border-bottom: 1px solid #f3f4f6; padding-bottom: 16px; margin-bottom: 16px;">
-                            <div>
-                                <p class="sett-toggle-label" style="font-weight: 600; color: #111827;">Team member joined</p>
-                                <p class="sett-toggle-hint" style="color: #6b7280;">When an invite is accepted</p>
-                            </div>
-                            <label class="toggle">
-                                <input type="checkbox" checked>
-                                <span class="toggle-slider"></span>
-                            </label>
-                        </div>
-
-                        <div class="sett-toggle-row" style="padding-bottom: 4px;">
-                            <div>
-                                <p class="sett-toggle-label" style="font-weight: 600; color: #111827;">Weekly summary</p>
-                                <p class="sett-toggle-hint" style="color: #6b7280;">Monday morning recap of the week ahead</p>
-                            </div>
-                            <label class="toggle">
-                                <input type="checkbox" checked>
-                                <span class="toggle-slider"></span>
-                            </label>
-                        </div>
-
+                        <label class="relative w-11 h-6 flex-shrink-0">
+                            <input type="checkbox" checked class="opacity-0 w-0 h-0 peer">
+                            <span class="absolute inset-0 bg-gray-300 rounded-full cursor-pointer transition peer-checked:bg-[#4338ca] before:content-[''] before:absolute before:left-1 before:top-1 before:w-4 before:h-4 before:bg-white before:rounded-full before:shadow before:transition peer-checked:before:translate-x-5"></span>
+                        </label>
                     </div>
+
+                    <div class="flex items-center justify-between py-4 border-b border-gray-100">
+                        <div>
+                            <p class="text-sm font-semibold text-gray-900 mb-1">Deadline reminder</p>
+                            <p class="text-sm text-gray-600">2 days before a project is due</p>
+                        </div>
+                        <label class="relative w-11 h-6 flex-shrink-0">
+                            <input type="checkbox" checked class="opacity-0 w-0 h-0 peer">
+                            <span class="absolute inset-0 bg-gray-300 rounded-full cursor-pointer transition peer-checked:bg-[#4338ca] before:content-[''] before:absolute before:left-1 before:top-1 before:w-4 before:h-4 before:bg-white before:rounded-full before:shadow before:transition peer-checked:before:translate-x-5"></span>
+                        </label>
+                    </div>
+
+                    <div class="flex items-center justify-between py-4 border-b border-gray-100">
+                        <div>
+                            <p class="text-sm font-semibold text-gray-900 mb-1">Overdue alert</p>
+                            <p class="text-sm text-gray-600">When a project passes its deadline</p>
+                        </div>
+                        <label class="relative w-11 h-6 flex-shrink-0">
+                            <input type="checkbox" checked class="opacity-0 w-0 h-0 peer">
+                            <span class="absolute inset-0 bg-gray-300 rounded-full cursor-pointer transition peer-checked:bg-[#4338ca] before:content-[''] before:absolute before:left-1 before:top-1 before:w-4 before:h-4 before:bg-white before:rounded-full before:shadow before:transition peer-checked:before:translate-x-5"></span>
+                        </label>
+                    </div>
+
+                    <div class="flex items-center justify-between py-4 border-b border-gray-100">
+                        <div>
+                            <p class="text-sm font-semibold text-gray-900 mb-1">Client portal viewed</p>
+                            <p class="text-sm text-gray-600">When a client opens their portal</p>
+                        </div>
+                        <label class="relative w-11 h-6 flex-shrink-0">
+                            <input type="checkbox" class="opacity-0 w-0 h-0 peer">
+                            <span class="absolute inset-0 bg-gray-300 rounded-full cursor-pointer transition peer-checked:bg-[#4338ca] before:content-[''] before:absolute before:left-1 before:top-1 before:w-4 before:h-4 before:bg-white before:rounded-full before:shadow before:transition peer-checked:before:translate-x-5"></span>
+                        </label>
+                    </div>
+
+                    <div class="flex items-center justify-between py-4 border-b border-gray-100">
+                        <div>
+                            <p class="text-sm font-semibold text-gray-900 mb-1">Team member joined</p>
+                            <p class="text-sm text-gray-600">When an invite is accepted</p>
+                        </div>
+                        <label class="relative w-11 h-6 flex-shrink-0">
+                            <input type="checkbox" checked class="opacity-0 w-0 h-0 peer">
+                            <span class="absolute inset-0 bg-gray-300 rounded-full cursor-pointer transition peer-checked:bg-[#4338ca] before:content-[''] before:absolute before:left-1 before:top-1 before:w-4 before:h-4 before:bg-white before:rounded-full before:shadow before:transition peer-checked:before:translate-x-5"></span>
+                        </label>
+                    </div>
+
+                    <div class="flex items-center justify-between py-4">
+                        <div>
+                            <p class="text-sm font-semibold text-gray-900 mb-1">Weekly summary</p>
+                            <p class="text-sm text-gray-600">Monday morning recap of the week ahead</p>
+                        </div>
+                        <label class="relative w-11 h-6 flex-shrink-0">
+                            <input type="checkbox" checked class="opacity-0 w-0 h-0 peer">
+                            <span class="absolute inset-0 bg-gray-300 rounded-full cursor-pointer transition peer-checked:bg-[#4338ca] before:content-[''] before:absolute before:left-1 before:top-1 before:w-4 before:h-4 before:bg-white before:rounded-full before:shadow before:transition peer-checked:before:translate-x-5"></span>
+                        </label>
+                    </div>
+
                 </div>
             </div>
-            <!-- /panels -->
 
         </div>
     </div>
 </div>
 
 <!-- Toast -->
-<div id="sett-toast">
-    <i class="fas fa-check-circle" style="color:#4ade80;"></i>
+<div id="sett-toast" class="fixed bottom-6 right-6 bg-gray-900 text-white px-5 py-3 rounded-xl text-sm font-medium flex items-center gap-3 shadow-xl opacity-0 translate-y-3 pointer-events-none transition-all duration-300 z-50">
+    <i class="fas fa-check-circle text-green-400"></i>
     <span id="sett-toast-msg">Saved!</span>
 </div>
+
+<style>
+.sett-tab-btn.active {
+    background: #ffffff !important;
+    color: #111827 !important;
+    font-weight: 600 !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08) !important;
+    border: 1px solid #e5e7eb !important;
+}
+#sett-toast.show {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+    pointer-events: auto !important;
+}
+</style>
+
 {% endblock %}
 
-
 {% block extra_scripts %}
-
 <script>
     // Tab switching
     function settSwitch(tab) {
@@ -418,8 +423,7 @@
     function showAllPlans() {
         const el = document.getElementById('all-plans-modal');
         if (!el) return;
-        el.style.display = el.style.display === 'none' ? 'block' : 'none';
+        el.classList.toggle('hidden');
     }
 </script>
-
 {% endblock %}

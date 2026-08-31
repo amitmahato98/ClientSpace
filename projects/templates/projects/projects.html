@@ -3,56 +3,25 @@
 
 {% block title %}Projects - ClientSpace{% endblock %}
 
-{% block navbar %}
-<!-- Top Header Navigation -->
-<div class="flex items-center justify-between w-full">
-    <!-- Left: Mobile Menu + Title -->
-    <div class="flex items-center gap-4">
-        <button id="sidebarToggle" class="md:hidden text-[#5a3e2b] text-xl hover:text-[#b8895e] transition">
-            <i class="fas fa-bars"></i>
-        </button>
-        <div>
-            <h1 class="text-lg font-bold text-gray-900 leading-tight">Projects</h1>
-            <p class="text-xs text-gray-500">Every active and recently completed engagement</p>
-        </div>
-    </div>
+{% block page_heading %}Projects{% endblock %}
+{% block page_subheading %}Every active and recently completed engagement{% endblock %}
 
-    <!-- Right: Search Bar & Actions -->
-    <div class="flex items-center gap-3">
-        <div class="relative hidden sm:block">
-            <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-            <input type="text" id="projectSearchInput" placeholder="Search clients, projects..."
-                autocomplete="off"
-                class="pl-9 pr-8 py-1.5 text-xs rounded-full bg-gray-100/80 text-gray-700 placeholder-gray-400 border border-transparent focus:bg-white focus:border-gray-300 focus:outline-none w-64 transition">
-            <button type="button" id="clearSearchButton"
-                class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-[10px] w-4 h-4 rounded-full items-center justify-center">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <button class="w-8 h-8 rounded-full border border-gray-200 bg-white/80 flex items-center justify-center text-gray-500 hover:bg-white text-xs transition">
-            <i class="far fa-bell"></i>
-        </button>
-        <button class="w-8 h-8 rounded-full border border-gray-200 bg-white/80 flex items-center justify-center text-gray-500 hover:bg-white text-xs transition">
-            <i class="far fa-question-circle"></i>
-        </button>
-        <div class="w-8 h-8 rounded-full bg-[#d34527] text-white text-xs font-semibold flex items-center justify-center">
-            {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
-        </div>
-    </div>
-</div>
-
-<!-- Mobile search -->
-<div class="sm:hidden mt-3">
-    <div class="relative">
-        <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-        <input type="text" id="projectSearchInputMobile" placeholder="Search clients, projects..."
-            autocomplete="off"
-            class="pl-9 pr-4 py-2 text-xs rounded-full bg-gray-100/80 text-gray-700 placeholder-gray-400 border border-transparent focus:bg-white focus:border-gray-300 focus:outline-none w-full transition">
-    </div>
-</div>
-{% endblock %}
+{# The base.html navbar search input is wired to the JS filter below via id="projectSearchInput" #}
+{# We override the search input id inside the base navbar by targeting it with JS. #}
 
 {% block content %}
+
+<!-- Mobile search row (only shown on small screens) -->
+<div class="sm:hidden mb-3 -mt-2">
+    <div class="relative">
+        <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
+        <input type="text" id="projectSearchInputMobile" placeholder="Search projects, clients..."
+            autocomplete="off"
+            class="pl-9 pr-4 py-2 text-xs rounded-full bg-gray-100/80 text-gray-700 placeholder-gray-400
+                   border border-transparent focus:bg-white focus:border-gray-300 focus:outline-none
+                   w-full transition">
+    </div>
+</div>
 
 <!-- =========================================================
      DJANGO MESSAGES
@@ -365,4 +334,20 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+/* Wire the base navbar search input (rendered by base.html) to the
+   projects filter JS so typing in the header searches projects.
+   We assign the ID before DOMContentLoaded so the filter script can
+   find it by ID when it initialises. */
+(function () {
+    var navInput = document.querySelector('header input[type="text"]');
+    if (navInput && !navInput.id) {
+        navInput.id = 'projectSearchInput';
+        navInput.placeholder = 'Search projects, clients\u2026';
+    }
+})();
+</script>
 {% endblock %}

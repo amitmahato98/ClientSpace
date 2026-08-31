@@ -3,31 +3,8 @@
 
 {% block title %}New Project - ClientSpace{% endblock %}
 
-{% block navbar %}
-<div class="flex items-center justify-between w-full">
-    <div class="flex items-center gap-4">
-        <button id="sidebarToggle" class="md:hidden text-[#5a3e2b] text-xl hover:text-[#b8895e] transition">
-            <i class="fas fa-bars"></i>
-        </button>
-        <div>
-            <div class="flex items-center gap-2">
-                <a href="{% url 'projects:project_list' %}"
-                    class="text-gray-400 hover:text-[#b8895e] transition text-xs">
-                    Projects
-                </a>
-                <i class="fas fa-chevron-right text-[9px] text-gray-300"></i>
-                <h1 class="text-lg font-bold text-gray-900 leading-tight">New project</h1>
-            </div>
-            <p class="text-xs text-gray-500">Set up a new client engagement</p>
-        </div>
-    </div>
-    <div class="flex items-center gap-3">
-        <div class="w-8 h-8 rounded-full bg-[#d34527] text-white text-xs font-semibold flex items-center justify-center">
-            {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
-        </div>
-    </div>
-</div>
-{% endblock %}
+{% block page_heading %}<a href="{% url 'projects:project_list' %}" class="text-gray-400 hover:text-[#b8895e] transition font-normal">Projects</a><span class="mx-1.5 text-gray-300 text-sm font-light">/</span>New project{% endblock %}
+{% block page_subheading %}Set up a new client engagement{% endblock %}
 
 {% block content %}
 <div class="max-w-2xl mx-auto">
