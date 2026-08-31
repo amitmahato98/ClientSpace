@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}New Project - ClientSpace{% endblock %}
+
+{% block navbar %}
+<div class="flex items-center justify-between w-full">
+    <!-- Left -->
+    <div class="flex items-center gap-4">
+        <button id="sidebarToggle" class="md:hidden text-[#5a3e2b] text-xl hover:text-[#b8895e] transition">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div>
+            <div class="flex items-center gap-2">
+                <a href="{% url 'projects:project_list' %}"
+                    class="text-gray-400 hover:text-[#b8895e] transition text-xs">
+                    Projects
+                </a>
+                <i class="fas fa-chevron-right text-[9px] text-gray-300"></i>
+                <h1 class="text-lg font-bold text-gray-900 leading-tight">New project</h1>
+            </div>
+            <p class="text-xs text-gray-500">Set up a new client engagement</p>
+        </div>
+    </div>
+    <!-- Right -->
+    <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-full bg-[#d34527] text-white text-xs font-semibold flex items-center justify-center">
+            {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+
+    <!-- Back link -->
+    <a href="{% url 'projects:project_list' %}"
+        class="inline-flex items-center gap-2 text-xs font-medium text-gray-400 hover:text-[#b8895e] transition mb-6 pt-2">
+        <i class="fas fa-arrow-left text-[10px]"></i>
+        Back to projects
+    </a>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8">
+
+        <div class="mb-6">
+            <h2 class="text-base font-bold text-gray-900">New project</h2>
+            <p class="text-[11px] text-gray-400 mt-0.5">Fill in the details below to create a new project.</p>
+        </div>
+
+        <!-- Non-field errors -->
+        {% if form.non_field_errors %}
+        <div class="mb-4 px-4 py-3 rounded-lg bg-[#fce8e6] border border-[#f5c2be] text-xs text-[#c5221f]">
+            {% for error in form.non_field_errors %}
+            <p>{{ error }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            <!-- Project name -->
+            <div class="mb-4">
+                <label for="{{ form.name.id_for_label }}"
+                    class="block text-xs font-semibold text-gray-700 mb-1.5">
+                    Project name <span class="text-red-500">*</span>
+                </label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                <p class="mt-1 text-[11px] text-red-500">{{ form.name.errors|join:", " }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Description -->
+            <div class="mb-4">
+                <label for="{{ form.description.id_for_label }}"
+                    class="block text-xs font-semibold text-gray-700 mb-1.5">
+                    Description <span class="text-gray-400 font-normal">(optional)</span>
+                </label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                <p class="mt-1 text-[11px] text-red-500">{{ form.description.errors|join:", " }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Client -->
+            <div class="mb-4">
+                <label for="{{ form.client.id_for_label }}"
+                    class="block text-xs font-semibold text-gray-700 mb-1.5">
+                    Client
+                </label>
+                {{ form.client }}
+                {% if form.client.errors %}
+                <p class="mt-1 text-[11px] text-red-500">{{ form.client.errors|join:", " }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Status + Priority -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label for="{{ form.status.id_for_label }}"
+                        class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Status
+                    </label>
+                    {{ form.status }}
+                    {% if form.status.errors %}
+                    <p class="mt-1 text-[11px] text-red-500">{{ form.status.errors|join:", " }}</p>
+                    {% endif %}
+                </div>
+                <div>
+                    <label for="{{ form.priority.id_for_label }}"
+                        class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Priority
+                    </label>
+                    {{ form.priority }}
+                    {% if form.priority.errors %}
+                    <p class="mt-1 text-[11px] text-red-500">{{ form.priority.errors|join:", " }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Start date + Deadline -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label for="{{ form.start_date.id_for_label }}"
+                        class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Start date
+                    </label>
+                    {{ form.start_date }}
+                    {% if form.start_date.errors %}
+                    <p class="mt-1 text-[11px] text-red-500">{{ form.start_date.errors|join:", " }}</p>
+                    {% endif %}
+                </div>
+                <div>
+                    <label for="{{ form.deadline.id_for_label }}"
+                        class="block text-xs font-semibold text-gray-700 mb-1.5">
+                        Deadline
+                    </label>
+                    {{ form.deadline }}
+                    {% if form.deadline.errors %}
+                    <p class="mt-1 text-[11px] text-red-500">{{ form.deadline.errors|join:", " }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Budget -->
+            <div class="mb-6">
+                <label for="{{ form.budget.id_for_label }}"
+                    class="block text-xs font-semibold text-gray-700 mb-1.5">
+                    Budget ($)
+                </label>
+                {{ form.budget }}
+                {% if form.budget.errors %}
+                <p class="mt-1 text-[11px] text-red-500">{{ form.budget.errors|join:", " }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Actions -->
+            <div class="flex items-center justify-end gap-3 pt-2 border-t border-gray-100">
+                <a href="{% url 'projects:project_list' %}"
+                    class="px-4 py-2.5 bg-white hover:bg-gray-50 text-gray-700 text-xs font-medium rounded-lg border border-gray-200 transition">
+                    Cancel
+                </a>
+                <button type="submit"
+                    class="px-5 py-2.5 bg-[#e0532e] hover:bg-[#c84625] text-white text-xs font-semibold rounded-lg shadow-sm transition">
+                    Create project
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+{% endblock %}

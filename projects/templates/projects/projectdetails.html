@@ -5,1764 +5,477 @@
 
 
 {% block navbar %}
-
-<!-- Top Header Navigation -->
 <div class="flex items-center justify-between w-full">
 
     <!-- Left -->
     <div class="flex items-center gap-4">
-
         <button id="sidebarToggle" class="md:hidden text-[#5a3e2b] text-xl hover:text-[#b8895e] transition">
             <i class="fas fa-bars"></i>
         </button>
-
         <div>
-
             <div class="flex items-center gap-2">
-
-                <a href="{% url 'projects:project_view' %}"
+                <a href="{% url 'projects:project_list' %}"
                     class="text-gray-400 hover:text-[#b8895e] transition text-xs">
                     Projects
                 </a>
-
                 <i class="fas fa-chevron-right text-[9px] text-gray-300"></i>
-
-                <h1 class="text-lg font-bold text-gray-900 leading-tight">
-                    {{ project.name }}
-                </h1>
-
+                <h1 class="text-lg font-bold text-gray-900 leading-tight">{{ project.name }}</h1>
             </div>
-
-            <p class="text-xs text-gray-500">
-                Project details and task progress
-            </p>
-
+            <p class="text-xs text-gray-500">Project details and task progress</p>
         </div>
-
     </div>
-
 
     <!-- Right -->
     <div class="flex items-center gap-3">
-
         <div class="relative hidden sm:block">
-
             <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-
             <input type="text" placeholder="Search..."
                 class="pl-9 pr-4 py-1.5 text-xs rounded-full bg-gray-100/80 text-gray-700 placeholder-gray-400 border border-transparent focus:bg-white focus:border-gray-300 focus:outline-none w-52 transition">
-
         </div>
-
-
-        <button
-            class="w-8 h-8 rounded-full border border-gray-200 bg-white/80 flex items-center justify-center text-gray-500 hover:bg-white text-xs transition">
+        <button class="w-8 h-8 rounded-full border border-gray-200 bg-white/80 flex items-center justify-center text-gray-500 hover:bg-white text-xs transition">
             <i class="far fa-bell"></i>
         </button>
-
-
-        <button
-            class="w-8 h-8 rounded-full border border-gray-200 bg-white/80 flex items-center justify-center text-gray-500 hover:bg-white text-xs transition">
+        <button class="w-8 h-8 rounded-full border border-gray-200 bg-white/80 flex items-center justify-center text-gray-500 hover:bg-white text-xs transition">
             <i class="far fa-question-circle"></i>
         </button>
-
-
-        <div
-            class="w-8 h-8 rounded-full bg-[#d34527] text-white text-xs font-semibold flex items-center justify-center">
-            MP
+        <div class="w-8 h-8 rounded-full bg-[#d34527] text-white text-xs font-semibold flex items-center justify-center">
+            {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
         </div>
-
     </div>
 
 </div>
-
 {% endblock %}
-
 
 
 {% block content %}
 
 <div class="max-w-7xl mx-auto space-y-6" id="projectDetailsPage">
 
+    <!-- =========================================================
+         DJANGO MESSAGES
+         ========================================================= -->
+    {% if messages %}
+    <div class="space-y-2 pt-2">
+        {% for message in messages %}
+        <div class="flex items-center gap-2.5 px-4 py-3 rounded-lg text-xs font-medium
+            {% if message.tags == 'success' %}bg-[#e6f4ea] text-[#137333] border border-[#b7dfbe]
+            {% elif message.tags == 'error' %}bg-[#fce8e6] text-[#c5221f] border border-[#f5c2be]
+            {% else %}bg-[#e8f0fe] text-[#1a73e8] border border-[#c5d8fb]{% endif %}">
+            <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %}"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
 
     <!-- =====================================================
          BACK + PROJECT HEADER
          ===================================================== -->
-
     <div class="pt-2">
 
-        <a href="{% url 'projects:project_view' %}"
+        <a href="{% url 'projects:project_list' %}"
             class="inline-flex items-center gap-2 text-xs font-medium text-gray-400 hover:text-[#b8895e] transition mb-5">
-
             <i class="fas fa-arrow-left text-[10px]"></i>
-
             Back to projects
-
         </a>
-
 
         <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
 
             <!-- Project information -->
-
             <div class="min-w-0 flex-1">
-
                 <div class="flex items-center gap-3 min-w-0">
-
                     <h2 class="text-lg sm:text-xl md:text-3xl font-bold text-gray-900 tracking-tight truncate"
                         title="{{ project.name }}">
                         {{ project.name }}
                     </h2>
 
-
-                    <!-- Dynamic status badge -->
-
-                    <span id="statusBadge"
-                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium shrink-0">
-
-                        <span class="text-base leading-none" id="statusDot">
-                            &middot;
-                        </span>
-
-                        <span id="statusBadgeText">
-                            {{ project.status }}
-                        </span>
-
+                    <!-- Status badge — driven by model value -->
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium shrink-0 {{ project.status_css_class }}">
+                        <span class="text-base leading-none">&middot;</span>
+                        {{ project.get_status_display }}
                     </span>
-
                 </div>
-
 
                 <div class="flex flex-wrap items-center gap-x-4 gap-y-2 mt-2">
-
                     <span class="text-xs text-gray-400">
-
                         Client:
-
                         <strong class="text-gray-700 font-semibold">
-                            {{ project.client }}
+                            {{ project.client.name|default:"No client assigned" }}
                         </strong>
-
                     </span>
 
-
-                    <span class="hidden sm:block text-gray-300">
-                        &bull;
-                    </span>
-
+                    <span class="hidden sm:block text-gray-300">&bull;</span>
 
                     <span class="text-xs text-gray-400">
-
                         <i class="far fa-calendar mr-1"></i>
-
                         Deadline:
-
                         <strong class="text-gray-700 font-semibold">
-                            {{ project.deadline }}
+                            {% if project.deadline %}{{ project.deadline|date:"M j, Y" }}{% else %}Not set{% endif %}
                         </strong>
-
                     </span>
 
-
-                    <span class="hidden sm:block text-gray-300">
-                        &bull;
-                    </span>
-
+                    <span class="hidden sm:block text-gray-300">&bull;</span>
 
                     <span class="text-xs text-gray-400">
-
                         Priority:
-
-                        <strong class="text-gray-700 font-semibold">
-                            {{ project.priority }}
-                        </strong>
-
+                        <strong class="text-gray-700 font-semibold">{{ project.get_priority_display }}</strong>
                     </span>
 
+                    <span class="hidden sm:block text-gray-300">&bull;</span>
+
+                    <span class="text-xs text-gray-400">
+                        Created by:
+                        <strong class="text-gray-700 font-semibold">
+                            {{ project.created_by.get_full_name|default:project.created_by.username }}
+                        </strong>
+                    </span>
                 </div>
 
+                {% if project.description %}
+                <p class="text-xs text-gray-500 mt-3 leading-relaxed max-w-2xl">{{ project.description }}</p>
+                {% endif %}
             </div>
-
-
 
             <!-- Action buttons -->
-
             <div class="flex flex-wrap items-center gap-2 shrink-0">
-
-                <button type="button" id="recordPaymentButton"
-                    class="px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 text-xs font-medium rounded-lg border border-gray-200 shadow-sm transition flex items-center gap-1.5">
-
-                    <i class="fas fa-receipt text-[10px]"></i>
-
-                    Record payment
-
-                </button>
-
-
                 <button type="button" id="sharePortalButton"
                     class="px-4 py-2 bg-[#d4a373] hover:bg-[#b8895e] text-white text-xs font-medium rounded-lg shadow-sm transition flex items-center gap-1.5">
-
                     <i class="fas fa-link text-[10px]"></i>
-
                     Share portal
-
                 </button>
-
-
-                <!-- Status -->
-
-                <div class="relative">
-
-                    <select id="projectStatus"
-                        class="appearance-none px-4 py-2 pr-9 bg-white text-gray-700 text-xs font-medium rounded-lg border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#d4a373]/30 focus:border-[#d4a373] cursor-pointer transition">
-
-                        <option value="Started" {% if project.status == "Started" %}selected{% endif %}>
-                            Started
-                        </option>
-
-                        <option value="In Progress" {% if project.status == "In Progress" %}selected{% endif %}>
-                            In Progress
-                        </option>
-
-                        <option value="Completed" {% if project.status == "Completed" %}selected{% endif %}>
-                            Completed
-                        </option>
-
-                        <option value="Hold" {% if project.status == "Hold" %}selected{% endif %}>
-                            Hold
-                        </option>
-
-                    </select>
-
-
-                    <i
-                        class="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-[9px] pointer-events-none"></i>
-
-                </div>
-
             </div>
 
         </div>
-
     </div>
 
 
-
     <!-- =====================================================
-         PROJECT SUMMARY
+         PROJECT SUMMARY CARDS
          ===================================================== -->
-
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
 
-
-        <!-- Progress -->
-
-        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-
-            <div class="flex items-center justify-between">
-
-                <span class="text-xs text-gray-400">
-                    Progress
-                </span>
-
-                <i class="fas fa-chart-line text-[#d4a373] text-xs"></i>
-
-            </div>
-
-
-            <div class="text-xl font-bold text-gray-900 mt-2" id="summaryProgress">
-                0%
-            </div>
-
-
-            <p class="text-[11px] text-gray-400 mt-0.5" id="summaryTasks">
-                0 of 0 tasks
-            </p>
-
-        </div>
-
-
-
         <!-- Budget -->
-
         <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-
             <div class="flex items-center justify-between">
-
-                <span class="text-xs text-gray-400">
-                    Budget
-                </span>
-
+                <span class="text-xs text-gray-400">Budget</span>
                 <i class="fas fa-wallet text-[#d4a373] text-xs"></i>
-
             </div>
-
-
             <div class="text-xl font-bold text-gray-900 mt-2">
-                ${{ project.budget }}
+                ${{ project.budget|floatformat:2 }}
             </div>
-
-
-            <p class="text-[11px] text-gray-400 mt-0.5">
-                Total project budget
-            </p>
-
+            <p class="text-[11px] text-gray-400 mt-0.5">Total project budget</p>
         </div>
 
-
-
-        <!-- Paid -->
-
+        <!-- Start date -->
         <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-
             <div class="flex items-center justify-between">
-
-                <span class="text-xs text-gray-400">
-                    Paid
-                </span>
-
-                <i class="fas fa-check-circle text-[#1b8755] text-xs"></i>
-
+                <span class="text-xs text-gray-400">Start date</span>
+                <i class="fas fa-play-circle text-[#d4a373] text-xs"></i>
             </div>
-
-
             <div class="text-xl font-bold text-gray-900 mt-2">
-                ${{ project.paid }}
+                {% if project.start_date %}{{ project.start_date|date:"M j" }}{% else %}—{% endif %}
             </div>
-
-
             <p class="text-[11px] text-gray-400 mt-0.5">
-                Amount received
+                {% if project.start_date %}{{ project.start_date|date:"Y" }}{% else %}Not set{% endif %}
             </p>
-
         </div>
 
-
-
-        <!-- Remaining -->
-
+        <!-- Deadline -->
         <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-
             <div class="flex items-center justify-between">
-
-                <span class="text-xs text-gray-400">
-                    Remaining
-                </span>
-
+                <span class="text-xs text-gray-400">Deadline</span>
                 <i class="fas fa-clock text-[#b8895e] text-xs"></i>
-
             </div>
-
-
             <div class="text-xl font-bold text-gray-900 mt-2">
-                ${{ project.remaining }}
+                {% if project.deadline %}{{ project.deadline|date:"M j" }}{% else %}—{% endif %}
             </div>
-
-
             <p class="text-[11px] text-gray-400 mt-0.5">
-                Outstanding amount
+                {% if project.deadline %}{{ project.deadline|date:"Y" }}{% else %}Not set{% endif %}
             </p>
-
         </div>
 
-    </div>
-
-
-
-    <!-- =====================================================
-         PROGRESS CARD
-         ===================================================== -->
-
-    <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-
-        <div class="flex items-center justify-between mb-2">
-
-            <div>
-
-                <h3 class="text-sm font-bold text-gray-900">
-                    Overall progress
-                </h3>
-
-                <p class="text-[11px] text-gray-400 mt-0.5">
-                    Automatically calculated from completed tasks
-                </p>
-
+        <!-- Status -->
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+            <div class="flex items-center justify-between">
+                <span class="text-xs text-gray-400">Status</span>
+                <i class="fas fa-chart-line text-[#d4a373] text-xs"></i>
             </div>
-
-
-            <span id="progressPercentage" class="text-sm font-bold text-[#8b6f55]">
-                0%
-            </span>
-
-        </div>
-
-
-        <!-- Progress bar -->
-
-        <div class="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
-
-            <div id="progressBar" class="h-full bg-[#d4a373] rounded-full transition-all duration-500 ease-out"
-                style="width: 0%;"></div>
-
-        </div>
-
-
-        <div class="flex items-center justify-between mt-2">
-
-            <span id="progressTaskText" class="text-[11px] text-gray-400">
-                0 completed
-            </span>
-
-
-            <span class="text-[11px] text-gray-400">
-                Tasks
-            </span>
-
+            <div class="mt-2">
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium {{ project.status_css_class }}">
+                    {{ project.get_status_display }}
+                </span>
+            </div>
+            <p class="text-[11px] text-gray-400 mt-1.5">Current project status</p>
         </div>
 
     </div>
-
 
 
     <!-- =====================================================
          TABS
          ===================================================== -->
-
     <div class="border-b border-gray-200">
-
         <div class="flex items-center gap-1 overflow-x-auto" id="projectTabs">
-
-            <button type="button" data-tab="tasks"
+            <button type="button" data-tab="overview"
                 class="project-tab active px-4 py-3 text-xs font-semibold text-[#8b6f55] border-b-2 border-[#d4a373] whitespace-nowrap transition">
-                <i class="far fa-check-square mr-1.5"></i>
-                Tasks
+                <i class="far fa-file-alt mr-1.5"></i> Overview
             </button>
-
-
-            <button type="button" data-tab="notes"
-                class="project-tab px-4 py-3 text-xs font-medium text-gray-400 hover:text-gray-700 border-b-2 border-transparent whitespace-nowrap transition">
-                <i class="far fa-sticky-note mr-1.5"></i>
-                Notes
-            </button>
-
-
-            <button type="button" data-tab="payments"
-                class="project-tab px-4 py-3 text-xs font-medium text-gray-400 hover:text-gray-700 border-b-2 border-transparent whitespace-nowrap transition">
-                <i class="far fa-credit-card mr-1.5"></i>
-                Payments
-            </button>
-
-
-            <button type="button" data-tab="files"
-                class="project-tab px-4 py-3 text-xs font-medium text-gray-400 hover:text-gray-700 border-b-2 border-transparent whitespace-nowrap transition">
-                <i class="far fa-file mr-1.5"></i>
-                Files
-            </button>
-
-
             <button type="button" data-tab="activity"
                 class="project-tab px-4 py-3 text-xs font-medium text-gray-400 hover:text-gray-700 border-b-2 border-transparent whitespace-nowrap transition">
-                <i class="far fa-clock mr-1.5"></i>
-                Activity
+                <i class="far fa-clock mr-1.5"></i> Activity
             </button>
-
         </div>
-
     </div>
 
 
-
     <!-- =====================================================
-         TASK TAB
+         OVERVIEW TAB
          ===================================================== -->
+    <div id="tab-overview" class="project-tab-content">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
-    <div id="tab-tasks" class="project-tab-content">
-
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-
-            <!-- Task header -->
-
-            <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-
-                <div>
-
-                    <h3 class="text-sm font-bold text-gray-900">
-                        Project tasks
-                    </h3>
-
-                    <p class="text-[11px] text-gray-400 mt-0.5">
-                        Check tasks as they are completed
-                    </p>
-
-                </div>
-
-
-                <span id="taskCounter"
-                    class="px-2.5 py-1 bg-gray-100 text-gray-500 rounded-full text-[10px] font-semibold">
-                    0 / 0
-                </span>
-
+            <!-- Project details card -->
+            <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+                <h3 class="text-sm font-bold text-gray-900 mb-4">Project details</h3>
+                <dl class="space-y-3">
+                    <div class="flex items-start gap-3">
+                        <dt class="w-28 shrink-0 text-[11px] font-medium text-gray-400 uppercase tracking-wide pt-0.5">Name</dt>
+                        <dd class="text-xs text-gray-800 font-semibold">{{ project.name }}</dd>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <dt class="w-28 shrink-0 text-[11px] font-medium text-gray-400 uppercase tracking-wide pt-0.5">Client</dt>
+                        <dd class="text-xs text-gray-800">{{ project.client.name|default:"No client assigned" }}</dd>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <dt class="w-28 shrink-0 text-[11px] font-medium text-gray-400 uppercase tracking-wide pt-0.5">Status</dt>
+                        <dd>
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium {{ project.status_css_class }}">
+                                {{ project.get_status_display }}
+                            </span>
+                        </dd>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <dt class="w-28 shrink-0 text-[11px] font-medium text-gray-400 uppercase tracking-wide pt-0.5">Priority</dt>
+                        <dd>
+                            <span class="text-xs font-medium px-2 py-0.5 rounded-md
+                                {% if project.priority == 'HIGH' %}bg-[#fce8e6] text-[#c5221f]
+                                {% elif project.priority == 'MEDIUM' %}bg-[#fef7e0] text-[#b06000]
+                                {% else %}bg-[#edf0f4] text-[#657084]{% endif %}">
+                                {{ project.get_priority_display }}
+                            </span>
+                        </dd>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <dt class="w-28 shrink-0 text-[11px] font-medium text-gray-400 uppercase tracking-wide pt-0.5">Start date</dt>
+                        <dd class="text-xs text-gray-800">
+                            {% if project.start_date %}{{ project.start_date|date:"M j, Y" }}{% else %}<span class="text-gray-400">Not set</span>{% endif %}
+                        </dd>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <dt class="w-28 shrink-0 text-[11px] font-medium text-gray-400 uppercase tracking-wide pt-0.5">Deadline</dt>
+                        <dd class="text-xs text-gray-800">
+                            {% if project.deadline %}{{ project.deadline|date:"M j, Y" }}{% else %}<span class="text-gray-400">Not set</span>{% endif %}
+                        </dd>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <dt class="w-28 shrink-0 text-[11px] font-medium text-gray-400 uppercase tracking-wide pt-0.5">Budget</dt>
+                        <dd class="text-xs text-gray-800 font-semibold">${{ project.budget|floatformat:2 }}</dd>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <dt class="w-28 shrink-0 text-[11px] font-medium text-gray-400 uppercase tracking-wide pt-0.5">Created by</dt>
+                        <dd class="text-xs text-gray-800">{{ project.created_by.get_full_name|default:project.created_by.username }}</dd>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <dt class="w-28 shrink-0 text-[11px] font-medium text-gray-400 uppercase tracking-wide pt-0.5">Created</dt>
+                        <dd class="text-xs text-gray-800">{{ project.created_at|date:"M j, Y" }}</dd>
+                    </div>
+                </dl>
             </div>
 
-
-            <!-- =================================================
-                 TASK LIST
-                 ================================================= -->
-
-            <div id="taskList">
-
-
-                <!-- Task 1 -->
-
-                <div class="task-row px-5 py-4 border-b border-gray-100 hover:bg-gray-50/70 transition" data-task>
-
-                    <div class="flex items-start gap-3">
-
-                        <button type="button"
-                            class="task-checkbox mt-0.5 w-5 h-5 rounded-md border-2 border-gray-300 bg-white flex items-center justify-center shrink-0 transition"
-                            aria-label="Mark task complete">
-
-                            <i class="fas fa-check text-white text-[9px] opacity-0 transition"></i>
-
-                        </button>
-
-
-                        <div class="min-w-0 flex-1">
-
-                            <button type="button"
-                                class="task-title text-left text-xs sm:text-sm font-semibold text-gray-800 hover:text-[#8b6f55] transition">
-                                Define brand direction
-                            </button>
-
-
-                            <div class="flex flex-wrap items-center gap-2 mt-1.5">
-
-                                <span class="text-[10px] text-gray-400">
-                                    Design
-                                </span>
-
-                                <span class="text-gray-300">
-                                    &bull;
-                                </span>
-
-                                <span class="text-[10px] text-gray-400">
-                                    Sep 02
-                                </span>
-
-                                <span
-                                    class="sm:hidden px-1.5 py-0.5 rounded-md bg-[#fce8e6] text-[#c5221f] text-[9px] font-semibold">
-                                    High
-                                </span>
-
-                            </div>
-
-                        </div>
-
-
-                        <span
-                            class="hidden sm:inline-flex px-2 py-1 rounded-md bg-[#fce8e6] text-[#c5221f] text-[10px] font-semibold shrink-0">
-                            High
-                        </span>
-
-                    </div>
-
-                </div>
-
-
-
-                <!-- Task 2 -->
-
-                <div class="task-row px-5 py-4 border-b border-gray-100 hover:bg-gray-50/70 transition" data-task>
-
-                    <div class="flex items-start gap-3">
-
-                        <button type="button"
-                            class="task-checkbox mt-0.5 w-5 h-5 rounded-md border-2 border-gray-300 bg-white flex items-center justify-center shrink-0 transition"
-                            aria-label="Mark task complete">
-
-                            <i class="fas fa-check text-white text-[9px] opacity-0 transition"></i>
-
-                        </button>
-
-
-                        <div class="min-w-0 flex-1">
-
-                            <button type="button"
-                                class="task-title text-left text-xs sm:text-sm font-semibold text-gray-800 hover:text-[#8b6f55] transition">
-                                Finalize visual identity
-                            </button>
-
-
-                            <div class="flex flex-wrap items-center gap-2 mt-1.5">
-
-                                <span class="text-[10px] text-gray-400">
-                                    Branding
-                                </span>
-
-                                <span class="text-gray-300">
-                                    &bull;
-                                </span>
-
-                                <span class="text-[10px] text-gray-400">
-                                    Sep 03
-                                </span>
-
-                                <span
-                                    class="sm:hidden px-1.5 py-0.5 rounded-md bg-[#fef7e0] text-[#b06000] text-[9px] font-semibold">
-                                    Medium
-                                </span>
-
-                            </div>
-
-                        </div>
-
-
-                        <span
-                            class="hidden sm:inline-flex px-2 py-1 rounded-md bg-[#fef7e0] text-[#b06000] text-[10px] font-semibold shrink-0">
-                            Medium
-                        </span>
-
-                    </div>
-
-                </div>
-
-
-
-                <!-- Task 3 -->
-
-                <div class="task-row px-5 py-4 border-b border-gray-100 hover:bg-gray-50/70 transition" data-task>
-
-                    <div class="flex items-start gap-3">
-
-                        <button type="button"
-                            class="task-checkbox mt-0.5 w-5 h-5 rounded-md border-2 border-gray-300 bg-white flex items-center justify-center shrink-0 transition"
-                            aria-label="Mark task complete">
-
-                            <i class="fas fa-check text-white text-[9px] opacity-0 transition"></i>
-
-                        </button>
-
-
-                        <div class="min-w-0 flex-1">
-
-                            <button type="button"
-                                class="task-title text-left text-xs sm:text-sm font-semibold text-gray-800 hover:text-[#8b6f55] transition">
-                                Prepare brand guidelines
-                            </button>
-
-
-                            <div class="flex flex-wrap items-center gap-2 mt-1.5">
-
-                                <span class="text-[10px] text-gray-400">
-                                    Documentation
-                                </span>
-
-                                <span class="text-gray-300">
-                                    &bull;
-                                </span>
-
-                                <span class="text-[10px] text-gray-400">
-                                    Sep 05
-                                </span>
-
-                                <span
-                                    class="sm:hidden px-1.5 py-0.5 rounded-md bg-[#edf0f4] text-[#657084] text-[9px] font-semibold">
-                                    Low
-                                </span>
-
-                            </div>
-
-                        </div>
-
-
-                        <span
-                            class="hidden sm:inline-flex px-2 py-1 rounded-md bg-[#edf0f4] text-[#657084] text-[10px] font-semibold shrink-0">
-                            Low
-                        </span>
-
-                    </div>
-
-                </div>
-
-
-
-                <!-- Task 4 -->
-
-                <div class="task-row px-5 py-4 border-b border-gray-100 hover:bg-gray-50/70 transition" data-task>
-
-                    <div class="flex items-start gap-3">
-
-                        <button type="button"
-                            class="task-checkbox mt-0.5 w-5 h-5 rounded-md border-2 border-gray-300 bg-white flex items-center justify-center shrink-0 transition"
-                            aria-label="Mark task complete">
-
-                            <i class="fas fa-check text-white text-[9px] opacity-0 transition"></i>
-
-                        </button>
-
-
-                        <div class="min-w-0 flex-1">
-
-                            <button type="button"
-                                class="task-title text-left text-xs sm:text-sm font-semibold text-gray-800 hover:text-[#8b6f55] transition">
-                                Client review and approval
-                            </button>
-
-
-                            <div class="flex flex-wrap items-center gap-2 mt-1.5">
-
-                                <span class="text-[10px] text-gray-400">
-                                    Review
-                                </span>
-
-                                <span class="text-gray-300">
-                                    &bull;
-                                </span>
-
-                                <span class="text-[10px] text-gray-400">
-                                    Sep 06
-                                </span>
-
-                                <span
-                                    class="sm:hidden px-1.5 py-0.5 rounded-md bg-[#fce8e6] text-[#c5221f] text-[9px] font-semibold">
-                                    High
-                                </span>
-
-                            </div>
-
-                        </div>
-
-
-                        <span
-                            class="hidden sm:inline-flex px-2 py-1 rounded-md bg-[#fce8e6] text-[#c5221f] text-[10px] font-semibold shrink-0">
-                            High
-                        </span>
-
-                    </div>
-
-                </div>
-
-
-
-                <!-- Task 5 -->
-
-                <div class="task-row px-5 py-4 border-b border-gray-100 hover:bg-gray-50/70 transition" data-task>
-
-                    <div class="flex items-start gap-3">
-
-                        <button type="button"
-                            class="task-checkbox mt-0.5 w-5 h-5 rounded-md border-2 border-gray-300 bg-white flex items-center justify-center shrink-0 transition"
-                            aria-label="Mark task complete">
-
-                            <i class="fas fa-check text-white text-[9px] opacity-0 transition"></i>
-
-                        </button>
-
-
-                        <div class="min-w-0 flex-1">
-
-                            <button type="button"
-                                class="task-title text-left text-xs sm:text-sm font-semibold text-gray-800 hover:text-[#8b6f55] transition">
-                                Export final brand assets
-                            </button>
-
-
-                            <div class="flex flex-wrap items-center gap-2 mt-1.5">
-
-                                <span class="text-[10px] text-gray-400">
-                                    Delivery
-                                </span>
-
-                                <span class="text-gray-300">
-                                    &bull;
-                                </span>
-
-                                <span class="text-[10px] text-gray-400">
-                                    Sep 07
-                                </span>
-
-                                <span
-                                    class="sm:hidden px-1.5 py-0.5 rounded-md bg-[#fef7e0] text-[#b06000] text-[9px] font-semibold">
-                                    Medium
-                                </span>
-
-                            </div>
-
-                        </div>
-
-
-                        <span
-                            class="hidden sm:inline-flex px-2 py-1 rounded-md bg-[#fef7e0] text-[#b06000] text-[10px] font-semibold shrink-0">
-                            Medium
-                        </span>
-
-                    </div>
-
-                </div>
-
-
-
-                <!-- Task 6 -->
-
-                <div class="task-row px-5 py-4 border-b border-gray-100 hover:bg-gray-50/70 transition" data-task>
-
-                    <div class="flex items-start gap-3">
-
-                        <button type="button"
-                            class="task-checkbox mt-0.5 w-5 h-5 rounded-md border-2 border-gray-300 bg-white flex items-center justify-center shrink-0 transition"
-                            aria-label="Mark task complete">
-
-                            <i class="fas fa-check text-white text-[9px] opacity-0 transition"></i>
-
-                        </button>
-
-
-                        <div class="min-w-0 flex-1">
-
-                            <button type="button"
-                                class="task-title text-left text-xs sm:text-sm font-semibold text-gray-800 hover:text-[#8b6f55] transition">
-                                Deliver project package
-                            </button>
-
-
-                            <div class="flex flex-wrap items-center gap-2 mt-1.5">
-
-                                <span class="text-[10px] text-gray-400">
-                                    Delivery
-                                </span>
-
-                                <span class="text-gray-300">
-                                    &bull;
-                                </span>
-
-                                <span class="text-[10px] text-gray-400">
-                                    Sep 08
-                                </span>
-
-                                <span
-                                    class="sm:hidden px-1.5 py-0.5 rounded-md bg-[#edf0f4] text-[#657084] text-[9px] font-semibold">
-                                    Low
-                                </span>
-
-                            </div>
-
-                        </div>
-
-
-                        <span
-                            class="hidden sm:inline-flex px-2 py-1 rounded-md bg-[#edf0f4] text-[#657084] text-[10px] font-semibold shrink-0">
-                            Low
-                        </span>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- =================================================
-                 ADD NEW TASK
-                 ================================================= -->
-
-            <div id="addTaskContainer" class="px-5 py-4 border-t border-gray-100 bg-gray-50/40">
-
-                <button type="button" id="showAddTaskForm"
-                    class="inline-flex items-center gap-2 text-xs font-semibold text-[#8b6f55] hover:text-[#6b4f3a] transition">
-                    <i class="fas fa-plus text-[10px]"></i>
-                    Add new task
-                </button>
-
-                <form id="addTaskForm" class="hidden mt-3 space-y-3">
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-
-                        <div>
-                            <label class="block text-[11px] font-medium text-gray-500 mb-1">
-                                Task title <span class="text-red-500">*</span>
-                            </label>
-                            <input type="text" id="newTaskTitle" required placeholder="e.g. Prepare style guide"
-                                class="w-full px-3 py-2 text-xs rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#d4a373]/30 focus:border-[#d4a373] transition">
-                        </div>
-
-                        <div>
-                            <label class="block text-[11px] font-medium text-gray-500 mb-1">
-                                Category
-                            </label>
-                            <input type="text" id="newTaskCategory" placeholder="e.g. Design"
-                                class="w-full px-3 py-2 text-xs rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#d4a373]/30 focus:border-[#d4a373] transition">
-                        </div>
-
-                        <div>
-                            <label class="block text-[11px] font-medium text-gray-500 mb-1">
-                                Due date
-                            </label>
-                            <input type="date" id="newTaskDate"
-                                class="w-full px-3 py-2 text-xs rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#d4a373]/30 focus:border-[#d4a373] transition">
-                        </div>
-
-                        <div>
-                            <label class="block text-[11px] font-medium text-gray-500 mb-1">
-                                Priority <span class="text-red-500">*</span>
-                            </label>
-                            <select id="newTaskPriority" required
-                                class="w-full px-3 py-2 text-xs rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#d4a373]/30 focus:border-[#d4a373] cursor-pointer transition">
-                                <option value="">Select priority</option>
-                                <option value="High">High</option>
-                                <option value="Medium">Medium</option>
-                                <option value="Low">Low</option>
-                            </select>
-                        </div>
-
-                    </div>
-
-                    <p id="addTaskError" class="hidden text-[11px] text-red-500">
-                        Please fill in the required fields.
-                    </p>
-
-                    <div class="flex items-center gap-2 pt-1">
-
-                        <button type="submit"
-                            class="px-4 py-2 bg-[#d4a373] hover:bg-[#b8895e] text-white text-xs font-medium rounded-lg shadow-sm transition">
-                            Add task
-                        </button>
-
-                        <button type="button" id="cancelAddTask"
-                            class="px-4 py-2 bg-white hover:bg-gray-50 text-gray-600 text-xs font-medium rounded-lg border border-gray-200 transition">
-                            Cancel
-                        </button>
-
-                    </div>
-
-                </form>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-
-    <!-- =====================================================
-         NOTES TAB
-         ===================================================== -->
-
-    <div id="tab-notes" class="project-tab-content hidden">
-
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-
-            <!-- Post update bar -->
-
-            <div class="p-5 border-b border-gray-100">
-
-                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-
-                    <input type="text" id="newNoteInput" placeholder="Post an update..."
-                        class="flex-1 min-w-0 px-4 py-2.5 text-xs rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#d4a373]/30 focus:border-[#d4a373] transition">
-
-                    <div class="relative shrink-0">
-
-                        <select id="noteVisibility"
-                            class="appearance-none w-full px-3 py-2.5 pr-9 bg-white text-gray-700 text-xs font-medium rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#d4a373]/30 focus:border-[#d4a373] cursor-pointer transition">
-                            <option value="internal">Internal only</option>
-                            <option value="client">Client only</option>
-                            <option value="both">Both</option>
-                        </select>
-
-                        <i
-                            class="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-[9px] pointer-events-none"></i>
-
-                    </div>
-
-                    <button type="button" id="postNoteButton"
-                        class="px-5 py-2.5 bg-[#d4a373] hover:bg-[#b8895e] text-white text-xs font-semibold rounded-lg shadow-sm transition shrink-0">
-                        Post
-                    </button>
-
-                </div>
-
-                <p id="noteError" class="hidden text-[11px] text-red-500 mt-2">
-                    Write something before posting.
-                </p>
-
-            </div>
-
-
-            <!-- Notes feed -->
-
-            <div id="notesFeed" class="divide-y divide-gray-100"></div>
-
-
-            <div id="noNotesMessage" class="hidden p-5">
-
+            <!-- Description / notes card -->
+            <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+                <h3 class="text-sm font-bold text-gray-900 mb-4">Description</h3>
+                {% if project.description %}
+                <p class="text-xs text-gray-600 leading-relaxed">{{ project.description }}</p>
+                {% else %}
                 <div class="p-4 rounded-lg bg-[#f8f4ef] border border-[#eadcca]">
                     <p class="text-xs text-[#6b4f3a] leading-relaxed">
-                        No project notes have been added yet.
+                        No description has been added for this project.
                     </p>
                 </div>
+                {% endif %}
 
+                {% if project.client %}
+                <div class="mt-5 pt-4 border-t border-gray-100">
+                    <h4 class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-3">Client info</h4>
+                    <dl class="space-y-2">
+                        <div class="flex gap-3">
+                            <dt class="w-24 shrink-0 text-[11px] text-gray-400">Company</dt>
+                            <dd class="text-xs text-gray-700">{{ project.client.company|default:project.client.name }}</dd>
+                        </div>
+                        {% if project.client.contact_email %}
+                        <div class="flex gap-3">
+                            <dt class="w-24 shrink-0 text-[11px] text-gray-400">Email</dt>
+                            <dd class="text-xs text-gray-700">{{ project.client.contact_email }}</dd>
+                        </div>
+                        {% endif %}
+                        {% if project.client.contact_phone %}
+                        <div class="flex gap-3">
+                            <dt class="w-24 shrink-0 text-[11px] text-gray-400">Phone</dt>
+                            <dd class="text-xs text-gray-700">{{ project.client.contact_phone }}</dd>
+                        </div>
+                        {% endif %}
+                        <div class="flex gap-3">
+                            <dt class="w-24 shrink-0 text-[11px] text-gray-400">Status</dt>
+                            <dd class="text-xs text-gray-700 capitalize">{{ project.client.status }}</dd>
+                        </div>
+                    </dl>
+                </div>
+                {% endif %}
             </div>
 
         </div>
-
     </div>
-
-
-
-    <!-- =====================================================
-         PAYMENTS TAB
-         ===================================================== -->
-
-    <div id="tab-payments" class="project-tab-content hidden">
-
-        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-
-                <div>
-
-                    <h3 class="text-sm font-bold text-gray-900">
-                        Payments
-                    </h3>
-
-                    <p class="text-xs text-gray-400 mt-1">
-                        Financial information for this project.
-                    </p>
-
-                </div>
-
-
-                <button type="button" id="paymentTabButton"
-                    class="px-3 py-2 bg-[#d4a373] hover:bg-[#b8895e] text-white text-[11px] font-medium rounded-lg transition self-start sm:self-auto">
-                    Record payment
-                </button>
-
-            </div>
-
-
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-5">
-
-                <div class="rounded-lg bg-gray-50 p-4">
-
-                    <p class="text-[11px] text-gray-400">
-                        Budget
-                    </p>
-
-                    <p class="text-lg font-bold text-gray-900 mt-1">
-                        ${{ project.budget }}
-                    </p>
-
-                </div>
-
-
-                <div class="rounded-lg bg-gray-50 p-4">
-
-                    <p class="text-[11px] text-gray-400">
-                        Paid
-                    </p>
-
-                    <p class="text-lg font-bold text-gray-900 mt-1">
-                        ${{ project.paid }}
-                    </p>
-
-                </div>
-
-
-                <div class="rounded-lg bg-gray-50 p-4">
-
-                    <p class="text-[11px] text-gray-400">
-                        Remaining
-                    </p>
-
-                    <p class="text-lg font-bold text-gray-900 mt-1">
-                        ${{ project.remaining }}
-                    </p>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-
-    <!-- =====================================================
-         FILES TAB
-         ===================================================== -->
-
-    <div id="tab-files" class="project-tab-content hidden">
-
-        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-
-            <h3 class="text-sm font-bold text-gray-900">
-                Project files
-            </h3>
-
-            <p class="text-xs text-gray-400 mt-1">
-                Files associated with this project.
-            </p>
-
-
-            <div class="mt-5 p-4 rounded-lg border border-dashed border-gray-200 text-center">
-
-                <i class="far fa-folder-open text-[#d4a373] text-2xl"></i>
-
-                <p class="text-xs text-gray-500 mt-2">
-                    No files uploaded yet.
-                </p>
-
-            </div>
-
-        </div>
-
-    </div>
-
 
 
     <!-- =====================================================
          ACTIVITY TAB
          ===================================================== -->
-
     <div id="tab-activity" class="project-tab-content hidden">
-
         <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-
-            <h3 class="text-sm font-bold text-gray-900">
-                Recent activity
-            </h3>
-
-            <p class="text-xs text-gray-400 mt-1">
-                Recent changes made to this project.
-            </p>
-
-
+            <h3 class="text-sm font-bold text-gray-900">Recent activity</h3>
+            <p class="text-xs text-gray-400 mt-1">Recent changes made to this project.</p>
             <div class="mt-5 space-y-4">
-
                 <div class="flex gap-3">
-
-                    <div
-                        class="w-7 h-7 rounded-full bg-[#f8eee4] text-[#8b6f55] flex items-center justify-center shrink-0">
+                    <div class="w-7 h-7 rounded-full bg-[#f8eee4] text-[#8b6f55] flex items-center justify-center shrink-0">
                         <i class="fas fa-plus text-[10px]"></i>
                     </div>
-
-
                     <div>
-
                         <p class="text-xs text-gray-700">
-                            Project was created.
+                            Project created by
+                            <strong>{{ project.created_by.get_full_name|default:project.created_by.username }}</strong>.
                         </p>
-
-                        <p class="text-[10px] text-gray-400 mt-0.5">
-                            Recently
-                        </p>
-
+                        <p class="text-[10px] text-gray-400 mt-0.5">{{ project.created_at|date:"M j, Y \a\t g:i A" }}</p>
                     </div>
-
                 </div>
-
-
+                {% if project.updated_at != project.created_at %}
                 <div class="flex gap-3">
-
-                    <div
-                        class="w-7 h-7 rounded-full bg-[#f8eee4] text-[#8b6f55] flex items-center justify-center shrink-0">
-                        <i class="fas fa-tasks text-[10px]"></i>
+                    <div class="w-7 h-7 rounded-full bg-[#f8eee4] text-[#8b6f55] flex items-center justify-center shrink-0">
+                        <i class="fas fa-pencil-alt text-[10px]"></i>
                     </div>
-
-
                     <div>
-
-                        <p class="text-xs text-gray-700">
-                            Project tasks were updated.
-                        </p>
-
-                        <p class="text-[10px] text-gray-400 mt-0.5">
-                            Recently
-                        </p>
-
+                        <p class="text-xs text-gray-700">Project was last updated.</p>
+                        <p class="text-[10px] text-gray-400 mt-0.5">{{ project.updated_at|date:"M j, Y \a\t g:i A" }}</p>
                     </div>
-
                 </div>
-
+                {% endif %}
             </div>
-
         </div>
-
     </div>
 
 </div>
 
 
-
 <!-- =========================================================
-     MODAL
+     MODAL (share portal)
      ========================================================= -->
-
 <div id="projectModal"
     class="fixed inset-0 z-50 hidden items-center justify-center bg-black/30 backdrop-blur-[2px] px-4">
-
-    <div class="bg-white rounded-xl shadow-xl border border-gray-100 w-full max-w-md p-5 transform transition">
-
+    <div class="bg-white rounded-xl shadow-xl border border-gray-100 w-full max-w-md p-5">
         <div class="flex items-center justify-between">
-
-            <h3 id="modalTitle" class="text-sm font-bold text-gray-900">
-                Project action
-            </h3>
-
-
+            <h3 id="modalTitle" class="text-sm font-bold text-gray-900">Project action</h3>
             <button type="button" id="closeModal"
                 class="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-500 flex items-center justify-center transition">
-
                 <i class="fas fa-times text-xs"></i>
-
             </button>
-
         </div>
-
-
         <p id="modalMessage" class="text-xs text-gray-500 mt-3 leading-relaxed break-words"></p>
-
-
         <div class="flex justify-end mt-5">
-
             <button type="button" id="modalOkay"
                 class="px-4 py-2 bg-[#d4a373] hover:bg-[#b8895e] text-white text-xs font-medium rounded-lg transition">
                 Okay
             </button>
-
         </div>
-
     </div>
-
 </div>
 
 
-
 <script>
+document.addEventListener("DOMContentLoaded", function () {
 
-    document.addEventListener("DOMContentLoaded", function () {
+    /* ── Tabs ─────────────────────────────────────────────────── */
+    const tabs        = document.querySelectorAll(".project-tab");
+    const tabContents = document.querySelectorAll(".project-tab-content");
 
+    tabs.forEach(function (tab) {
+        tab.addEventListener("click", function () {
+            const target = tab.dataset.tab;
 
-        /* =====================================================
-           TASK SYSTEM
-           ===================================================== */
-
-        const taskList = document.getElementById("taskList");
-
-        const progressBar = document.getElementById("progressBar");
-        const progressPercentage = document.getElementById("progressPercentage");
-        const progressTaskText = document.getElementById("progressTaskText");
-        const summaryProgress = document.getElementById("summaryProgress");
-        const summaryTasks = document.getElementById("summaryTasks");
-        const taskCounter = document.getElementById("taskCounter");
-
-
-        function updateProgress() {
-
-            /* re-query every time so newly added tasks are counted */
-            const taskRows = taskList.querySelectorAll("[data-task]");
-
-            const total = taskRows.length;
-            let completed = 0;
-
-            taskRows.forEach(function (row) {
-                const checkbox = row.querySelector(".task-checkbox");
-                if (checkbox && checkbox.dataset.completed === "true") {
-                    completed++;
-                }
+            tabs.forEach(function (t) {
+                t.classList.remove("active", "text-[#8b6f55]", "border-[#d4a373]");
+                t.classList.add("text-gray-400", "border-transparent");
             });
+            tabContents.forEach(function (c) { c.classList.add("hidden"); });
 
-            let percentage = 0;
-            if (total > 0) {
-                percentage = Math.round((completed / total) * 100);
-            }
+            tab.classList.add("active", "text-[#8b6f55]", "border-[#d4a373]");
+            tab.classList.remove("text-gray-400", "border-transparent");
 
-            /* Progress bar */
-            progressBar.style.width = percentage + "%";
+            const selected = document.getElementById("tab-" + target);
+            if (selected) selected.classList.remove("hidden");
 
-            /* Percentage */
-            progressPercentage.textContent = percentage + "%";
-            summaryProgress.textContent = percentage + "%";
-
-            /* Task text */
-            progressTaskText.textContent = completed + " completed";
-            summaryTasks.textContent = completed + " of " + total + " tasks";
-            taskCounter.textContent = completed + " / " + total;
-
-            /* Completed project */
-            if (percentage === 100 && total > 0) {
-                progressBar.classList.remove("bg-[#d4a373]");
-                progressBar.classList.add("bg-[#1b8755]");
-            } else {
-                progressBar.classList.remove("bg-[#1b8755]");
-                progressBar.classList.add("bg-[#d4a373]");
-            }
-
-        }
-
-
-        /* =====================================================
-           TASK CHECKBOX / TITLE TOGGLE (event delegation so
-           dynamically added tasks work automatically)
-           ===================================================== */
-
-        function toggleTask(row) {
-
-            const checkbox = row.querySelector(".task-checkbox");
-            const title = row.querySelector(".task-title");
-            const checkIcon = checkbox.querySelector("i");
-
-            const isCompleted = checkbox.dataset.completed === "true";
-
-            if (isCompleted) {
-
-                checkbox.dataset.completed = "false";
-                checkbox.classList.remove("bg-[#d4a373]", "border-[#d4a373]");
-                checkbox.classList.add("bg-white", "border-gray-300");
-                checkIcon.classList.remove("opacity-100");
-                checkIcon.classList.add("opacity-0");
-                title.classList.remove("line-through", "text-gray-400");
-                title.classList.add("text-gray-800");
-                row.classList.remove("bg-[#faf7f3]");
-
-            } else {
-
-                checkbox.dataset.completed = "true";
-                checkbox.classList.remove("bg-white", "border-gray-300");
-                checkbox.classList.add("bg-[#d4a373]", "border-[#d4a373]");
-                checkIcon.classList.remove("opacity-0");
-                checkIcon.classList.add("opacity-100");
-                title.classList.remove("text-gray-800");
-                title.classList.add("line-through", "text-gray-400");
-                row.classList.add("bg-[#faf7f3]");
-
-            }
-
-            updateProgress();
-        }
-
-        taskList.addEventListener("click", function (event) {
-
-            const checkboxHit = event.target.closest(".task-checkbox");
-            const titleHit = event.target.closest(".task-title");
-
-            if (checkboxHit || titleHit) {
-                const row = (checkboxHit || titleHit).closest("[data-task]");
-                if (row) {
-                    toggleTask(row);
-                }
-            }
-
-        });
-
-        updateProgress();
-
-
-        /* =====================================================
-           ADD NEW TASK
-           ===================================================== */
-
-        const showAddTaskForm = document.getElementById("showAddTaskForm");
-        const addTaskForm = document.getElementById("addTaskForm");
-        const cancelAddTask = document.getElementById("cancelAddTask");
-        const addTaskContainer = document.getElementById("addTaskContainer");
-        const addTaskError = document.getElementById("addTaskError");
-
-        const newTaskTitle = document.getElementById("newTaskTitle");
-        const newTaskCategory = document.getElementById("newTaskCategory");
-        const newTaskDate = document.getElementById("newTaskDate");
-        const newTaskPriority = document.getElementById("newTaskPriority");
-
-        const priorityStyles = {
-            High: { bg: "bg-[#fce8e6]", text: "text-[#c5221f]" },
-            Medium: { bg: "bg-[#fef7e0]", text: "text-[#b06000]" },
-            Low: { bg: "bg-[#edf0f4]", text: "text-[#657084]" }
-        };
-
-        function formatDate(dateValue) {
-            if (!dateValue) return "No due date";
-            const parts = dateValue.split("-");
-            const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
-            const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-            return months[d.getMonth()] + " " + String(d.getDate()).padStart(2, "0");
-        }
-
-        function resetAddTaskForm() {
-            newTaskTitle.value = "";
-            newTaskCategory.value = "";
-            newTaskDate.value = "";
-            newTaskPriority.value = "";
-            addTaskError.classList.add("hidden");
-        }
-
-        showAddTaskForm.addEventListener("click", function () {
-            addTaskForm.classList.remove("hidden");
-            showAddTaskForm.classList.add("hidden");
-            newTaskTitle.focus();
-        });
-
-        cancelAddTask.addEventListener("click", function () {
-            addTaskForm.classList.add("hidden");
-            showAddTaskForm.classList.remove("hidden");
-            resetAddTaskForm();
-        });
-
-        addTaskForm.addEventListener("submit", function (event) {
-
-            event.preventDefault();
-
-            const title = newTaskTitle.value.trim();
-            const priority = newTaskPriority.value;
-
-            if (!title || !priority) {
-                addTaskError.classList.remove("hidden");
-                return;
-            }
-
-            addTaskError.classList.add("hidden");
-
-            const category = newTaskCategory.value.trim() || "General";
-            const dateLabel = formatDate(newTaskDate.value);
-            const styles = priorityStyles[priority];
-
-            const row = document.createElement("div");
-            row.className = "task-row px-5 py-4 border-b border-gray-100 hover:bg-gray-50/70 transition";
-            row.setAttribute("data-task", "");
-
-            row.innerHTML =
-                '<div class="flex items-start gap-3">' +
-                '<button type="button" class="task-checkbox mt-0.5 w-5 h-5 rounded-md border-2 border-gray-300 bg-white flex items-center justify-center shrink-0 transition" data-completed="false" aria-label="Mark task complete">' +
-                '<i class="fas fa-check text-white text-[9px] opacity-0 transition"></i>' +
-                '</button>' +
-                '<div class="min-w-0 flex-1">' +
-                '<button type="button" class="task-title text-left text-xs sm:text-sm font-semibold text-gray-800 hover:text-[#8b6f55] transition">' + title + '</button>' +
-                '<div class="flex flex-wrap items-center gap-2 mt-1.5">' +
-                '<span class="text-[10px] text-gray-400">' + category + '</span>' +
-                '<span class="text-gray-300">&bull;</span>' +
-                '<span class="text-[10px] text-gray-400">' + dateLabel + '</span>' +
-                '<span class="sm:hidden px-1.5 py-0.5 rounded-md ' + styles.bg + ' ' + styles.text + ' text-[9px] font-semibold">' + priority + '</span>' +
-                '</div>' +
-                '</div>' +
-                '<span class="hidden sm:inline-flex px-2 py-1 rounded-md ' + styles.bg + ' ' + styles.text + ' text-[10px] font-semibold shrink-0">' + priority + '</span>' +
-                '</div>';
-
-            taskList.appendChild(row);
-
-            updateProgress();
-
-            resetAddTaskForm();
-            addTaskForm.classList.add("hidden");
-            showAddTaskForm.classList.remove("hidden");
-
-        });
-
-
-        /* =====================================================
-           TABS
-           ===================================================== */
-
-        const tabs = document.querySelectorAll(".project-tab");
-        const tabContents = document.querySelectorAll(".project-tab-content");
-
-        tabs.forEach(function (tab) {
-
-            tab.addEventListener("click", function () {
-
-                const target = tab.dataset.tab;
-
-                tabs.forEach(function (item) {
-                    item.classList.remove("active", "text-[#8b6f55]", "border-[#d4a373]");
-                    item.classList.add("text-gray-400", "border-transparent");
-                });
-
-                tabContents.forEach(function (content) {
-                    content.classList.add("hidden");
-                });
-
-                tab.classList.add("active");
-                tab.classList.remove("text-gray-400", "border-transparent");
-                tab.classList.add("text-[#8b6f55]", "border-[#d4a373]");
-
-                const selectedContent = document.getElementById("tab-" + target);
-                if (selectedContent) {
-                    selectedContent.classList.remove("hidden");
-                }
-
-                /* keep the active tab in view on small screens */
-                if (typeof tab.scrollIntoView === "function") {
-                    tab.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
-                }
-
-            });
-
-        });
-
-
-        /* =====================================================
-           STATUS
-           ===================================================== */
-
-        const statusSelect = document.getElementById("projectStatus");
-        const statusBadge = document.getElementById("statusBadge");
-        const statusBadgeText = document.getElementById("statusBadgeText");
-
-        function updateStatus(status) {
-
-            statusBadgeText.textContent = status;
-
-            statusBadge.className = "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium shrink-0";
-
-            if (status === "Started") {
-                statusBadge.classList.add("bg-[#e8f0fe]", "text-[#1a73e8]");
-            } else if (status === "In Progress") {
-                statusBadge.classList.add("bg-[#fef7e0]", "text-[#b06000]");
-            } else if (status === "Completed") {
-                statusBadge.classList.add("bg-[#e6f4ea]", "text-[#137333]");
-            } else if (status === "Hold") {
-                statusBadge.classList.add("bg-[#fce8e6]", "text-[#c5221f]");
-            }
-
-        }
-
-        updateStatus(statusSelect.value);
-
-        statusSelect.addEventListener("change", function () {
-            updateStatus(this.value);
-        });
-
-
-        /* =====================================================
-           NOTES
-           ===================================================== */
-
-        const notesFeed = document.getElementById("notesFeed");
-        const noNotesMessage = document.getElementById("noNotesMessage");
-        const newNoteInput = document.getElementById("newNoteInput");
-        const noteVisibility = document.getElementById("noteVisibility");
-        const postNoteButton = document.getElementById("postNoteButton");
-        const noteError = document.getElementById("noteError");
-
-        const avatarColors = ["bg-[#3b5bdb]", "bg-[#7048e8]", "bg-[#d34527]", "bg-[#1b8755]", "bg-[#b06000]"];
-
-        /* sample notes so the feed isn't empty on first load;
-           these can be replaced with data from the backend */
-        let notes = [
-            {
-                author: "Alex Rivera",
-                initials: "AR",
-                color: "bg-[#3b5bdb]",
-                message: "Client approved round 2 with one change \u2014 swap the hero image on the homepage. Moving into front-end build this week.",
-                timestamp: "Aug 12, 4:10 PM",
-                visibility: "both"
-            },
-            {
-                author: "Sana Iqbal",
-                initials: "SI",
-                color: "bg-[#7048e8]",
-                message: "Uploaded final visual designs for all 5 interior pages. Used updated brand palette throughout. Figma link is in the files tab.",
-                timestamp: "Aug 9, 11:30 AM",
-                visibility: "internal"
-            },
-            {
-                author: "Alex Rivera",
-                initials: "AR",
-                color: "bg-[#3b5bdb]",
-                message: "First review call went well. Client wants a bolder CTA and simplified nav. Noted in the wireframe annotations.",
-                timestamp: "Jul 26, 2:15 PM",
-                visibility: "both"
-            }
-        ];
-
-        function initials(name) {
-            return name
-                .split(" ")
-                .map(function (part) { return part.charAt(0); })
-                .join("")
-                .slice(0, 2)
-                .toUpperCase();
-        }
-
-        function renderNotes() {
-
-            notesFeed.innerHTML = "";
-
-            if (notes.length === 0) {
-                noNotesMessage.classList.remove("hidden");
-                return;
-            }
-
-            noNotesMessage.classList.add("hidden");
-
-            notes.forEach(function (note) {
-
-                const row = document.createElement("div");
-                row.className = "note-row px-5 py-4";
-
-                const visibleTag = note.visibility !== "internal"
-                    ? '<span class="inline-flex items-center gap-1 mt-2 px-2 py-0.5 rounded-full bg-[#f3e8ff] text-[#7e3af2] text-[9px] font-semibold"><i class="fas fa-eye text-[8px]"></i>Visible to client</span>'
-                    : "";
-
-                row.innerHTML =
-                    '<div class="flex items-start gap-3">' +
-                    '<div class="w-8 h-8 rounded-full ' + note.color + ' text-white text-[11px] font-semibold flex items-center justify-center shrink-0">' + note.initials + '</div>' +
-                    '<div class="min-w-0 flex-1">' +
-                    '<div class="flex items-center justify-between gap-2">' +
-                    '<span class="text-xs font-semibold text-gray-800">' + note.author + '</span>' +
-                    '<span class="text-[10px] text-gray-400 shrink-0">' + note.timestamp + '</span>' +
-                    '</div>' +
-                    '<p class="text-xs text-gray-600 leading-relaxed mt-1">' + note.message + '</p>' +
-                    visibleTag +
-                    '</div>' +
-                    '</div>';
-
-                notesFeed.appendChild(row);
-
-            });
-
-        }
-
-        function postNote() {
-
-            const message = newNoteInput.value.trim();
-
-            if (!message) {
-                noteError.classList.remove("hidden");
-                return;
-            }
-
-            noteError.classList.add("hidden");
-
-            const authorName = "You";
-            const randomColor = avatarColors[Math.floor(Math.random() * avatarColors.length)];
-
-            notes.unshift({
-                author: authorName,
-                initials: initials(authorName === "You" ? "M P" : authorName),
-                color: "bg-[#d34527]",
-                message: message,
-                timestamp: "Just now",
-                visibility: noteVisibility.value
-            });
-
-            renderNotes();
-
-            newNoteInput.value = "";
-            noteVisibility.value = "internal";
-
-        }
-
-        postNoteButton.addEventListener("click", postNote);
-
-        newNoteInput.addEventListener("keydown", function (event) {
-            if (event.key === "Enter") {
-                event.preventDefault();
-                postNote();
+            if (typeof tab.scrollIntoView === "function") {
+                tab.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
             }
         });
-
-        renderNotes();
-
-
-        /* =====================================================
-           MODAL
-           ===================================================== */
-
-        const modal = document.getElementById("projectModal");
-        const modalTitle = document.getElementById("modalTitle");
-        const modalMessage = document.getElementById("modalMessage");
-        const closeModal = document.getElementById("closeModal");
-        const modalOkay = document.getElementById("modalOkay");
-
-        function openModal(title, message) {
-            modalTitle.textContent = title;
-            modalMessage.textContent = message;
-            modal.classList.remove("hidden");
-            modal.classList.add("flex");
-        }
-
-        function hideModal() {
-            modal.classList.add("hidden");
-            modal.classList.remove("flex");
-        }
-
-        closeModal.addEventListener("click", hideModal);
-        modalOkay.addEventListener("click", hideModal);
-
-        modal.addEventListener("click", function (event) {
-            if (event.target === modal) {
-                hideModal();
-            }
-        });
-
-        document.addEventListener("keydown", function (event) {
-            if (event.key === "Escape" && !modal.classList.contains("hidden")) {
-                hideModal();
-            }
-        });
-
-
-        /* =====================================================
-           RECORD PAYMENT
-           ===================================================== */
-
-        const recordPaymentButton = document.getElementById("recordPaymentButton");
-        const paymentTabButton = document.getElementById("paymentTabButton");
-
-        function handleRecordPayment() {
-            openModal(
-                "Record payment",
-                "The payment interface is ready for the frontend. Backend/database integration can be connected later."
-            );
-        }
-
-        if (recordPaymentButton) {
-            recordPaymentButton.addEventListener("click", handleRecordPayment);
-        }
-
-        if (paymentTabButton) {
-            paymentTabButton.addEventListener("click", handleRecordPayment);
-        }
-
-
-        /* =====================================================
-           SHARE PORTAL
-           ===================================================== */
-
-        const sharePortalButton = document.getElementById("sharePortalButton");
-
-        if (sharePortalButton) {
-
-            sharePortalButton.addEventListener("click", async function () {
-
-                const url = window.location.href;
-
-                try {
-
-                    if (!navigator.clipboard) {
-                        throw new Error("Clipboard API unavailable");
-                    }
-
-                    await navigator.clipboard.writeText(url);
-
-                    openModal(
-                        "Portal link copied",
-                        "The current project portal link has been copied to your clipboard."
-                    );
-
-                } catch (error) {
-
-                    openModal("Share portal", url);
-
-                }
-
-            });
-
-        }
-
     });
 
+    /* ── Modal ────────────────────────────────────────────────── */
+    const modal        = document.getElementById("projectModal");
+    const modalTitle   = document.getElementById("modalTitle");
+    const modalMessage = document.getElementById("modalMessage");
+    const closeModal   = document.getElementById("closeModal");
+    const modalOkay    = document.getElementById("modalOkay");
+
+    function openModal(title, message) {
+        modalTitle.textContent   = title;
+        modalMessage.textContent = message;
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+    }
+
+    function hideModal() {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+    }
+
+    if (closeModal) closeModal.addEventListener("click", hideModal);
+    if (modalOkay)  modalOkay.addEventListener("click", hideModal);
+
+    modal.addEventListener("click", function (e) {
+        if (e.target === modal) hideModal();
+    });
+
+    document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && !modal.classList.contains("hidden")) hideModal();
+    });
+
+    /* ── Share portal ─────────────────────────────────────────── */
+    const sharePortalButton = document.getElementById("sharePortalButton");
+    if (sharePortalButton) {
+        sharePortalButton.addEventListener("click", async function () {
+            const url = window.location.href;
+            try {
+                if (!navigator.clipboard) throw new Error("unavailable");
+                await navigator.clipboard.writeText(url);
+                openModal("Portal link copied", "The project portal link has been copied to your clipboard.");
+            } catch (_) {
+                openModal("Share portal", url);
+            }
+        });
+    }
+
+});
 </script>
 
 {% endblock %}

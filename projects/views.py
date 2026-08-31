@@ -1,362 +1,77 @@
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, redirect, render
+
+from accounts.decorators import manager_required
+from .forms import ProjectForm
+from .models import Project
 
 
 # =========================================================
-# PROJECT DATA
-# Temporary hardcoded data
-# Later this will come from the database
+# PROJECT LIST
 # =========================================================
 
-PROJECTS = {
+@login_required
+def project_list(request):
+    """
+    Show all projects.
 
-    "brand-identity-refresh": {
-        "name": "Brand identity refresh",
-        "client": "Alden & Co.",
-        "deadline": "Sep 2",
-        "priority": "High",
-        "status": "In Progress",
+    All authenticated users (MANAGER, STAFF, CLIENT) can view the list.
+    The template hides the "New project" button for non-managers.
+    """
+    projects = Project.objects.select_related("client", "created_by").all()
 
-        "progress": 72,
-        "completed_tasks": 8,
-        "total_tasks": 12,
-
-        "budget": "18,000",
-        "paid": "12,960",
-        "remaining": "5,040",
-    },
-
-    "marketing-site-rebuild": {
-        "name": "Marketing site rebuild",
-        "client": "Solene Foods",
-        "deadline": "Sep 18",
-        "priority": "Medium",
-        "status": "At Risk",
-
-        "progress": 38,
-        "completed_tasks": 4,
-        "total_tasks": 10,
-
-        "budget": "14,000",
-        "paid": "5,320",
-        "remaining": "8,680",
-    },
-
-    "q3-investor-deck": {
-        "name": "Q3 investor deck",
-        "client": "Verdant Capital",
-        "deadline": "Aug 28",
-        "priority": "High",
-        "status": "In Progress",
-
-        "progress": 94,
-        "completed_tasks": 9,
-        "total_tasks": 10,
-
-        "budget": "7,500",
-        "paid": "7,050",
-        "remaining": "450",
-    },
-
-    "product-photography": {
-        "name": "Product photography",
-        "client": "Solene Foods",
-        "deadline": "Sep 12",
-        "priority": "High",
-        "status": "Blocked",
-
-        "progress": 15,
-        "completed_tasks": 2,
-        "total_tasks": 12,
-
-        "budget": "5,200",
-        "paid": "780",
-        "remaining": "4,420",
-    },
-
-    "office-signage-system": {
-        "name": "Office signage system",
-        "client": "Alden & Co.",
-        "deadline": "Oct 10",
-        "priority": "Low",
-        "status": "Planning",
-
-        "progress": 8,
-        "completed_tasks": 1,
-        "total_tasks": 12,
-
-        "budget": "6,400",
-        "paid": "510",
-        "remaining": "5,890",
-    },
-
-    "onboarding-flow-redesign": {
-        "name": "Onboarding flow redesign",
-        "client": "Halcyon Labs",
-        "deadline": "Sep 25",
-        "priority": "Medium",
-        "status": "In Progress",
-
-        "progress": 55,
-        "completed_tasks": 6,
-        "total_tasks": 11,
-
-        "budget": "18,000",
-        "paid": "9,900",
-        "remaining": "8,100",
-    },
-}
+    return render(request, "projects/projects.html", {
+        "projects": projects,
+    })
 
 
 # =========================================================
-# PROJECT LIST PAGE
+# PROJECT CREATE  — MANAGER ONLY
 # =========================================================
 
-def project_view(request):
-    return render(
-        request,
-        "projects/projects.html"
+@manager_required
+def project_create(request):
+    """
+    GET  → display the blank project creation form.
+    POST → validate, save with created_by=request.user, redirect.
+
+    The @manager_required decorator (from accounts.decorators) renders
+    403.html for STAFF and CLIENT, so they can never create a project
+    even by directly visiting /projects/create/.
+    """
+    if request.method == "POST":
+        form = ProjectForm(request.POST)
+        if form.is_valid():
+            project = form.save(commit=False)
+            # created_by is always set server-side — never from POST data.
+            project.created_by = request.user
+            project.save()
+            messages.success(request, f'Project "{project.name}" created successfully.')
+            return redirect("projects:project_list")
+    else:
+        form = ProjectForm()
+
+    return render(request, "projects/project_form.html", {"form": form})
+
+
+# =========================================================
+# PROJECT DETAIL
+# =========================================================
+
+@login_required
+def project_detail(request, pk):
+    """
+    Display details for a single project loaded from the database.
+
+    Uses get_object_or_404 so a missing PK returns a clean 404 rather
+    than a server error.
+    """
+    project = get_object_or_404(
+        Project.objects.select_related("client", "created_by"),
+        pk=pk,
     )
 
-
-# =========================================================
-# PROJECT DETAIL PAGE
-# =========================================================
-
-def project_detail(request, slug):
-
-    # Find the project using the slug from the URL
-    project = PROJECTS.get(slug)
-
-    # If the project does not exist
-    if project is None:
-        return render(
-            request,
-            "404.html",
-            status=404
-        )
-
-    # -----------------------------------------------------
-    # Temporary task data
-    # -----------------------------------------------------
-
-    tasks = [
-
-        {
-            "name": "Kickoff call & requirements",
-            "completed": True,
-            "initials": "AR",
-            "assignee": "Alex",
-            "date": "Jul 5",
-            "priority": "High",
-        },
-
-        {
-            "name": "Sitemap & content audit",
-            "completed": True,
-            "initials": "AR",
-            "assignee": "Alex",
-            "date": "Jul 12",
-            "priority": "",
-        },
-
-        {
-            "name": "Homepage wireframe",
-            "completed": True,
-            "initials": "AR",
-            "assignee": "Alex",
-            "date": "Jul 18",
-            "priority": "",
-        },
-
-        {
-            "name": "Interior page wireframes (5 pages)",
-            "completed": True,
-            "initials": "SI",
-            "assignee": "Sana",
-            "date": "Jul 24",
-            "priority": "",
-        },
-
-        {
-            "name": "Client review — round 1",
-            "completed": True,
-            "initials": "AR",
-            "assignee": "Alex",
-            "date": "Jul 26",
-            "priority": "",
-        },
-
-        {
-            "name": "Visual design — homepage",
-            "completed": True,
-            "initials": "SI",
-            "assignee": "Sana",
-            "date": "Aug 2",
-            "priority": "",
-        },
-
-        {
-            "name": "Visual design — interior pages",
-            "completed": True,
-            "initials": "SI",
-            "assignee": "Sana",
-            "date": "Aug 9",
-            "priority": "",
-        },
-
-        {
-            "name": "Client review — round 2",
-            "completed": True,
-            "initials": "AR",
-            "assignee": "Alex",
-            "date": "Aug 12",
-            "priority": "",
-        },
-
-        {
-            "name": "Front-end build — homepage",
-            "completed": False,
-            "initials": "AR",
-            "assignee": "Alex",
-            "date": "Aug 20",
-            "priority": "High",
-        },
-
-        {
-            "name": "Front-end build — interior pages",
-            "completed": False,
-            "initials": "AR",
-            "assignee": "Alex",
-            "date": "Aug 27",
-            "priority": "",
-        },
-
-        {
-            "name": "QA & cross-browser testing",
-            "completed": False,
-            "initials": "SI",
-            "assignee": "Sana",
-            "date": "Aug 30",
-            "priority": "",
-        },
-
-        {
-            "name": "Launch & handover to client",
-            "completed": False,
-            "initials": "AR",
-            "assignee": "Alex",
-            "date": "Sep 2",
-            "priority": "",
-        },
-    ]
-
-    # -----------------------------------------------------
-    # Temporary notes
-    # -----------------------------------------------------
-
-    notes = [
-
-        {
-            "text": "Client requested a clean and modern visual direction.",
-            "author": "Alex",
-            "date": "Aug 12",
-        },
-
-        {
-            "text": "Final homepage design approved by the client.",
-            "author": "Sana",
-            "date": "Aug 9",
-        },
-    ]
-
-    # -----------------------------------------------------
-    # Temporary payments
-    # -----------------------------------------------------
-
-    payments = [
-
-        {
-            "description": "Initial project payment",
-            "amount": "6,000",
-            "date": "Jul 5",
-        },
-
-        {
-            "description": "Design milestone",
-            "amount": "6,960",
-            "date": "Aug 12",
-        },
-    ]
-
-    # -----------------------------------------------------
-    # Temporary files
-    # -----------------------------------------------------
-
-    files = [
-
-        {
-            "name": "Project brief.pdf",
-            "size": "2.4 MB",
-            "date": "Jul 5",
-        },
-
-        {
-            "name": "Homepage-final.fig",
-            "size": "18.2 MB",
-            "date": "Aug 9",
-        },
-
-        {
-            "name": "Brand-assets.zip",
-            "size": "8.7 MB",
-            "date": "Aug 12",
-        },
-    ]
-
-    # -----------------------------------------------------
-    # Temporary activity
-    # -----------------------------------------------------
-
-    activities = [
-
-        {
-            "user": "Alex",
-            "description": "completed Client review — round 2",
-            "date": "Aug 12",
-            "icon": "fas fa-check",
-        },
-
-        {
-            "user": "Sana",
-            "description": "uploaded Homepage-final.fig",
-            "date": "Aug 9",
-            "icon": "fas fa-upload",
-        },
-
-        {
-            "user": "Alex",
-            "description": "updated project progress",
-            "date": "Aug 8",
-            "icon": "fas fa-chart-line",
-        },
-    ]
-
-    # -----------------------------------------------------
-    # Send everything to template
-    # -----------------------------------------------------
-
-    context = {
+    return render(request, "projects/projectdetails.html", {
         "project": project,
-        "tasks": tasks,
-        "notes": notes,
-        "payments": payments,
-        "files": files,
-        "activities": activities,
-    }
-
-    return render(
-        request,
-        "projects/projectdetails.html",
-        context
-    )
+    })
