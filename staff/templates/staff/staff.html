@@ -1,0 +1,938 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Staff | ClientSpace{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'staff/staff.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="staff-container">
+
+    <!-- =========================
+         HEADER
+    ========================== -->
+
+    <div class="staff-header">
+
+        <div>
+            <h1>Staff</h1>
+            <p>Manage your team and distribute project work.</p>
+        </div>
+
+        <a href="{% url 'add_staff' %}" class="add-staff-btn">
+            <span>+</span>
+            Add Staff
+        </a>
+
+    </div>
+
+
+    <!-- =========================
+         SEARCH & FILTERS
+    ========================== -->
+
+    <div class="staff-tools">
+
+        <div class="search-box">
+            <span>⌕</span>
+
+            <input
+                type="text"
+                id="staffSearch"
+                placeholder="Search staff..."
+            >
+        </div>
+
+        <select id="roleFilter">
+
+            <option value="">All Roles</option>
+
+            <option value="Developer">
+                Developer
+            </option>
+
+            <option value="Designer">
+                Designer
+            </option>
+
+            <option value="Tester">
+                Tester
+            </option>
+
+            <option value="Manager">
+                Manager
+            </option>
+
+        </select>
+
+
+        <select id="statusFilter">
+
+            <option value="">All Status</option>
+
+            <option value="Available">
+                Available
+            </option>
+
+            <option value="Working">
+                Working
+            </option>
+
+            <option value="On Leave">
+                On Leave
+            </option>
+
+        </select>
+
+    </div>
+
+
+    <!-- =========================
+         STATISTICS
+    ========================== -->
+
+    <div class="staff-stats">
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                👥
+            </div>
+
+            <div>
+                <p>Total Staff</p>
+                <h2>12</h2>
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                ✓
+            </div>
+
+            <div>
+                <p>Available</p>
+                <h2>5</h2>
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                💻
+            </div>
+
+            <div>
+                <p>Working</p>
+                <h2>7</h2>
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                📋
+            </div>
+
+            <div>
+                <p>Active Tasks</p>
+                <h2>24</h2>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         STAFF TABLE
+    ========================== -->
+
+    <div class="staff-card">
+
+
+        <!-- Table Header -->
+
+        <div class="table-header">
+
+            <div>
+
+                <h2>Team Members</h2>
+
+                <p>
+                    Your current project team
+                </p>
+
+            </div>
+
+            <span id="memberCount">
+                6 members
+            </span>
+
+        </div>
+
+
+        <!-- Table -->
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Staff
+                        </th>
+
+                        <th>
+                            Role
+                        </th>
+
+                        <th>
+                            Project
+                        </th>
+
+                        <th>
+                            Tasks
+                        </th>
+
+                        <th>
+                            Status
+                        </th>
+
+                        <th>
+                            Action
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="staffTable">
+
+
+                    <!-- =========================
+                         STAFF 1
+                    ========================== -->
+
+                    <tr>
+
+                        <td>
+
+                            <div class="staff-info">
+
+                                <div class="avatar">
+                                    AR
+                                </div>
+
+                                <div>
+
+                                    <strong>
+                                        Aashish Rai
+                                    </strong>
+
+                                    <small>
+                                        aashish@example.com
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+                        <td>
+
+                            <span class="role">
+                                Developer
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <span class="project-name">
+                                E-Commerce Website
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <span class="task-count">
+                                4 tasks
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <span class="status working">
+
+                                <i></i>
+
+                                Working
+
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <div class="actions">
+
+                                <a
+                                    href="#"
+                                    class="view-btn"
+                                >
+                                    View
+                                </a>
+
+                                <a
+                                    href="#"
+                                    class="more-btn"
+                                >
+                                    ⋮
+                                </a>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+
+                    <!-- =========================
+                         STAFF 2
+                    ========================== -->
+
+                    <tr>
+
+                        <td>
+
+                            <div class="staff-info">
+
+                                <div class="avatar">
+                                    SS
+                                </div>
+
+                                <div>
+
+                                    <strong>
+                                        Sita Sharma
+                                    </strong>
+
+                                    <small>
+                                        sita@example.com
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+                        <td>
+
+                            <span class="role">
+                                Designer
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <span class="project-name">
+                                Banking Application
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <span class="task-count">
+                                3 tasks
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <span class="status available">
+
+                                <i></i>
+
+                                Available
+
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <div class="actions">
+
+                                <a
+                                    href="#"
+                                    class="view-btn"
+                                >
+                                    View
+                                </a>
+
+                                <a
+                                    href="#"
+                                    class="more-btn"
+                                >
+                                    ⋮
+                                </a>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+
+                    <!-- =========================
+                         STAFF 3
+                    ========================== -->
+
+                    <tr>
+
+                        <td>
+
+                            <div class="staff-info">
+
+                                <div class="avatar">
+                                    RT
+                                </div>
+
+                                <div>
+
+                                    <strong>
+                                        Roshan Thapa
+                                    </strong>
+
+                                    <small>
+                                        roshan@example.com
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+                        <td>
+
+                            <span class="role">
+                                Tester
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <span class="project-name">
+                                Hospital Management
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <span class="task-count">
+                                6 tasks
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <span class="status working">
+
+                                <i></i>
+
+                                Working
+
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <div class="actions">
+
+                                <a
+                                    href="#"
+                                    class="view-btn"
+                                >
+                                    View
+                                </a>
+
+                                <a
+                                    href="#"
+                                    class="more-btn"
+                                >
+                                    ⋮
+                                </a>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+
+                    <!-- =========================
+                         STAFF 4
+                    ========================== -->
+
+                    <tr>
+
+                        <td>
+
+                            <div class="staff-info">
+
+                                <div class="avatar">
+                                    PL
+                                </div>
+
+                                <div>
+
+                                    <strong>
+                                        Pratik Limbu
+                                    </strong>
+
+                                    <small>
+                                        pratik@example.com
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+                        <td>
+
+                            <span class="role">
+                                Developer
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <span class="project-name">
+                                ClientSpace
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <span class="task-count">
+                                7 tasks
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <span class="status working">
+
+                                <i></i>
+
+                                Working
+
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <div class="actions">
+
+                                <a
+                                    href="#"
+                                    class="view-btn"
+                                >
+                                    View
+                                </a>
+
+                                <a
+                                    href="#"
+                                    class="more-btn"
+                                >
+                                    ⋮
+                                </a>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+
+                    <!-- =========================
+                         STAFF 5
+                    ========================== -->
+
+                    <tr>
+
+                        <td>
+
+                            <div class="staff-info">
+
+                                <div class="avatar">
+                                    NK
+                                </div>
+
+                                <div>
+
+                                    <strong>
+                                        Nisha Karki
+                                    </strong>
+
+                                    <small>
+                                        nisha@example.com
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+                        <td>
+
+                            <span class="role">
+                                Manager
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <span class="project-name">
+                                CRM System
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <span class="task-count">
+                                4 tasks
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <span class="status available">
+
+                                <i></i>
+
+                                Available
+
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <div class="actions">
+
+                                <a
+                                    href="#"
+                                    class="view-btn"
+                                >
+                                    View
+                                </a>
+
+                                <a
+                                    href="#"
+                                    class="more-btn"
+                                >
+                                    ⋮
+                                </a>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+
+                    <!-- =========================
+                         STAFF 6
+                    ========================== -->
+
+                    <tr>
+
+                        <td>
+
+                            <div class="staff-info">
+
+                                <div class="avatar">
+                                    BG
+                                </div>
+
+                                <div>
+
+                                    <strong>
+                                        Bibek Gurung
+                                    </strong>
+
+                                    <small>
+                                        bibek@example.com
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+                        <td>
+
+                            <span class="role">
+                                Developer
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <span class="project-name">
+                                Food Delivery App
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <span class="task-count">
+                                2 tasks
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <span class="status available">
+
+                                <i></i>
+
+                                Available
+
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <div class="actions">
+
+                                <a
+                                    href="#"
+                                    class="view-btn"
+                                >
+                                    View
+                                </a>
+
+                                <a
+                                    href="#"
+                                    class="more-btn"
+                                >
+                                    ⋮
+                                </a>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================
+     SEARCH & FILTER JAVASCRIPT
+========================== -->
+
+<script>
+
+const searchInput =
+    document.getElementById("staffSearch");
+
+const roleFilter =
+    document.getElementById("roleFilter");
+
+const statusFilter =
+    document.getElementById("statusFilter");
+
+const staffTable =
+    document.getElementById("staffTable");
+
+const memberCount =
+    document.getElementById("memberCount");
+
+
+function filterStaff() {
+
+    const searchValue =
+        searchInput.value.toLowerCase().trim();
+
+    const roleValue =
+        roleFilter.value.toLowerCase();
+
+    const statusValue =
+        statusFilter.value.toLowerCase();
+
+
+    const rows =
+        staffTable.querySelectorAll("tr");
+
+
+    let visibleCount = 0;
+
+
+    rows.forEach(row => {
+
+        const rowText =
+            row.innerText.toLowerCase();
+
+
+        const role =
+            row.cells[1].innerText
+                .toLowerCase()
+                .trim();
+
+
+        const status =
+            row.cells[4].innerText
+                .toLowerCase()
+                .trim();
+
+
+        const matchesSearch =
+            rowText.includes(searchValue);
+
+
+        const matchesRole =
+            roleValue === "" ||
+            role.includes(roleValue);
+
+
+        const matchesStatus =
+            statusValue === "" ||
+            status.includes(statusValue);
+
+
+        if (
+            matchesSearch &&
+            matchesRole &&
+            matchesStatus
+        ) {
+
+            row.style.display = "";
+
+            visibleCount++;
+
+        } else {
+
+            row.style.display = "none";
+
+        }
+
+    });
+
+
+    memberCount.innerText =
+        visibleCount +
+        (visibleCount === 1 ? " member" : " members");
+
+}
+
+
+/* Search */
+
+searchInput.addEventListener(
+    "input",
+    filterStaff
+);
+
+
+/* Role */
+
+roleFilter.addEventListener(
+    "change",
+    filterStaff
+);
+
+
+/* Status */
+
+statusFilter.addEventListener(
+    "change",
+    filterStaff
+);
+
+</script>
+
+{% endblock %}

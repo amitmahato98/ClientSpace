@@ -37,6 +37,7 @@ urlpatterns = [
 
     # Dashboard application added in main
     path("dashboard/", include("dashboard.urls")),
+    path("staff/",include("staff.urls")),
 
     # Root URL — smart redirect based on authentication + organization state
     path("", home_view, name="home"),

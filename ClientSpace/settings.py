@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'projects',
     'sett',
     'dashboard',
+    'staff',
 ]
 
 AUTH_USER_MODEL = "accounts.User"

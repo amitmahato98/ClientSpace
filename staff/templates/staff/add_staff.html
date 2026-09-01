@@ -1,0 +1,331 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Add Staff | ClientSpace{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'staff/add_staff.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="add-staff-container">
+
+    <!-- Header -->
+    <div class="add-staff-header">
+
+        <div>
+            <a href="{% url 'staff' %}" class="back-btn">
+                ← Back to Staff
+            </a>
+
+            <h1>Add Staff Member</h1>
+            <p>Add a new member to your team.</p>
+        </div>
+
+    </div>
+
+
+    <!-- Form Card -->
+    <div class="form-card">
+
+        <form method="POST" action="">
+
+            {% csrf_token %}
+
+            <!-- Personal Information -->
+            <div class="form-section">
+
+                <h2>Personal Information</h2>
+                <p class="section-description">
+                    Enter the basic information of the staff member.
+                </p>
+
+                <div class="form-grid">
+
+                    <!-- First Name -->
+                    <div class="form-group">
+
+                        <label for="first_name">
+                            First Name
+                        </label>
+
+                        <input
+                            type="text"
+                            id="first_name"
+                            name="first_name"
+                            placeholder="Enter first name"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- Last Name -->
+                    <div class="form-group">
+
+                        <label for="last_name">
+                            Last Name
+                        </label>
+
+                        <input
+                            type="text"
+                            id="last_name"
+                            name="last_name"
+                            placeholder="Enter last name"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- Email -->
+                    <div class="form-group">
+
+                        <label for="email">
+                            Email Address
+                        </label>
+
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            placeholder="example@email.com"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- Phone -->
+                    <div class="form-group">
+
+                        <label for="phone">
+                            Phone Number
+                        </label>
+
+                        <input
+                            type="tel"
+                            id="phone"
+                            name="phone"
+                            placeholder="98XXXXXXXX"
+                        >
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Staff Information -->
+            <div class="form-section">
+
+                <h2>Staff Information</h2>
+
+                <p class="section-description">
+                    Assign a role and working status to the staff member.
+                </p>
+
+
+                <div class="form-grid">
+
+                    <!-- Role -->
+                    <div class="form-group">
+
+                        <label for="role">
+                            Role
+                        </label>
+
+                        <select id="role" name="role" required>
+
+                            <option value="">
+                                Select a role
+                            </option>
+
+                            <option value="Developer">
+                                Developer
+                            </option>
+
+                            <option value="Designer">
+                                Designer
+                            </option>
+
+                            <option value="Tester">
+                                Tester
+                            </option>
+
+                            <option value="Manager">
+                                Manager
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- Status -->
+                    <div class="form-group">
+
+                        <label for="status">
+                            Status
+                        </label>
+
+                        <select id="status" name="status" required>
+
+                            <option value="">
+                                Select status
+                            </option>
+
+                            <option value="Available">
+                                Available
+                            </option>
+
+                            <option value="Working">
+                                Working
+                            </option>
+
+                            <option value="On Leave">
+                                On Leave
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- Project -->
+                    <div class="form-group full-width">
+
+                        <label for="project">
+                            Project
+                        </label>
+
+                        <select id="project" name="project">
+
+                            <option value="">
+                                Select a project
+                            </option>
+
+                            <option value="E-Commerce Website">
+                                E-Commerce Website
+                            </option>
+
+                            <option value="Banking Application">
+                                Banking Application
+                            </option>
+
+                            <option value="Hospital Management">
+                                Hospital Management
+                            </option>
+
+                            <option value="ClientSpace">
+                                ClientSpace
+                            </option>
+
+                            <option value="CRM System">
+                                CRM System
+                            </option>
+
+                            <option value="Food Delivery App">
+                                Food Delivery App
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Account Information -->
+            <div class="form-section">
+
+                <h2>Account Information</h2>
+
+                <p class="section-description">
+                    Create login credentials for the staff member.
+                </p>
+
+                <div class="form-grid">
+
+                    <!-- Username -->
+                    <div class="form-group">
+
+                        <label for="username">
+                            Username
+                        </label>
+
+                        <input
+                            type="text"
+                            id="username"
+                            name="username"
+                            placeholder="Enter username"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- Password -->
+                    <div class="form-group">
+
+                        <label for="password">
+                            Password
+                        </label>
+
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Enter password"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- Confirm Password -->
+                    <div class="form-group">
+
+                        <label for="confirm_password">
+                            Confirm Password
+                        </label>
+
+                        <input
+                            type="password"
+                            id="confirm_password"
+                            name="confirm_password"
+                            placeholder="Confirm password"
+                            required
+                        >
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Buttons -->
+            <div class="form-actions">
+
+                <a href="{% url 'staff' %}" class="cancel-btn">
+                    Cancel
+                </a>
+
+                <button type="submit" class="save-btn">
+                    Add Staff
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}
