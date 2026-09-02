@@ -26,12 +26,28 @@ class User(AbstractUser):
     # Email is required and unique across the system.
     email = models.EmailField(unique=True, verbose_name="email address")
 
+    display_name = models.CharField(max_length=150, blank=True, default="")
+    profile_picture = models.ImageField(
+        upload_to="profile_pictures/",
+        blank=True,
+        null=True,
+    )
+
     # AbstractUser already provides: username, first_name, last_name,
     # password, is_active, is_staff, is_superuser, date_joined, last_login,
     # groups, user_permissions.
 
     def __str__(self):
-        return self.username
+        return self.display_name or self.username or self.email
+
+    @property
+    def initials(self):
+        name = self.display_name or self.get_full_name() or self.username or "User"
+        parts = name.strip().split()
+        if len(parts) >= 2:
+            return f"{parts[0][0]}{parts[1][0]}".upper()
+        return name[:2].upper()
+
 
     # ------------------------------------------------------------------ #
     # Convenience role-check properties                                    #

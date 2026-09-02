@@ -9,12 +9,20 @@ def home_view(request):
     """
     Root URL dispatcher.
 
-    Anonymous            → /login/
-    Authenticated, no org → /create-organization/
-    Authenticated, has org → /dashboard/
+    Role-aware routing — CLIENT users must never be sent to onboarding.
+
+    Anonymous              → /login/
+    CLIENT                 → /projects/   (their project view)
+    MANAGER/STAFF, no org  → /create-organization/
+    MANAGER/STAFF, has org → /dashboard/
     """
     if not request.user.is_authenticated:
         return redirect("accounts:login")
+
+    # CLIENT accounts are created programmatically by Managers and are never
+    # responsible for creating an organisation.  Send them straight to projects.
+    if request.user.role == "CLIENT":
+        return redirect("projects:project_list")
 
     from accounts.models import OrganizationMembership
 

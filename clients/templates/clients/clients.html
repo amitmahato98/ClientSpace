@@ -1,11 +1,14 @@
 {% extends "base.html" %} {% block title %}Clients — ClientSpace{% endblock %}
 {% block page_heading %}Clients{% endblock %} {% block content %}
+
 <div
   class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6"
 >
   <div>
     <h2 class="text-lg font-semibold text-[#4a3520]">Clients</h2>
-    <p class="text-sm text-[#8b6f55]">9 clients across 14 active projects</p>
+    <p class="text-sm text-[#8b6f55]">
+      {{ clients.count }} client{{ clients.count|pluralize }}
+    </p>
   </div>
   <div class="flex flex-wrap gap-2">
     <button
@@ -13,11 +16,11 @@
     >
       Import CSV
     </button>
-    <button
-      class="px-4 py-2 text-sm rounded-lg bg-[#d4a373] text-white hover:bg-[#b8895e]"
+    <a
+      href="{% url 'projects:project_create' %}"
+      class="px-4 py-2 text-sm rounded-lg bg-[#d4a373] text-white hover:bg-[#b8895e] inline-block"
+      >+ New client</a
     >
-      + New client
-    </button>
   </div>
 </div>
 
@@ -38,20 +41,20 @@
       <div
         class="w-9 h-9 shrink-0 rounded-full bg-[#d4a373] text-white flex items-center justify-center text-sm font-medium"
       >
-        {{ c.initials }}
+        {{ c.username|slice:":2"|upper }}
       </div>
       <div class="flex-1 min-w-0">
         <div class="text-sm font-semibold text-[#4a3520] truncate">
-          {{ c.name }}
+          {{ c.get_full_name|default:c.username }}
         </div>
         <div class="text-xs text-[#8b6f55] truncate">
-          {{ c.projects.count }} active projects
+          {{ c.client_projects.count }} project{{c.client_projects.count|pluralize }}
         </div>
       </div>
       <span
-        class="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700 shrink-0"
+        class="text-xs px-2 py-0.5 rounded-full {% if c.is_active %}bg-green-100 text-green-700{% else %}bg-gray-100 text-gray-500{% endif %} shrink-0"
       >
-        {{ c.get_status_display }}
+        {% if c.is_active %}Active{% else %}Inactive{% endif %}
       </span>
     </a>
     {% endfor %}
@@ -66,20 +69,18 @@
       <div
         class="w-14 h-14 shrink-0 rounded-2xl bg-[#d4a373] text-white flex items-center justify-center text-lg font-semibold"
       >
-        {{ selected.initials }}
+        {{ selected.username|slice:":2"|upper }}
       </div>
       <div class="flex-1 min-w-0">
         <h3 class="text-lg font-semibold text-[#4a3520] truncate">
-          {{ selected.name }}
+          {{ selected.get_full_name|default:selected.username }}
         </h3>
-        <p class="text-sm text-[#8b6f55]">
-          {{ selected.company }} · {{ selected.contact_email }} · {{selected.contact_phone }}
-        </p>
+        <p class="text-sm text-[#8b6f55]">{{ selected.email }}</p>
       </div>
       <span
-        class="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700 h-fit shrink-0"
+        class="text-xs px-2 py-0.5 rounded-full {% if selected.is_active %}bg-green-100 text-green-700{% else %}bg-gray-100 text-gray-500{% endif %} h-fit shrink-0"
       >
-        {{ selected.get_status_display }}
+        {% if selected.is_active %}Active{% else %}Inactive{% endif %}
       </span>
     </div>
 
@@ -90,18 +91,18 @@
         <tr class="text-left text-[#8b6f55] border-b border-[#e8dccc]">
           <th class="pb-2">Project</th>
           <th class="pb-2">Status</th>
-          <th class="pb-2">Value</th>
+          <th class="pb-2">Budget</th>
         </tr>
-        {% for p in selected.projects.all %}
+        {% for p in selected.client_projects.all %}
         <tr class="border-b border-[#f2ede4]">
           <td class="py-2 text-[#4a3520]">{{ p.name }}</td>
           <td class="py-2">
             <span
-              class="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700"
+              class="text-xs px-2 py-0.5 rounded-full {{ p.status_css_class }}"
               >{{ p.get_status_display }}</span
             >
           </td>
-          <td class="py-2 font-mono text-[#4a3520]">₹{{ p.value }}</td>
+          <td class="py-2 font-mono text-[#4a3520]">₹{{ p.budget }}</td>
         </tr>
         {% endfor %}
       </table>
@@ -112,15 +113,19 @@
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 text-sm">
       <div>
         <div class="text-[#8b6f55] text-xs">Total Billed</div>
-        <div class="text-[#4a3520] font-mono">₹{{ selected.total_billed }}</div>
+        <div class="text-[#4a3520] font-mono">
+          ₹{{ financials.total_billed }}
+        </div>
       </div>
       <div>
         <div class="text-[#8b6f55] text-xs">Total Paid</div>
-        <div class="text-[#4a3520] font-mono">₹{{ selected.total_paid }}</div>
+        <div class="text-[#4a3520] font-mono">₹{{ financials.total_paid }}</div>
       </div>
       <div>
         <div class="text-[#8b6f55] text-xs">Outstanding</div>
-        <div class="text-[#4a3520] font-mono">₹{{ selected.outstanding }}</div>
+        <div class="text-[#4a3520] font-mono">
+          ₹{{ financials.outstanding }}
+        </div>
       </div>
     </div>
 
@@ -158,7 +163,7 @@
       {% for note in selected.notes.all %}
       <div class="p-3 rounded-lg bg-[#faf1e3] text-sm">
         <div class="flex justify-between text-xs text-[#8b6f55] mb-1">
-          <span>{{ note.author|default:"Unknown" }}</span>
+          <span>{{ note.author.username|default:"Unknown" }}</span>
           <span>{{ note.created_at|date:"M j" }}</span>
         </div>
         <div class="text-[#4a3520]">{{ note.body }}</div>

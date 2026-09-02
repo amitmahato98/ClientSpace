@@ -66,6 +66,13 @@ def get_user_organization(user):
     return membership.organization if membership else None
 
 def _post_login_redirect(request, user):
+    # CLIENT users are created by managers and never go through organisation
+    # onboarding — send them straight to the projects page.
+    if user.role == "CLIENT":
+        next_url = _safe_next(request, fallback=reverse("projects:project_list"))
+        return next_url
+
+    # MANAGER / STAFF must complete onboarding before accessing the app.
     if not user_has_organization(user):
         return reverse("accounts:create_organization")
 
@@ -314,13 +321,25 @@ def create_organization_view(request):
 
     Guards:
       - Requires authentication (@login_required).
-      - If the user already has an organization, redirect to dashboard
+      - CLIENT users are created programmatically and must never reach this
+        view — they are redirected to their project page.
+      - STAFF users do not create organisations — redirected to dashboard
+        (they should already belong to one via manual setup / future invite flow).
+      - A Manager who already has an organisation is redirected to dashboard
         immediately — prevents duplicate setup.
       - created_by and role are set server-side; never from POST data.
-      - Organization + membership are created inside a single transaction
+      - Organisation + membership are created inside a single transaction
         so the database is never left in a half-created state.
     """
-    # Already onboarded → skip straight to dashboard.
+    # ── Role guard: CLIENT must never see this page ──────────────────────────
+    if request.user.role == "CLIENT":
+        return redirect(reverse("projects:project_list"))
+
+    # ── Role guard: STAFF do not create organisations ────────────────────────
+    if request.user.role == "STAFF":
+        return redirect(reverse("dashboard"))
+
+    # ── Already onboarded Manager → skip straight to dashboard ───────────────
     if user_has_organization(request.user):
         return redirect(reverse("dashboard"))
 

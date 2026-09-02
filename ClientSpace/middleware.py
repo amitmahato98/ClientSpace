@@ -1,12 +1,12 @@
 import re
 
 from django.conf import settings
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.urls import reverse
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# URLs anonymous users may visit without authentication.
+# Stage 1 — URLs anonymous users may visit without authentication.
 # ─────────────────────────────────────────────────────────────────────────────
 PUBLIC_URL_PATTERNS = [
     r"^/login/$",
@@ -23,44 +23,58 @@ PUBLIC_URL_PATTERNS = [
 ]
 
 # ─────────────────────────────────────────────────────────────────────────────
-# URLs authenticated-but-not-yet-onboarded users may visit.
-# This set must include the onboarding page itself plus all auth/public URLs,
-# otherwise a redirect loop forms when the onboarding page tries to load.
+# Stage 2 — Onboarding gate: authenticated-but-not-yet-onboarded users.
+# CLIENT users are created programmatically and never go through onboarding,
+# so they must be exempt from this gate entirely.
 # ─────────────────────────────────────────────────────────────────────────────
 ONBOARDING_EXEMPT_PATTERNS = PUBLIC_URL_PATTERNS + [
     r"^/create-organization/$",
     r"^/logout/$",
 ]
 
-_PUBLIC_RE = re.compile("|".join(f"(?:{p})" for p in PUBLIC_URL_PATTERNS))
+# ─────────────────────────────────────────────────────────────────────────────
+# Stage 3 — Role guard: URLs that CLIENT users must NOT access.
+# This is backend enforcement — hiding nav links is only UX sugar.
+# ─────────────────────────────────────────────────────────────────────────────
+CLIENT_BLOCKED_PATTERNS = [
+    r"^/dashboard/",
+    r"^/clients/",
+    r"^/settings/",
+    r"^/projects/create/",
+]
+
+_PUBLIC_RE = re.compile(
+    "|".join(f"(?:{p})" for p in PUBLIC_URL_PATTERNS)
+)
 _ONBOARDING_EXEMPT_RE = re.compile(
     "|".join(f"(?:{p})" for p in ONBOARDING_EXEMPT_PATTERNS)
 )
+_CLIENT_BLOCKED_RE = re.compile(
+    "|".join(f"(?:{p})" for p in CLIENT_BLOCKED_PATTERNS)
+)
+
+
+def _forbidden(request, reason="You do not have permission to access this page."):
+    """Render the shared 403 template."""
+    return render(request, "403.html", {"reason": reason}, status=403)
 
 
 class LoginRequiredMiddleware:
     """
-    Two-stage access gate that runs on every request.
+    Three-stage access gate that runs on every request.
 
     Stage 1 — Authentication gate
     ──────────────────────────────
-    If the user is not authenticated AND the requested URL is not in
-    PUBLIC_URL_PATTERNS, redirect to /login/?next=<original_path>.
+    Unauthenticated + non-public URL  →  /login/?next=...
 
     Stage 2 — Onboarding gate
     ──────────────────────────
-    If the user IS authenticated but has no organization membership AND the
-    requested URL is not in ONBOARDING_EXEMPT_PATTERNS, redirect to
-    /create-organization/ so they complete onboarding before accessing the app.
+    Authenticated + no organisation + non-exempt URL  →  /create-organization/
+    Skipped entirely for CLIENT role users (they never have an organisation).
 
-    This ensures:
-      Anonymous          → /login/
-      Authenticated, no org → /create-organization/
-      Authenticated, has org → application (normal flow)
-
-    The middleware never creates redirect loops because:
-      - /login/               is in PUBLIC_URL_PATTERNS
-      - /create-organization/ is in ONBOARDING_EXEMPT_PATTERNS
+    Stage 3 — Role guard
+    ──────────────────────
+    CLIENT role  +  management URL  →  403
 
     Must be placed in MIDDLEWARE **after**:
         django.contrib.auth.middleware.AuthenticationMiddleware
@@ -81,14 +95,22 @@ class LoginRequiredMiddleware:
             return self.get_response(request)
 
         # ── Stage 2: onboarding gate ─────────────────────────────────────────
-        # Import here to avoid circular import at module level (models are
-        # not ready when middleware is first imported).
-        from accounts.models import OrganizationMembership  # noqa: PLC0415
+        # CLIENT users are created by managers — they never go through the
+        # organisation onboarding flow, so skip this gate for them entirely.
+        if request.user.role != "CLIENT":
+            from accounts.models import OrganizationMembership  # noqa: PLC0415
 
-        if not _ONBOARDING_EXEMPT_RE.match(path):
-            if not OrganizationMembership.objects.filter(
-                user=request.user
-            ).exists():
-                return redirect(reverse("accounts:create_organization"))
+            if not _ONBOARDING_EXEMPT_RE.match(path):
+                if not OrganizationMembership.objects.filter(
+                    user=request.user
+                ).exists():
+                    return redirect(reverse("accounts:create_organization"))
+
+        # ── Stage 3: CLIENT role guard ───────────────────────────────────────
+        if request.user.role == "CLIENT" and _CLIENT_BLOCKED_RE.match(path):
+            return _forbidden(
+                request,
+                "Clients do not have access to this section.",
+            )
 
         return self.get_response(request)
