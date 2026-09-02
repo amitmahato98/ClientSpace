@@ -5,4 +5,4 @@ def staff(request):
 
 
 def add_staff(request):
-    return render(request, 'satff/add_staff.html')
+    return render(request, 'staff/add_staff.html')
