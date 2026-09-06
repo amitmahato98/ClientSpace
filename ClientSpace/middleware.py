@@ -41,6 +41,8 @@ CLIENT_BLOCKED_PATTERNS = [
     r"^/clients/",
     r"^/settings/",
     r"^/projects/create/",
+    r"^/projects/\d+/assign-staff/",
+    r"^/projects/\d+/remove-staff/",
 ]
 
 _PUBLIC_RE = re.compile(

@@ -7,6 +7,12 @@ from .models import Project
 
 User = get_user_model()
 
+# ---------------------------------------------------------------------------
+# Imported lazily to avoid circular imports at module load time.
+# Staff and StaffAssignment live in the staff app; we import them inside the
+# form class so there is no import-time coupling.
+# ---------------------------------------------------------------------------
+
 # Shared Tailwind input classes used across all widgets
 _INPUT = (
     "w-full px-3.5 py-2.5 text-sm rounded-lg border border-gray-200 "
@@ -227,3 +233,75 @@ class ProjectForm(forms.ModelForm):
                 )
 
         return cleaned
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# ProjectStaffAssignForm
+# ═══════════════════════════════════════════════════════════════════════════
+
+class ProjectStaffAssignForm(forms.Form):
+    """
+    Manager-facing form for assigning one or more Staff members to a project.
+
+    Security guarantees
+    ───────────────────
+    • The eligible Staff queryset is built server-side from the project's
+      organization. Only Staff whose user account exists (user__isnull=False)
+      and who belong to the same organization as the project are eligible.
+    • Already-active assignments are excluded so the same staff member cannot
+      be assigned twice to the same project.
+    • Every submitted staff ID is validated against the eligible queryset
+      inside clean_staff_ids(). A malicious POST with an out-of-org ID is
+      rejected with a form error before any database write occurs.
+
+    Usage
+    ─────
+        form = ProjectStaffAssignForm(
+            project=project,
+            organization=project.organization,
+            data=request.POST or None,
+        )
+    """
+
+    # Populated dynamically in __init__ — widget rendered in template manually
+    # so we can style the checkboxes to match the existing Tailwind design.
+    staff_ids = forms.ModelMultipleChoiceField(
+        queryset=None,          # set in __init__
+        required=True,
+        error_messages={
+            "required": "Please select at least one staff member to assign.",
+            "invalid_choice": "One or more selected staff members are not eligible.",
+            "invalid_pk_value": "Invalid staff selection.",
+        },
+    )
+
+    def __init__(self, *args, project, organization, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Import here to avoid circular dependency at module level.
+        from staff.models import Staff, StaffAssignment
+
+        # IDs of staff already actively assigned to this project — excluded
+        # so the UI shows them as "already assigned" and they cannot be added twice.
+        already_assigned_ids = StaffAssignment.objects.filter(
+            project=project,
+            is_active=True,
+        ).values_list("staff_id", flat=True)
+
+        eligible_qs = (
+            Staff.objects
+            .filter(
+                organization=organization,
+                user__isnull=False,     # only staff who have completed setup
+            )
+            .exclude(id__in=already_assigned_ids)
+            .select_related("user")
+            .order_by("first_name", "last_name")
+        )
+
+        self.fields["staff_ids"].queryset = eligible_qs
+
+        # Store on self so the view can access it for the "already assigned"
+        # display list without running another query.
+        self.already_assigned_ids = list(already_assigned_ids)
+        self.eligible_qs = eligible_qs

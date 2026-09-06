@@ -25,4 +25,18 @@ urlpatterns = [
         views.project_detail,
         name="project_detail",
     ),
+
+    # /projects/<pk>/assign-staff/   — MANAGER POST only
+    path(
+        "<int:pk>/assign-staff/",
+        views.assign_staff,
+        name="assign_staff",
+    ),
+
+    # /projects/<pk>/remove-staff/<assignment_id>/   — MANAGER POST only
+    path(
+        "<int:pk>/remove-staff/<int:assignment_id>/",
+        views.remove_staff,
+        name="remove_staff",
+    ),
 ]

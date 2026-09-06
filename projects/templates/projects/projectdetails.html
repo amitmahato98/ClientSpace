@@ -99,6 +99,13 @@
 
             <!-- Action buttons -->
             <div class="flex flex-wrap items-center gap-2 shrink-0">
+                {% if user.is_manager %}
+                <button type="button" id="assignStaffButton"
+                    class="px-4 py-2 bg-white hover:bg-[#f8f4ef] text-[#5a3e2b] text-xs font-medium rounded-lg shadow-sm border border-[#d4a373] transition flex items-center gap-1.5">
+                    <i class="fas fa-user-plus text-[#b8895e] text-[10px]"></i>
+                    Assign Staff <span class="ml-0.5 text-[#b8895e]">+</span>
+                </button>
+                {% endif %}
                 <button type="button" id="sharePortalButton"
                     class="px-4 py-2 bg-[#d4a373] hover:bg-[#b8895e] text-white text-xs font-medium rounded-lg shadow-sm transition flex items-center gap-1.5">
                     <i class="fas fa-link text-[10px]"></i>
@@ -283,8 +290,84 @@
                 {% endif %}
             </div>
 
-        </div>
-    </div>
+            <!-- =====================================================
+                 ASSIGNED STAFF CARD
+                 ===================================================== -->
+            <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 lg:col-span-2">
+
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-sm font-bold text-gray-900">Assigned Staff</h3>
+                    {% if user.is_manager %}
+                    <button type="button" id="assignStaffButton"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-[#f8f4ef] text-[#5a3e2b] text-xs font-medium rounded-lg border border-[#d4a373] transition">
+                        <i class="fas fa-user-plus text-[#b8895e] text-[10px]"></i>
+                        Assign Staff <span class="text-[#b8895e] ml-0.5">+</span>
+                    </button>
+                    {% endif %}
+                </div>
+
+                {% if assigned_staff %}
+                <div class="space-y-2">
+                    {% for assignment in assigned_staff %}
+                    <div class="flex items-center justify-between gap-3 px-4 py-3 rounded-lg bg-[#faf8f5] border border-[#ede8e0] hover:border-[#d4a373] transition group">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <!-- Avatar initials -->
+                            <div class="w-8 h-8 rounded-full bg-[#f5e6d0] text-[#8b6f55] flex items-center justify-center shrink-0 text-xs font-semibold">
+                                {% with name=assignment.staff.first_name|add:" "|add:assignment.staff.last_name %}
+                                    {% with parts=name.split %}
+                                        {% if parts|length >= 2 %}{{ parts.0|first|upper }}{{ parts.1|first|upper }}{% else %}{{ name|first|upper }}{% endif %}
+                                    {% endwith %}
+                                {% endwith %}
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-xs font-semibold text-gray-800 truncate">
+                                    {{ assignment.staff.first_name }} {{ assignment.staff.last_name }}
+                                </p>
+                                <p class="text-[11px] text-gray-400 truncate">
+                                    {{ assignment.staff.role }}
+                                    {% if assignment.staff.user %}
+                                    &bull; {{ assignment.staff.user.email }}
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Assigned date + Remove button (manager only) -->
+                        <div class="flex items-center gap-3 shrink-0">
+                            <span class="hidden sm:block text-[11px] text-gray-400">
+                                Since {{ assignment.assigned_at|date:"M j, Y" }}
+                            </span>
+                            {% if user.is_manager %}
+                            <form method="POST"
+                                  action="{% url 'projects:remove_staff' project.pk assignment.pk %}"
+                                  onsubmit="return confirm('Remove {{ assignment.staff.first_name }} {{ assignment.staff.last_name }} from this project?');">
+                                {% csrf_token %}
+                                <button type="submit"
+                                    class="px-2.5 py-1 text-[11px] font-medium text-[#c5221f] bg-[#fce8e6] hover:bg-[#f5c2be] rounded-md transition">
+                                    Remove
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                {% else %}
+                <!-- Empty state -->
+                <div class="p-5 rounded-lg bg-[#f8f4ef] border border-[#eadcca] text-center">
+                    <i class="fas fa-users text-[#c9a87a] text-xl mb-2"></i>
+                    <p class="text-xs text-[#6b4f3a]">No staff assigned to this project yet.</p>
+                    {% if user.is_manager %}
+                    <p class="text-[11px] text-[#9b7d62] mt-1">Click <strong>Assign Staff +</strong> above to get started.</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+            </div><!-- /assigned staff card -->
+
+        </div><!-- /overview grid -->
+    </div><!-- /tab-overview -->
 
 
     <!-- =====================================================
@@ -326,7 +409,7 @@
 
 
 <!-- =========================================================
-     MODAL (share portal)
+     MODAL — Share portal
      ========================================================= -->
 <div id="projectModal"
     class="fixed inset-0 z-50 hidden items-center justify-center bg-black/30 backdrop-blur-[2px] px-4">
@@ -347,6 +430,84 @@
         </div>
     </div>
 </div>
+
+
+<!-- =========================================================
+     MODAL — Assign Staff  (MANAGER ONLY)
+     ========================================================= -->
+{% if user.is_manager and assign_form %}
+<div id="assignStaffModal"
+    class="fixed inset-0 z-50 hidden items-center justify-center bg-black/30 backdrop-blur-[2px] px-4">
+    <div class="bg-white rounded-xl shadow-xl border border-gray-100 w-full max-w-lg">
+
+        <!-- Modal header -->
+        <div class="flex items-center justify-between px-5 pt-5 pb-4 border-b border-gray-100">
+            <div>
+                <h3 class="text-sm font-bold text-gray-900">Assign Staff</h3>
+                <p class="text-[11px] text-gray-400 mt-0.5">Select staff members from your organisation to assign to this project.</p>
+            </div>
+            <button type="button" id="closeAssignModal"
+                class="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-500 flex items-center justify-center transition shrink-0 ml-4">
+                <i class="fas fa-times text-xs"></i>
+            </button>
+        </div>
+
+        <!-- Modal body -->
+        <form method="POST" action="{% url 'projects:assign_staff' project.pk %}" id="assignStaffForm">
+            {% csrf_token %}
+            <div class="px-5 py-4 max-h-80 overflow-y-auto space-y-1">
+
+                {% if assign_form.staff_ids.field.queryset.exists %}
+                    <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-3">Available staff</p>
+                    {% for staff_member in assign_form.staff_ids.field.queryset %}
+                    <label class="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer hover:bg-[#f8f4ef] border border-transparent hover:border-[#eadcca] transition group">
+                        <input type="checkbox"
+                               name="staff_ids"
+                               value="{{ staff_member.pk }}"
+                               class="w-4 h-4 rounded border-gray-300 text-[#d4a373] focus:ring-[#d4a373]/30 accent-[#d4a373] cursor-pointer">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <!-- Initials avatar -->
+                            <div class="w-7 h-7 rounded-full bg-[#f5e6d0] text-[#8b6f55] flex items-center justify-center shrink-0 text-[11px] font-semibold">
+                                {{ staff_member.first_name|first|upper }}{{ staff_member.last_name|first|upper }}
+                            </div>
+                            <div class="min-w-0">
+                                <span class="text-xs font-medium text-gray-800 group-hover:text-[#4a3520]">
+                                    {{ staff_member.first_name }} {{ staff_member.last_name }}
+                                </span>
+                                <span class="block text-[11px] text-gray-400">{{ staff_member.role }}</span>
+                            </div>
+                        </div>
+                    </label>
+                    {% endfor %}
+
+                {% else %}
+                    <div class="py-6 text-center">
+                        <i class="fas fa-user-check text-[#c9a87a] text-2xl mb-2"></i>
+                        <p class="text-xs text-gray-500">All staff members in your organisation are already assigned to this project.</p>
+                    </div>
+                {% endif %}
+
+            </div>
+
+            <!-- Modal footer -->
+            <div class="flex items-center justify-end gap-2 px-5 py-4 border-t border-gray-100">
+                <button type="button" id="cancelAssignModal"
+                    class="px-4 py-2 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition">
+                    Cancel
+                </button>
+                {% if assign_form.staff_ids.field.queryset.exists %}
+                <button type="submit"
+                    class="px-4 py-2 text-xs font-medium text-white bg-[#d4a373] hover:bg-[#b8895e] rounded-lg shadow-sm transition">
+                    <i class="fas fa-user-plus mr-1.5 text-[10px]"></i>
+                    Assign Staff
+                </button>
+                {% endif %}
+            </div>
+        </form>
+
+    </div>
+</div>
+{% endif %}
 
 
 <script>
@@ -378,7 +539,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    /* ── Modal ────────────────────────────────────────────────── */
+    /* ── Share-portal modal ───────────────────────────────────── */
     const modal        = document.getElementById("projectModal");
     const modalTitle   = document.getElementById("modalTitle");
     const modalMessage = document.getElementById("modalMessage");
@@ -420,6 +581,41 @@ document.addEventListener("DOMContentLoaded", function () {
             } catch (_) {
                 openModal("Share portal", url);
             }
+        });
+    }
+
+    /* ── Assign Staff modal ───────────────────────────────────── */
+    const assignModal        = document.getElementById("assignStaffModal");
+    const closeAssignModal   = document.getElementById("closeAssignModal");
+    const cancelAssignModal  = document.getElementById("cancelAssignModal");
+
+    function openAssignModal() {
+        if (!assignModal) return;
+        assignModal.classList.remove("hidden");
+        assignModal.classList.add("flex");
+    }
+
+    function hideAssignModal() {
+        if (!assignModal) return;
+        assignModal.classList.add("hidden");
+        assignModal.classList.remove("flex");
+    }
+
+    // Both "Assign Staff +" buttons (header + card) wire to the same modal
+    document.querySelectorAll("#assignStaffButton").forEach(function (btn) {
+        btn.addEventListener("click", openAssignModal);
+    });
+
+    if (closeAssignModal)  closeAssignModal.addEventListener("click", hideAssignModal);
+    if (cancelAssignModal) cancelAssignModal.addEventListener("click", hideAssignModal);
+
+    if (assignModal) {
+        assignModal.addEventListener("click", function (e) {
+            if (e.target === assignModal) hideAssignModal();
+        });
+
+        document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape" && !assignModal.classList.contains("hidden")) hideAssignModal();
         });
     }
 

@@ -10,10 +10,12 @@ from django.core.mail import send_mail
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils import timezone as tz
 
 from accounts.decorators import manager_required
+from accounts.models import OrganizationMembership
 from accounts.views import get_user_organization
-from .forms import ProjectForm
+from .forms import ProjectForm, ProjectStaffAssignForm
 from .models import Project
 
 User = get_user_model()
@@ -356,7 +358,13 @@ def project_detail(request, pk):
       MANAGER / STAFF  → can view any project
       CLIENT           → can only view projects where project.client == request.user
                          silently 404s on mismatch to avoid leaking existence
+
+    Context extras for staff assignment UI (MANAGER only):
+      assigned_staff   — active StaffAssignment queryset for this project
+      assign_form      — ProjectStaffAssignForm (blank) for the modal
     """
+    from staff.models import StaffAssignment
+
     qs = Project.objects.select_related("client", "created_by", "organization")
 
     if request.user.is_client:
@@ -364,4 +372,165 @@ def project_detail(request, pk):
     else:
         project = get_object_or_404(qs, pk=pk)
 
-    return render(request, "projects/projectdetails.html", {"project": project})
+    # Assigned staff — always load so STAFF/CLIENT can see the list (read-only)
+    assigned_staff = (
+        StaffAssignment.objects
+        .filter(project=project, is_active=True)
+        .select_related("staff", "staff__user")
+        .order_by("assigned_at")
+    )
+
+    # Assign form — only built for managers (avoids unnecessary query for others)
+    assign_form = None
+    if request.user.is_manager and project.organization:
+        assign_form = ProjectStaffAssignForm(
+            project=project,
+            organization=project.organization,
+        )
+
+    return render(request, "projects/projectdetails.html", {
+        "project": project,
+        "assigned_staff": assigned_staff,
+        "assign_form": assign_form,
+    })
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# ASSIGN STAFF  — MANAGER ONLY
+# ──────────────────────────────────────────────────────────────────────────────
+
+@manager_required
+def assign_staff(request, pk):
+    """
+    POST-only endpoint.  Assigns one or more eligible Staff members to the
+    given project by creating StaffAssignment records.
+
+    Authorization chain (all enforced server-side):
+      1. @manager_required  →  must be authenticated + MANAGER role
+      2. Project must exist
+      3. Project must belong to the manager's organisation
+      4. Every submitted staff ID is validated against the eligible queryset
+         (same org, has account, not already assigned) by ProjectStaffAssignForm
+
+    Duplicate-safe: because we exclude already-active assignments from the
+    eligible queryset, a staff member who is already assigned cannot be
+    selected — the form will reject the submission if someone forges the POST.
+    """
+    from staff.models import StaffAssignment
+
+    if request.method != "POST":
+        return redirect("projects:project_detail", pk=pk)
+
+    # ── Resolve manager's organisation ───────────────────────────────────────
+    manager_org = get_user_organization(request.user)
+    if manager_org is None:
+        messages.error(request, "You must belong to an organisation to assign staff.")
+        return redirect("projects:project_detail", pk=pk)
+
+    # ── Load & authorise project ──────────────────────────────────────────────
+    project = get_object_or_404(
+        Project,
+        pk=pk,
+        organization=manager_org,   # cross-org attack prevention
+    )
+
+    # ── Validate submitted staff IDs ─────────────────────────────────────────
+    form = ProjectStaffAssignForm(
+        request.POST,
+        project=project,
+        organization=manager_org,
+    )
+
+    if not form.is_valid():
+        # Collect the first meaningful error to surface via messages
+        error_text = " ".join(
+            str(e)
+            for field_errors in form.errors.values()
+            for e in field_errors
+        )
+        messages.error(request, error_text or "Invalid staff selection.")
+        return redirect("projects:project_detail", pk=pk)
+
+    eligible_staff = form.cleaned_data["staff_ids"]   # validated Staff QS items
+
+    newly_assigned = []
+    for staff_member in eligible_staff:
+        # Final duplicate guard: skip if an active assignment already exists.
+        # This handles the race where two requests land simultaneously.
+        _, created = StaffAssignment.objects.get_or_create(
+            staff=staff_member,
+            project=project,
+            is_active=True,
+            defaults={
+                "work": "Assigned to project",
+                "assigned_by": request.user,
+            },
+        )
+        if created:
+            newly_assigned.append(staff_member)
+
+    if newly_assigned:
+        if len(newly_assigned) == 1:
+            name = f"{newly_assigned[0].first_name} {newly_assigned[0].last_name}".strip()
+            messages.success(request, f"{name} was assigned to this project.")
+        else:
+            names = ", ".join(
+                f"{s.first_name} {s.last_name}".strip() for s in newly_assigned
+            )
+            messages.success(request, f"{len(newly_assigned)} staff members assigned: {names}.")
+    else:
+        messages.info(request, "No new staff were assigned (already assigned or none selected).")
+
+    return redirect("projects:project_detail", pk=pk)
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# REMOVE STAFF  — MANAGER ONLY
+# ──────────────────────────────────────────────────────────────────────────────
+
+@manager_required
+def remove_staff(request, pk, assignment_id):
+    """
+    POST-only endpoint.  Removes a Staff member from a project by marking
+    the StaffAssignment as inactive.
+
+    This does NOT delete the User, deactivate the Staff account, delete
+    the Project, or remove the staff member's organisation membership.
+    It only marks the Project ↔ Staff relationship as inactive.
+
+    Authorization chain:
+      1. @manager_required
+      2. Project must belong to the manager's organisation
+      3. StaffAssignment must belong to that project
+    """
+    from staff.models import StaffAssignment
+
+    if request.method != "POST":
+        return redirect("projects:project_detail", pk=pk)
+
+    manager_org = get_user_organization(request.user)
+    if manager_org is None:
+        messages.error(request, "You must belong to an organisation to manage staff.")
+        return redirect("projects:project_detail", pk=pk)
+
+    project = get_object_or_404(
+        Project,
+        pk=pk,
+        organization=manager_org,
+    )
+
+    assignment = get_object_or_404(
+        StaffAssignment,
+        pk=assignment_id,
+        project=project,        # must belong to this project
+        is_active=True,
+    )
+
+    staff_name = f"{assignment.staff.first_name} {assignment.staff.last_name}".strip()
+
+    assignment.is_active = False
+    assignment.completed_at = tz.now()
+    assignment.save(update_fields=["is_active", "completed_at"])
+
+    messages.success(request, f"{staff_name} has been removed from this project.")
+    return redirect("projects:project_detail", pk=pk)

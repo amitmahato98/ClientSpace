@@ -1,6 +1,19 @@
 from django.contrib import admin
 
 from .models import Project
+from staff.models import StaffAssignment
+
+
+class StaffAssignmentInline(admin.TabularInline):
+    """Read-only inline showing staff assignments on the Project admin page."""
+    model = StaffAssignment
+    extra = 0
+    fields = ("staff", "assigned_by", "assigned_at", "is_active", "completed_at")
+    readonly_fields = ("assigned_by", "assigned_at", "completed_at")
+    ordering = ("-assigned_at",)
+    show_change_link = True
+    verbose_name = "Staff Assignment"
+    verbose_name_plural = "Staff Assignments"
 
 
 @admin.register(Project)
@@ -16,6 +29,7 @@ class ProjectAdmin(admin.ModelAdmin):
     )
     readonly_fields = ("created_at", "updated_at")
     ordering       = ("-created_at",)
+    inlines        = [StaffAssignmentInline]
 
     fieldsets = (
         ("Project", {
