@@ -1,0 +1,817 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'staff/staff.css' %}">
+{% endblock %}
+
+
+{% block content %}
+
+
+{% if messages %}
+    <div class="toast-container">
+
+        {% for message in messages %}
+
+            <div class="toast-message">
+                <i class="fas fa-check-circle"></i>
+                <span>{{ message }}</span>
+            </div>
+
+        {% endfor %}
+
+    </div>
+{% endif %}
+
+<div class="staff-page">
+
+    <!-- =====================================================
+         PAGE HEADER
+    ====================================================== -->
+
+    <div class="page-header">
+
+        <div class="page-heading">
+
+            <div class="page-title-row">
+
+                <div class="page-title-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+
+                <div>
+                    <h1>Staff</h1>
+
+                    <p>
+                        Manage your team and distribute project work.
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- HEADER ACTIONS -->
+
+        <div class="header-actions">
+
+            <a
+                href="{% url 'add_staff' %}"
+                class="header-btn primary-btn"
+            >
+                <i class="fas fa-user-plus"></i>
+                <span>Add Staff</span>
+            </a>
+
+
+            <a
+                href="{% url 'assign_work' %}"
+                class="header-btn secondary-btn"
+            >
+                <i class="fas fa-tasks"></i>
+                <span>Assign Work</span>
+            </a>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         STATISTICS
+    ====================================================== -->
+
+    <div class="stats-grid">
+
+
+        <!-- TOTAL STAFF -->
+
+        <div class="stat-card">
+
+            <div class="stat-card-left">
+
+                <div class="stat-icon total-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+
+                <div class="stat-info">
+
+                    <span class="stat-label">
+                        Total Staff
+                    </span>
+
+                    <h2>
+                        {{ total_staff }}
+                    </h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- AVAILABLE -->
+
+        <div class="stat-card">
+
+            <div class="stat-card-left">
+
+                <div class="stat-icon available-icon">
+                    <i class="fas fa-user-check"></i>
+                </div>
+
+                <div class="stat-info">
+
+                    <span class="stat-label">
+                        Available
+                    </span>
+
+                    <h2>
+                        {{ available_staff }}
+                    </h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- WORKING -->
+
+        <div class="stat-card">
+
+            <div class="stat-card-left">
+
+                <div class="stat-icon working-icon">
+                    <i class="fas fa-briefcase"></i>
+                </div>
+
+                <div class="stat-info">
+
+                    <span class="stat-label">
+                        Working
+                    </span>
+
+                    <h2>
+                        {{ working_staff }}
+                    </h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ACTIVE TASKS -->
+
+        <div class="stat-card">
+
+            <div class="stat-card-left">
+
+                <div class="stat-icon task-icon">
+                    <i class="fas fa-list-check"></i>
+                </div>
+
+                <div class="stat-info">
+
+                    <span class="stat-label">
+                        Active Tasks
+                    </span>
+
+                    <h2>
+                        {{ active_tasks }}
+                    </h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         STAFF SECTION
+    ====================================================== -->
+
+    <div class="staff-card">
+
+
+        <!-- CARD HEADER -->
+
+        <div class="staff-card-header">
+
+            <div class="section-heading">
+
+                <h2>
+                    Team Members
+                </h2>
+
+                <span id="memberCount">
+
+                    {{ total_staff }}
+                    member{{ total_staff|pluralize }}
+
+                </span>
+
+            </div>
+
+
+            <!-- SEARCH -->
+
+            <div class="search-box">
+
+                <i class="fas fa-search"></i>
+
+                <input
+                    type="text"
+                    id="staffSearch"
+                    placeholder="Search staff..."
+                    autocomplete="off"
+                >
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             FILTER BAR
+        ================================================== -->
+
+        <div class="filter-bar">
+
+            <div class="filter-left">
+
+                <span class="filter-label">
+                    <i class="fas fa-filter"></i>
+                    Filter by
+                </span>
+
+
+                <!-- ROLE -->
+
+                <select id="roleFilter">
+
+                    <option value="">
+                        All Roles
+                    </option>
+
+                    <option value="developer">
+                        Developer
+                    </option>
+
+                    <option value="designer">
+                        Designer
+                    </option>
+
+                    <option value="tester">
+                        Tester
+                    </option>
+
+                    <option value="manager">
+                        Manager
+                    </option>
+
+                </select>
+
+
+
+                <!-- STATUS -->
+
+                <select id="statusFilter">
+
+                    <option value="">
+                        All Status
+                    </option>
+
+                    <option value="available">
+                        Available
+                    </option>
+
+                    <option value="working">
+                        Working
+                    </option>
+
+                    <option value="on leave">
+                        On Leave
+                    </option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             STAFF TABLE
+        ================================================== -->
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Staff Member
+                        </th>
+
+                        <th>
+                            Role
+                        </th>
+
+                        <th>
+                            Projects
+                        </th>
+
+                        <th>
+                            Tasks
+                        </th>
+
+                        <th>
+                            Status
+                        </th>
+
+                        <th class="actions-column">
+                            Actions
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="staffTable">
+
+
+                    {% for staff in staff_members %}
+
+                    <tr
+                        data-name="{{ staff.first_name }} {{ staff.last_name }}"
+                        data-role="{{ staff.role|lower }}"
+                        data-status="{{ staff.status|lower }}"
+                    >
+
+
+                        <!-- =================================
+                             STAFF MEMBER
+                        ================================== -->
+
+                        <td>
+
+                            <div class="staff-info">
+
+
+                                <!-- AVATAR -->
+
+                                <div class="avatar">
+
+                                    {% if staff.user %}
+
+                                        {{ staff.user.initials }}
+
+                                    {% else %}
+
+                                        {{ staff.first_name|first }}{{ staff.last_name|first }}
+
+                                    {% endif %}
+
+                                </div>
+
+
+                                <!-- NAME -->
+
+                                <div class="staff-details">
+
+                                    <strong>
+
+                                        {{ staff.first_name }}
+                                        {{ staff.last_name }}
+
+                                    </strong>
+
+                                    <small>
+
+                                        {{ staff.email }}
+
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+
+                        <!-- =================================
+                             ROLE
+                        ================================== -->
+
+                        <td>
+
+                            {% if staff.role %}
+
+                                <span class="role-badge">
+
+                                    {{ staff.role }}
+
+                                </span>
+
+                            {% else %}
+
+                                <span class="role-badge unassigned">
+
+                                    Not Assigned
+
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+
+                        <!-- =================================
+                             PROJECTS
+                        ================================== -->
+
+                        <td>
+
+                            <div class="project-list">
+
+                                {% for assignment in staff.active_assignments %}
+
+                                    <div class="project-item">
+
+                                        <span class="project-dot"></span>
+
+                                        <span class="project-name">
+
+                                            {{ assignment.project.name }}
+
+                                        </span>
+
+                                    </div>
+
+                                {% empty %}
+
+                                    <span class="no-project">
+
+                                        No active project
+
+                                    </span>
+
+                                {% endfor %}
+
+                            </div>
+
+                        </td>
+
+
+
+                        <!-- =================================
+                             TASKS
+                        ================================== -->
+
+                        <td>
+
+                            <span class="task-badge">
+
+                                <i class="fas fa-check-circle"></i>
+
+                                {{ staff.active_assignments|length }}
+
+                                task{{ staff.active_assignments|length|pluralize }}
+
+                            </span>
+
+                        </td>
+
+
+
+                        <!-- =================================
+                             STATUS
+                        ================================== -->
+
+                        <td>
+
+                            {% if staff.status == "Working" %}
+
+                                <span class="status-badge working">
+
+                                    <span class="status-dot"></span>
+
+                                    Working
+
+                                </span>
+
+
+                            {% elif staff.status == "Available" %}
+
+                                <span class="status-badge available">
+
+                                    <span class="status-dot"></span>
+
+                                    Available
+
+                                </span>
+
+
+                            {% elif staff.status == "On Leave" %}
+
+                                <span class="status-badge leave">
+
+                                    <span class="status-dot"></span>
+
+                                    On Leave
+
+                                </span>
+
+
+                            {% else %}
+
+                                <span class="status-badge">
+
+                                    <span class="status-dot"></span>
+
+                                    {{ staff.status }}
+
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+
+                        <!-- =================================
+                             ACTIONS
+                        ================================== -->
+
+                        <td>
+
+                            <div class="actions">
+
+
+                                <!-- VIEW -->
+
+                                 <a 
+                                    href="{% url 'staff_view' staff.id %}" 
+                                    class="action-btn view-btn" 
+                                    title="View Staff" 
+                                >
+                                    <i class="fas fa-eye"></i>
+                                    <span>View</span>
+                                </a>
+
+
+                                <!-- ASSIGN -->
+
+                                <a
+                                    href="{% url 'assign_work' %}?staff={{staff.id}}"
+                                    class="action-icon-btn assign-btn"
+                                    title="Assign Work"
+                                >
+
+                                    <i class="fas fa-plus"></i>
+
+                                </a>
+
+                                 <a
+                                    href="{% url 'staff_manage' staff.id %}"
+                                    class="action-icon-btn more-btn"
+                                    title="More"
+                                >
+
+                                    <i class="fas fa-ellipsis-h"></i>
+
+                                </a>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+
+                    {% empty %}
+
+
+                    <!-- =================================
+                         NO STAFF
+                    ================================== -->
+
+                    <tr class="empty-row">
+
+                        <td colspan="6">
+
+                            <div class="empty-state">
+
+                                <div class="empty-icon">
+
+                                    <i class="fas fa-users"></i>
+
+                                </div>
+
+                                <h3>
+                                    No staff members yet
+                                </h3>
+
+                                <p>
+                                    Add your first staff member
+                                    to get started.
+                                </p>
+
+                                <a
+                                    href="{% url 'add_staff' %}"
+                                    class="empty-btn"
+                                >
+
+                                    <i class="fas fa-user-plus"></i>
+
+                                    Add Staff
+
+                                </a>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     SEARCH + FILTER JAVASCRIPT
+====================================================== -->
+
+<script>
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        const searchInput =
+            document.getElementById("staffSearch");
+
+        const roleFilter =
+            document.getElementById("roleFilter");
+
+        const statusFilter =
+            document.getElementById("statusFilter");
+
+        const table =
+            document.getElementById("staffTable");
+
+        const memberCount =
+            document.getElementById("memberCount");
+
+
+        function filterStaff() {
+
+            const searchValue =
+                searchInput.value
+                    .toLowerCase()
+                    .trim();
+
+
+            const roleValue =
+                roleFilter.value
+                    .toLowerCase();
+
+
+            const statusValue =
+                statusFilter.value
+                    .toLowerCase();
+
+
+            const rows =
+                table.querySelectorAll(
+                    "tr[data-name]"
+                );
+
+
+            let visibleCount = 0;
+
+
+            rows.forEach(
+                function (row) {
+
+                    const name =
+                        row.dataset.name
+                            .toLowerCase();
+
+
+                    const role =
+                        row.dataset.role
+                            .toLowerCase();
+
+
+                    const status =
+                        row.dataset.status
+                            .toLowerCase();
+
+
+                    const matchesSearch =
+                        name.includes(
+                            searchValue
+                        );
+
+
+                    const matchesRole =
+                        !roleValue ||
+                        role === roleValue;
+
+
+                    const matchesStatus =
+                        !statusValue ||
+                        status === statusValue;
+
+
+                    if (
+                        matchesSearch &&
+                        matchesRole &&
+                        matchesStatus
+                    ) {
+
+                        row.style.display = "";
+
+                        visibleCount++;
+
+                    }
+                    else {
+
+                        row.style.display = "none";
+
+                    }
+
+                }
+            );
+
+
+            memberCount.textContent =
+                visibleCount +
+                " member" +
+                (
+                    visibleCount !== 1
+                        ? "s"
+                        : ""
+                );
+
+        }
+
+
+        searchInput.addEventListener(
+            "input",
+            filterStaff
+        );
+
+
+        roleFilter.addEventListener(
+            "change",
+            filterStaff
+        );
+
+
+        statusFilter.addEventListener(
+            "change",
+            filterStaff
+        );
+
+    }
+);
+
+</script>
+
+{% endblock %}

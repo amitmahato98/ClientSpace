@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Assign Work | ClientSpace{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'staff/assign_work.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="assign-work-container">
+
+    <!-- Header -->
+    <div class="page-header">
+
+        <div>
+            <h1>Assign Work</h1>
+            <p>Assign a project and specific work to a staff member.</p>
+        </div>
+
+        <a href="{% url 'staff' %}" class="back-btn">
+            ← Back to Staff
+        </a>
+
+    </div>
+
+
+    <!-- Form Card -->
+    <div class="form-card">
+
+        <form method="POST">
+
+            {% csrf_token %}
+
+            <!-- Staff -->
+            <div class="form-group">
+
+                <label for="{{ form.staff.id_for_label }}">
+                    Staff Member
+                </label>
+
+                {{ form.staff }}
+
+                {% for error in form.staff.errors %}
+                    <small class="error">
+                        {{ error }}
+                    </small>
+                {% endfor %}
+
+            </div>
+
+
+            <!-- Project -->
+            <div class="form-group">
+
+                <label for="{{ form.project.id_for_label }}">
+                    Project
+                </label>
+
+                {{ form.project }}
+
+                {% for error in form.project.errors %}
+                    <small class="error">
+                        {{ error }}
+                    </small>
+                {% endfor %}
+
+            </div>
+
+
+            <!-- Work -->
+            <div class="form-group">
+
+                <label for="{{ form.work.id_for_label }}">
+                    Project Work
+                </label>
+
+                {{ form.work }}
+
+                <small class="help-text">
+                    Describe the specific work that needs to be completed.
+                </small>
+
+                {% for error in form.work.errors %}
+                    <small class="error">
+                        {{ error }}
+                    </small>
+                {% endfor %}
+
+            </div>
+
+
+            <!-- Non-field errors -->
+            {% if form.non_field_errors %}
+
+                <div class="form-errors">
+
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+
+                </div>
+
+            {% endif %}
+
+
+            <!-- Actions -->
+            <div class="form-actions">
+
+                <a
+                    href="{% url 'staff' %}"
+                    class="cancel-btn"
+                >
+                    Cancel
+                </a>
+
+                <button
+                    type="submit"
+                    class="assign-btn"
+                >
+                    Assign Work
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}
