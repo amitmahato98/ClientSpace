@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Tasks — ClientSpace{% endblock %}
+{% block page_heading %}My Tasks{% endblock %}
+{% block page_subheading %}Tasks assigned to you across all projects{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+
+    <!-- =========================================================
+         DJANGO MESSAGES
+         ========================================================= -->
+    {% if messages %}
+    <div class="space-y-2">
+        {% for message in messages %}
+        <div class="flex items-center gap-2.5 px-4 py-3 rounded-lg text-xs font-medium
+            {% if message.tags == 'success' %}bg-[#e6f4ea] text-[#137333] border border-[#b7dfbe]
+            {% elif message.tags == 'error' %}bg-[#fce8e6] text-[#c5221f] border border-[#f5c2be]
+            {% else %}bg-[#e8f0fe] text-[#1a73e8] border border-[#c5d8fb]{% endif %}">
+            <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %}"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- =========================================================
+         SUMMARY CARDS
+         ========================================================= -->
+    <div class="grid grid-cols-3 gap-3">
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center">
+            <div class="text-2xl font-bold text-gray-900">{{ pending_tasks|length }}</div>
+            <div class="text-[11px] text-gray-400 mt-1 font-medium uppercase tracking-wide">Pending</div>
+        </div>
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center">
+            <div class="text-2xl font-bold text-[#1a73e8]">{{ inprogress_tasks|length }}</div>
+            <div class="text-[11px] text-gray-400 mt-1 font-medium uppercase tracking-wide">In Progress</div>
+        </div>
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center">
+            <div class="text-2xl font-bold text-[#137333]">{{ completed_tasks|length }}</div>
+            <div class="text-[11px] text-gray-400 mt-1 font-medium uppercase tracking-wide">Completed</div>
+        </div>
+    </div>
+
+    {% if tasks %}
+
+    <!-- =========================================================
+         PENDING
+         ========================================================= -->
+    {% if pending_tasks %}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100">
+        <div class="px-5 py-3 border-b border-gray-100 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-gray-400"></span>
+            <h3 class="text-sm font-bold text-gray-900">Pending</h3>
+            <span class="ml-auto text-[11px] text-gray-400">{{ pending_tasks|length }} task{{ pending_tasks|length|pluralize }}</span>
+        </div>
+        <div class="divide-y divide-gray-50">
+            {% for task in pending_tasks %}
+            {% include "projects/_task_row.html" with task=task show_status_form=True %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- =========================================================
+         IN PROGRESS
+         ========================================================= -->
+    {% if inprogress_tasks %}
+    <div class="bg-white rounded-xl shadow-sm border border-[#c5d8fb]">
+        <div class="px-5 py-3 border-b border-[#c5d8fb] flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-[#1a73e8]"></span>
+            <h3 class="text-sm font-bold text-gray-900">In Progress</h3>
+            <span class="ml-auto text-[11px] text-gray-400">{{ inprogress_tasks|length }} task{{ inprogress_tasks|length|pluralize }}</span>
+        </div>
+        <div class="divide-y divide-gray-50">
+            {% for task in inprogress_tasks %}
+            {% include "projects/_task_row.html" with task=task show_status_form=True %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- =========================================================
+         COMPLETED
+         ========================================================= -->
+    {% if completed_tasks %}
+    <div class="bg-white rounded-xl shadow-sm border border-[#b7dfbe]">
+        <div class="px-5 py-3 border-b border-[#b7dfbe] flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-[#137333]"></span>
+            <h3 class="text-sm font-bold text-gray-900">Completed</h3>
+            <span class="ml-auto text-[11px] text-gray-400">{{ completed_tasks|length }} task{{ completed_tasks|length|pluralize }}</span>
+        </div>
+        <div class="divide-y divide-gray-50 opacity-80">
+            {% for task in completed_tasks %}
+            {% include "projects/_task_row.html" with task=task show_status_form=True %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <!-- Empty state -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
+        <i class="fas fa-clipboard-list text-[#c9a87a] text-3xl mb-3"></i>
+        <p class="text-sm font-semibold text-gray-700">No tasks assigned to you yet</p>
+        <p class="text-xs text-gray-400 mt-1">Your manager will assign tasks to you once a project is underway.</p>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

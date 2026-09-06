@@ -12,11 +12,11 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone as tz
 
-from accounts.decorators import manager_required
+from accounts.decorators import manager_required, staff_or_above
 from accounts.models import OrganizationMembership
 from accounts.views import get_user_organization
-from .forms import ProjectForm, ProjectStaffAssignForm
-from .models import Project
+from .forms import ProjectForm, ProjectStaffAssignForm, TaskForm, TaskStatusUpdateForm
+from .models import Project, Task
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
@@ -359,9 +359,10 @@ def project_detail(request, pk):
       CLIENT           → can only view projects where project.client == request.user
                          silently 404s on mismatch to avoid leaking existence
 
-    Context extras for staff assignment UI (MANAGER only):
-      assigned_staff   — active StaffAssignment queryset for this project
-      assign_form      — ProjectStaffAssignForm (blank) for the modal
+    Context extras:
+      assigned_staff   — active StaffAssignment queryset (Phase 1)
+      assign_form      — ProjectStaffAssignForm for the modal (MANAGER only)
+      tasks            — Task queryset for this project
     """
     from staff.models import StaffAssignment
 
@@ -380,6 +381,14 @@ def project_detail(request, pk):
         .order_by("assigned_at")
     )
 
+    # Tasks for this project — visible to MANAGER, STAFF, and CLIENT
+    tasks = (
+        Task.objects
+        .filter(project=project)
+        .select_related("assigned_to", "created_by")
+        .order_by("due_date", "-priority", "title")
+    )
+
     # Assign form — only built for managers (avoids unnecessary query for others)
     assign_form = None
     if request.user.is_manager and project.organization:
@@ -392,6 +401,7 @@ def project_detail(request, pk):
         "project": project,
         "assigned_staff": assigned_staff,
         "assign_form": assign_form,
+        "tasks": tasks,
     })
 
 
@@ -468,6 +478,14 @@ def assign_staff(request, pk):
         )
         if created:
             newly_assigned.append(staff_member)
+            # Phase 3 — Event A: notify the staff member
+            if staff_member.user:
+                from notifications.service import notify_staff_assigned_to_project
+                notify_staff_assigned_to_project(
+                    actor=request.user,
+                    staff_user=staff_member.user,
+                    project=project,
+                )
 
     if newly_assigned:
         if len(newly_assigned) == 1:
@@ -534,3 +552,233 @@ def remove_staff(request, pk, assignment_id):
 
     messages.success(request, f"{staff_name} has been removed from this project.")
     return redirect("projects:project_detail", pk=pk)
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# TASK CREATE  — MANAGER ONLY
+# ──────────────────────────────────────────────────────────────────────────────
+
+@manager_required
+def task_create(request, pk):
+    """
+    Create a new Task for the given project.
+
+    Authorization chain:
+      1. @manager_required  — MANAGER role + authenticated
+      2. project.organization == manager's org  — cross-org prevention
+      3. TaskForm.clean_assigned_to()  — assigned user must have active
+         Phase 1 StaffAssignment to this project
+
+    GET  → blank TaskForm
+    POST → validate + save, redirect to project detail
+    """
+    manager_org = get_user_organization(request.user)
+    if manager_org is None:
+        messages.error(request, "You must belong to an organisation to create tasks.")
+        return redirect("projects:project_detail", pk=pk)
+
+    project = get_object_or_404(Project, pk=pk, organization=manager_org)
+
+    if request.method == "POST":
+        form = TaskForm(request.POST, project=project)
+        if form.is_valid():
+            task = form.save(commit=False)
+            task.project    = project         # server-side only
+            task.created_by = request.user    # server-side only
+            task.save()
+
+            # Phase 3 — Event B: notify the assigned staff member
+            if task.assigned_to:
+                from notifications.service import notify_task_assigned
+                notify_task_assigned(actor=request.user, task=task)
+
+            assignee = task.assigned_display_name
+            messages.success(
+                request,
+                f'Task "{task.title}" created and assigned to {assignee}.'
+            )
+            return redirect("projects:project_detail", pk=pk)
+    else:
+        form = TaskForm(project=project)
+
+    return render(request, "projects/task_form.html", {
+        "form": form,
+        "project": project,
+        "form_title": "Create Task",
+        "submit_label": "Create Task",
+    })
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# TASK EDIT  — MANAGER ONLY
+# ──────────────────────────────────────────────────────────────────────────────
+
+@manager_required
+def task_edit(request, pk, task_id):
+    """
+    Edit an existing Task.
+
+    Authorization chain:
+      1. @manager_required
+      2. project.organization == manager's org
+      3. task.project == project  (prevents cross-project task manipulation)
+      4. TaskForm.clean_assigned_to()  — reassigned user must still have
+         active Phase 1 assignment to this project
+
+    GET  → TaskForm pre-filled with task data
+    POST → validate + save, redirect to project detail
+    """
+    manager_org = get_user_organization(request.user)
+    if manager_org is None:
+        messages.error(request, "You must belong to an organisation to edit tasks.")
+        return redirect("projects:project_detail", pk=pk)
+
+    project = get_object_or_404(Project, pk=pk, organization=manager_org)
+    task    = get_object_or_404(Task, pk=task_id, project=project)
+
+    if request.method == "POST":
+        form = TaskForm(request.POST, project=project, instance=task)
+        if form.is_valid():
+            previous_assignee = task.assigned_to  # capture before save
+            form.save()
+
+            # Phase 3 — Event B (reassign): notify if assigned_to changed
+            if task.assigned_to and task.assigned_to != previous_assignee:
+                from notifications.service import notify_task_reassigned
+                notify_task_reassigned(
+                    actor=request.user,
+                    task=task,
+                    previous_user=previous_assignee,
+                )
+
+            messages.success(request, f'Task "{task.title}" updated successfully.')
+            return redirect("projects:project_detail", pk=pk)
+    else:
+        form = TaskForm(project=project, instance=task)
+
+    return render(request, "projects/task_form.html", {
+        "form": form,
+        "project": project,
+        "task": task,
+        "form_title": "Edit Task",
+        "submit_label": "Save Changes",
+    })
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# TASK DELETE  — MANAGER ONLY
+# ──────────────────────────────────────────────────────────────────────────────
+
+@manager_required
+def task_delete(request, pk, task_id):
+    """
+    Delete a Task.  POST only.
+
+    Authorization chain:
+      1. @manager_required
+      2. project.organization == manager's org
+      3. task.project == project
+    """
+    if request.method != "POST":
+        return redirect("projects:project_detail", pk=pk)
+
+    manager_org = get_user_organization(request.user)
+    if manager_org is None:
+        messages.error(request, "You must belong to an organisation to delete tasks.")
+        return redirect("projects:project_detail", pk=pk)
+
+    project = get_object_or_404(Project, pk=pk, organization=manager_org)
+    task    = get_object_or_404(Task, pk=task_id, project=project)
+
+    title = task.title
+    task.delete()
+    messages.success(request, f'Task "{title}" has been deleted.')
+    return redirect("projects:project_detail", pk=pk)
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# MY TASKS  — STAFF ONLY
+# ──────────────────────────────────────────────────────────────────────────────
+
+@staff_or_above
+def my_tasks(request):
+    """
+    List all tasks assigned to the currently logged-in user.
+
+    Access rules:
+      • MANAGER → redirected to project list (they manage via project pages)
+      • STAFF   → sees only tasks where task.assigned_to == request.user
+      • CLIENT  → blocked by @staff_or_above (403)
+
+    A Staff member cannot see tasks belonging to other Staff members —
+    the queryset is hard-filtered to request.user.
+    """
+    if request.user.is_manager:
+        return redirect("projects:project_list")
+
+    tasks = (
+        Task.objects
+        .filter(assigned_to=request.user)
+        .select_related("project", "project__organization", "created_by")
+        .order_by("due_date", "-priority", "title")
+    )
+
+    # Group by status for a cleaner UI
+    pending_tasks     = tasks.filter(status=Task.Status.PENDING)
+    inprogress_tasks  = tasks.filter(status=Task.Status.IN_PROGRESS)
+    completed_tasks   = tasks.filter(status=Task.Status.COMPLETED)
+
+    return render(request, "projects/my_tasks.html", {
+        "tasks":            tasks,
+        "pending_tasks":    pending_tasks,
+        "inprogress_tasks": inprogress_tasks,
+        "completed_tasks":  completed_tasks,
+    })
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# TASK STATUS UPDATE  — STAFF ONLY (own tasks)
+# ──────────────────────────────────────────────────────────────────────────────
+
+@staff_or_above
+def task_status_update(request, task_id):
+    """
+    Allow a Staff member to update the status of their own assigned task.
+
+    Security:
+      • @staff_or_above  — authenticated STAFF or MANAGER
+      • task.assigned_to == request.user  — ownership check (STAFF only)
+        Managers can update status via task_edit instead.
+      • TaskStatusUpdateForm  — exposes ONLY the status field; project,
+        assigned_to, and all other fields are never accepted from POST.
+
+    POST only.
+    """
+    if request.method != "POST":
+        return redirect("projects:my_tasks")
+
+    # Only STAFF may use this endpoint; redirect managers to project page
+    if request.user.is_manager:
+        return redirect("projects:project_list")
+
+    # Ownership check — staff can only update their own tasks
+    task = get_object_or_404(Task, pk=task_id, assigned_to=request.user)
+
+    form = TaskStatusUpdateForm(request.POST)
+    if form.is_valid():
+        new_status = form.cleaned_data["status"]
+        task.status = new_status
+        task.save(update_fields=["status", "updated_at"])
+
+        # Phase 3 — Event C: notify manager(s) of the status change
+        from notifications.service import notify_task_status_updated
+        notify_task_status_updated(actor=request.user, task=task)
+
+        messages.success(
+            request,
+            f'Task "{task.title}" marked as {task.get_status_display()}.'
+        )
+    else:
+        messages.error(request, "Invalid status value.")
+
+    return redirect("projects:my_tasks")

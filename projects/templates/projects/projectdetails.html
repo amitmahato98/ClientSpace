@@ -188,6 +188,11 @@
                 class="project-tab active px-4 py-3 text-xs font-semibold text-[#8b6f55] border-b-2 border-[#d4a373] whitespace-nowrap transition">
                 <i class="far fa-file-alt mr-1.5"></i> Overview
             </button>
+            <button type="button" data-tab="tasks"
+                class="project-tab px-4 py-3 text-xs font-medium text-gray-400 hover:text-gray-700 border-b-2 border-transparent whitespace-nowrap transition">
+                <i class="fas fa-tasks mr-1.5"></i> Tasks
+                {% if tasks %}<span class="ml-1 px-1.5 py-0.5 rounded-full bg-[#f5e6d0] text-[#8b6f55] text-[10px] font-semibold">{{ tasks|length }}</span>{% endif %}
+            </button>
             <button type="button" data-tab="activity"
                 class="project-tab px-4 py-3 text-xs font-medium text-gray-400 hover:text-gray-700 border-b-2 border-transparent whitespace-nowrap transition">
                 <i class="far fa-clock mr-1.5"></i> Activity
@@ -368,6 +373,114 @@
 
         </div><!-- /overview grid -->
     </div><!-- /tab-overview -->
+
+
+    <!-- =====================================================
+         TASKS TAB
+         ===================================================== -->
+    <div id="tab-tasks" class="project-tab-content hidden">
+
+        <!-- Header row: title + Create Task button (manager only) -->
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <h3 class="text-sm font-bold text-gray-900">Tasks</h3>
+                <p class="text-[11px] text-gray-400 mt-0.5">All tasks for this project</p>
+            </div>
+            {% if user.is_manager %}
+            <a href="{% url 'projects:task_create' project.pk %}"
+               class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#d4a373] hover:bg-[#b8895e] text-white text-xs font-medium rounded-lg shadow-sm transition">
+                <i class="fas fa-plus text-[10px]"></i>
+                Create Task
+            </a>
+            {% endif %}
+        </div>
+
+        {% if tasks %}
+        <div class="space-y-2">
+            {% for task in tasks %}
+            <div class="bg-white rounded-xl border border-gray-100 shadow-sm hover:border-[#d4a373] transition">
+                <div class="flex items-start justify-between gap-4 px-5 py-4">
+
+                    <!-- Left: title + meta -->
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="text-xs font-semibold text-gray-800 truncate">{{ task.title }}</span>
+                            <!-- Status badge -->
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium {{ task.status_css_class }}">
+                                {{ task.get_status_display }}
+                            </span>
+                            <!-- Priority badge -->
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium {{ task.priority_css_class }}">
+                                {{ task.get_priority_display }}
+                            </span>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5">
+                            <!-- Assigned to -->
+                            <span class="text-[11px] text-gray-400">
+                                <i class="fas fa-user mr-1"></i>
+                                {{ task.assigned_display_name }}
+                            </span>
+                            <!-- Due date -->
+                            {% if task.due_date %}
+                            <span class="text-[11px] text-gray-400">
+                                <i class="far fa-calendar mr-1"></i>
+                                Due {{ task.due_date|date:"M j, Y" }}
+                            </span>
+                            {% endif %}
+                            <!-- Description preview -->
+                            {% if task.description %}
+                            <span class="text-[11px] text-gray-400 truncate max-w-xs">{{ task.description|truncatechars:60 }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Right: Manager actions only -->
+                    {% if user.is_manager %}
+                    <div class="flex items-center gap-2 shrink-0">
+                        <a href="{% url 'projects:task_edit' project.pk task.pk %}"
+                           class="px-2.5 py-1 text-[11px] font-medium text-[#1a73e8] bg-[#e8f0fe] hover:bg-[#c5d8fb] rounded-md transition">
+                            Edit
+                        </a>
+                        <form method="POST" action="{% url 'projects:task_delete' project.pk task.pk %}"
+                              onsubmit="return confirm('Delete task \'{{ task.title }}\'? This cannot be undone.');">
+                            {% csrf_token %}
+                            <button type="submit"
+                                class="px-2.5 py-1 text-[11px] font-medium text-[#c5221f] bg-[#fce8e6] hover:bg-[#f5c2be] rounded-md transition">
+                                Delete
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% else %}
+        <!-- Empty state -->
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-8 text-center">
+            <i class="fas fa-tasks text-[#c9a87a] text-2xl mb-3"></i>
+            <p class="text-sm font-medium text-gray-700">No tasks yet</p>
+            <p class="text-xs text-gray-400 mt-1">
+                {% if user.is_manager %}
+                    Create the first task for this project.
+                {% else %}
+                    No tasks have been created for this project yet.
+                {% endif %}
+            </p>
+            {% if user.is_manager %}
+            <a href="{% url 'projects:task_create' project.pk %}"
+               class="inline-flex items-center gap-1.5 mt-4 px-4 py-2 bg-[#d4a373] hover:bg-[#b8895e] text-white text-xs font-medium rounded-lg shadow-sm transition">
+                <i class="fas fa-plus text-[10px]"></i>
+                Create Task
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+    </div><!-- /tab-tasks -->
 
 
     <!-- =====================================================

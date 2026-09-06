@@ -1,0 +1,57 @@
+{% comment %}
+Partial: a single task row used in my_tasks.html.
+Context vars: task, show_status_form (bool)
+{% endcomment %}
+<div class="px-5 py-4">
+    <div class="flex items-start justify-between gap-4">
+
+        <!-- Left: task info -->
+        <div class="min-w-0 flex-1">
+            <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-xs font-semibold text-gray-800">{{ task.title }}</span>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium {{ task.status_css_class }}">
+                    {{ task.get_status_display }}
+                </span>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium {{ task.priority_css_class }}">
+                    {{ task.get_priority_display }}
+                </span>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5">
+                <span class="text-[11px] text-gray-500">
+                    <i class="fas fa-folder-open mr-1 text-[#b8895e]"></i>
+                    <a href="{% url 'projects:project_detail' task.project.pk %}"
+                       class="hover:text-[#b8895e] transition">{{ task.project.name }}</a>
+                </span>
+                {% if task.due_date %}
+                <span class="text-[11px] text-gray-400">
+                    <i class="far fa-calendar mr-1"></i>
+                    Due {{ task.due_date|date:"M j, Y" }}
+                </span>
+                {% endif %}
+                {% if task.description %}
+                <span class="text-[11px] text-gray-400 truncate max-w-xs">{{ task.description|truncatechars:80 }}</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Right: status update form (staff only) -->
+        {% if show_status_form %}
+        <form method="POST" action="{% url 'projects:task_status_update' task.pk %}"
+              class="shrink-0 flex items-center gap-2">
+            {% csrf_token %}
+            <select name="status"
+                class="text-[11px] px-2 py-1.5 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#d4a373]/30 focus:border-[#d4a373] transition">
+                {% for value, label in task.Status.choices %}
+                <option value="{{ value }}" {% if task.status == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit"
+                class="px-2.5 py-1.5 text-[11px] font-medium text-white bg-[#d4a373] hover:bg-[#b8895e] rounded-lg transition whitespace-nowrap">
+                Update
+            </button>
+        </form>
+        {% endif %}
+
+    </div>
+</div>

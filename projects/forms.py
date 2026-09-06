@@ -305,3 +305,124 @@ class ProjectStaffAssignForm(forms.Form):
         # display list without running another query.
         self.already_assigned_ids = list(already_assigned_ids)
         self.eligible_qs = eligible_qs
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# TaskForm  — Manager use only
+# ═══════════════════════════════════════════════════════════════════════════
+
+class TaskForm(forms.ModelForm):
+    """
+    Manager-facing form for creating and editing a Task.
+
+    Security guarantees
+    ───────────────────
+    • assigned_to queryset is built server-side from active StaffAssignment
+      records for the given project.  Only Staff users who already have an
+      active Phase 1 assignment to this project are eligible.
+    • clean_assigned_to() re-validates the submitted user against that same
+      queryset so a crafted POST with an arbitrary user ID is rejected.
+    • project and created_by are never read from POST — they are set
+      server-side in the view.
+
+    Usage
+    ─────
+        form = TaskForm(project=project, data=request.POST or None, instance=task)
+    """
+
+    class Meta:
+        from .models import Task  # local import avoids circular at class definition
+        model = Task
+        fields = [
+            "title",
+            "description",
+            "assigned_to",
+            "priority",
+            "status",
+            "due_date",
+        ]
+        widgets = {
+            "title": forms.TextInput(attrs={
+                "placeholder": "e.g. Build login page",
+                "class": _INPUT,
+                "autofocus": True,
+            }),
+            "description": forms.Textarea(attrs={
+                "rows": 3,
+                "placeholder": "Describe what needs to be done...",
+                "class": _TEXTAREA,
+            }),
+            "assigned_to": forms.Select(attrs={"class": _SELECT}),
+            "priority":    forms.Select(attrs={"class": _SELECT}),
+            "status":      forms.Select(attrs={"class": _SELECT}),
+            "due_date":    forms.DateInput(attrs={"type": "date", "class": _INPUT}),
+        }
+        labels = {
+            "title":       "Task title",
+            "description": "Description (optional)",
+            "assigned_to": "Assign to",
+            "priority":    "Priority",
+            "status":      "Status",
+            "due_date":    "Due date",
+        }
+
+    def __init__(self, *args, project, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Import here to keep module-level import-free.
+        from staff.models import StaffAssignment
+
+        # Build the eligible user queryset:
+        # only users whose Staff profile has an ACTIVE assignment to this project.
+        eligible_user_ids = (
+            StaffAssignment.objects
+            .filter(project=project, is_active=True)
+            .exclude(staff__user__isnull=True)
+            .values_list("staff__user_id", flat=True)
+        )
+
+        eligible_qs = (
+            User.objects
+            .filter(id__in=eligible_user_ids, role=User.Role.STAFF)
+            .order_by("first_name", "last_name", "username")
+        )
+
+        self.fields["assigned_to"].queryset = eligible_qs
+        self.fields["assigned_to"].empty_label = "— Select staff —"
+
+        # Stash for server-side re-validation in clean_assigned_to.
+        self._eligible_user_ids = set(eligible_user_ids)
+        self._project = project
+
+    def clean_assigned_to(self):
+        user = self.cleaned_data.get("assigned_to")
+        if user is None:
+            return user  # field is not required; unassigned is allowed
+        if user.pk not in self._eligible_user_ids:
+            raise forms.ValidationError(
+                "This staff member is not assigned to the project. "
+                "Only staff with an active project assignment can be selected."
+            )
+        return user
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# TaskStatusUpdateForm  — Staff use only
+# ═══════════════════════════════════════════════════════════════════════════
+
+class TaskStatusUpdateForm(forms.Form):
+    """
+    Minimal form that exposes ONLY the status field.
+
+    Used by Staff members to update the status of their own assigned task.
+    Does NOT expose project, assigned_to, title, priority, due_date, or
+    any other Manager-controlled field.  The view enforces that the task
+    belongs to request.user before accepting a submission.
+    """
+    from .models import Task as _Task  # local reference for choices
+
+    status = forms.ChoiceField(
+        choices=_Task.Status.choices,
+        widget=forms.Select(attrs={"class": _SELECT}),
+        label="Update status",
+    )

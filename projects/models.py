@@ -2,6 +2,123 @@ from django.conf import settings
 from django.db import models
 
 
+# ═══════════════════════════════════════════════════════════════════════════
+# Task
+# ═══════════════════════════════════════════════════════════════════════════
+
+class Task(models.Model):
+    """
+    A unit of work belonging to a Project and assigned to a Staff member.
+
+    Authorization chain
+    ───────────────────
+    Task → project → organization  (no duplicate org FK needed)
+
+    Assignment constraint (enforced in TaskForm, not at DB level)
+    ─────────────────────────────────────────────────────────────
+    assigned_to must be a User whose Staff profile has an *active*
+    StaffAssignment to the same project.  This is validated server-side
+    in TaskForm so crafted POST requests cannot bypass the restriction.
+
+    Phase 3 hook points
+    ────────────────────
+    task_create  → "Task created and assigned to <staff>"
+    task_edit    → "Task reassigned to <new staff>" or "Status changed to …"
+    task_status_update → "Task marked <status> by <staff>"
+    """
+
+    class Status(models.TextChoices):
+        PENDING     = "PENDING",     "Pending"
+        IN_PROGRESS = "IN_PROGRESS", "In Progress"
+        COMPLETED   = "COMPLETED",   "Completed"
+
+    class Priority(models.TextChoices):
+        LOW    = "LOW",    "Low"
+        MEDIUM = "MEDIUM", "Medium"
+        HIGH   = "HIGH",   "High"
+
+    project = models.ForeignKey(
+        "projects.Project",
+        on_delete=models.CASCADE,
+        related_name="tasks",
+    )
+
+    # Points to the STAFF user assigned to this task.
+    # SET_NULL so deleting a user account does not cascade-delete the task record.
+    assigned_to = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="assigned_tasks",
+        limit_choices_to={"role": "STAFF"},
+    )
+
+    title = models.CharField(max_length=200)
+
+    description = models.TextField(blank=True)
+
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.PENDING,
+    )
+
+    priority = models.CharField(
+        max_length=20,
+        choices=Priority.choices,
+        default=Priority.MEDIUM,
+    )
+
+    due_date = models.DateField(null=True, blank=True)
+
+    # The Manager who created this task — set server-side, never from POST.
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="created_tasks",
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["due_date", "-priority", "title"]
+        verbose_name = "Task"
+        verbose_name_plural = "Tasks"
+
+    def __str__(self):
+        assignee = self.assigned_to.get_full_name() if self.assigned_to else "Unassigned"
+        return f"{self.title} ({self.project.name} → {assignee})"
+
+    # ------------------------------------------------------------------ #
+    # Template helpers                                                     #
+    # ------------------------------------------------------------------ #
+
+    @property
+    def status_css_class(self):
+        return {
+            self.Status.PENDING:     "bg-[#f3f4f6] text-[#6b7280]",
+            self.Status.IN_PROGRESS: "bg-[#e8f0fe] text-[#1a73e8]",
+            self.Status.COMPLETED:   "bg-[#e6f4ea] text-[#137333]",
+        }.get(self.status, "bg-gray-100 text-gray-600")
+
+    @property
+    def priority_css_class(self):
+        return {
+            self.Priority.HIGH:   "bg-[#fce8e6] text-[#c5221f]",
+            self.Priority.MEDIUM: "bg-[#fef7e0] text-[#b06000]",
+            self.Priority.LOW:    "bg-[#edf0f4] text-[#657084]",
+        }.get(self.priority, "bg-gray-100 text-gray-600")
+
+    @property
+    def assigned_display_name(self):
+        if not self.assigned_to:
+            return "Unassigned"
+        full = self.assigned_to.get_full_name()
+        return full.strip() if full.strip() else self.assigned_to.username
+
+
 class Project(models.Model):
     """
     Core project entity for ClientSpace.

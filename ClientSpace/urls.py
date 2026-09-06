@@ -42,10 +42,9 @@ urlpatterns = [
     path("projects/", include("projects.urls")),
     path("clients/", include("clients.urls")),
     path("settings/", include("sett.urls")),
-
-    # Dashboard application added in main
     path("dashboard/", include("dashboard.urls")),
-    path("staff/",include("staff.urls")),
+    path("staff/", include("staff.urls")),
+    path("notifications/", include("notifications.urls", namespace="notifications")),
 
     # Root URL — smart redirect based on authentication + organization state
     path("", home_view, name="home"),
