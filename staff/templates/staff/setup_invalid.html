@@ -1,0 +1,1437 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Set Up Your Account</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Segoe UI", Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+
+            background:
+                radial-gradient(
+                    circle at 10% 20%,
+                    rgba(184, 137, 94, 0.10),
+                    transparent 30%
+                ),
+                radial-gradient(
+                    circle at 90% 80%,
+                    rgba(47, 62, 53, 0.10),
+                    transparent 30%
+                ),
+                #f4f3f0;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            padding: 30px;
+        }
+
+
+        /* =========================
+           MAIN CONTAINER
+        ========================== */
+
+        .setup-wrapper {
+            width: 100%;
+            max-width: 1050px;
+            min-height: 620px;
+
+            background: #ffffff;
+
+            border-radius: 22px;
+
+            overflow: hidden;
+
+            display: grid;
+            grid-template-columns: 42% 58%;
+
+            box-shadow:
+                0 25px 70px rgba(0, 0, 0, 0.10),
+                0 5px 20px rgba(0, 0, 0, 0.04);
+
+            animation: containerAppear 0.7s ease;
+        }
+
+
+        @keyframes containerAppear {
+
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+
+        }
+
+
+        /* =========================
+           LEFT PANEL
+        ========================== */
+
+        .welcome-panel {
+            position: relative;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    #2f3e35,
+                    #394b40 55%,
+                    #26342c
+                );
+
+            color: white;
+
+            padding: 55px 45px;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+
+            overflow: hidden;
+        }
+
+
+        .welcome-panel::before {
+
+            content: "";
+
+            position: absolute;
+
+            width: 300px;
+            height: 300px;
+
+            border-radius: 50%;
+
+            background: rgba(255, 255, 255, 0.035);
+
+            top: -120px;
+            right: -100px;
+        }
+
+
+        .welcome-panel::after {
+
+            content: "";
+
+            position: absolute;
+
+            width: 220px;
+            height: 220px;
+
+            border-radius: 50%;
+
+            border: 1px solid rgba(255, 255, 255, 0.08);
+
+            bottom: -80px;
+            left: -80px;
+        }
+
+
+        .brand {
+            position: relative;
+            z-index: 2;
+
+            display: flex;
+            align-items: center;
+
+            gap: 12px;
+
+            font-size: 15px;
+            font-weight: 700;
+
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+
+        .brand-icon {
+
+            width: 38px;
+            height: 38px;
+
+            border-radius: 10px;
+
+            background: #b8895e;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 18px;
+        }
+
+
+        .welcome-content {
+
+            position: relative;
+            z-index: 2;
+        }
+
+
+        .welcome-content h2 {
+
+            font-size: 38px;
+            line-height: 1.12;
+
+            margin-bottom: 18px;
+
+            font-weight: 700;
+        }
+
+
+        .welcome-content h2 span {
+
+            color: #d5ad86;
+        }
+
+
+        .welcome-content p {
+
+            max-width: 340px;
+
+            color: rgba(255, 255, 255, 0.72);
+
+            line-height: 1.7;
+
+            font-size: 15px;
+        }
+
+
+        .staff-preview {
+
+            position: relative;
+            z-index: 2;
+
+            margin-top: 30px;
+
+            padding: 18px;
+
+            border: 1px solid rgba(255, 255, 255, 0.10);
+
+            background: rgba(255, 255, 255, 0.05);
+
+            border-radius: 14px;
+
+            backdrop-filter: blur(10px);
+        }
+
+
+        .staff-label {
+
+            font-size: 11px;
+
+            text-transform: uppercase;
+
+            letter-spacing: 1px;
+
+            color: rgba(255, 255, 255, 0.50);
+
+            margin-bottom: 7px;
+        }
+
+
+        .staff-name {
+
+            font-size: 18px;
+            font-weight: 600;
+
+            margin-bottom: 4px;
+        }
+
+
+        .staff-email {
+
+            color: rgba(255, 255, 255, 0.60);
+
+            font-size: 13px;
+
+            word-break: break-word;
+        }
+
+
+        .security-note {
+
+            position: relative;
+            z-index: 2;
+
+            display: flex;
+            align-items: center;
+
+            gap: 10px;
+
+            color: rgba(255, 255, 255, 0.55);
+
+            font-size: 12px;
+        }
+
+
+        .security-icon {
+
+            width: 30px;
+            height: 30px;
+
+            border-radius: 8px;
+
+            background: rgba(255, 255, 255, 0.08);
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+
+        /* =========================
+           FORM PANEL
+        ========================== */
+
+        .form-panel {
+
+            padding: 50px 60px;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+
+        .form-header {
+
+            margin-bottom: 28px;
+        }
+
+
+        .form-header h1 {
+
+            color: #2f3e35;
+
+            font-size: 30px;
+
+            margin-bottom: 8px;
+        }
+
+
+        .form-header p {
+
+            color: #8a8a8a;
+
+            font-size: 14px;
+
+            line-height: 1.5;
+        }
+
+
+        /* =========================
+           INFO BOX
+        ========================== */
+
+        .info-box {
+
+            display: flex;
+            align-items: flex-start;
+
+            gap: 12px;
+
+            background: #faf7f3;
+
+            border: 1px solid #eee5dc;
+
+            border-radius: 12px;
+
+            padding: 14px 16px;
+
+            margin-bottom: 25px;
+        }
+
+
+        .info-icon {
+
+            flex-shrink: 0;
+
+            width: 30px;
+            height: 30px;
+
+            border-radius: 8px;
+
+            background: #b8895e;
+
+            color: white;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 13px;
+        }
+
+
+        .info-box p {
+
+            color: #707070;
+
+            font-size: 13px;
+
+            line-height: 1.5;
+        }
+
+
+        /* =========================
+           FORM GRID
+        ========================== */
+
+        form {
+
+            width: 100%;
+        }
+
+
+        .form-grid {
+
+            display: grid;
+
+            grid-template-columns: 1fr 1fr;
+
+            column-gap: 20px;
+        }
+
+
+        .form-group {
+
+            margin-bottom: 19px;
+        }
+
+
+        label {
+
+            display: block;
+
+            margin-bottom: 7px;
+
+            color: #343a36;
+
+            font-size: 13px;
+
+            font-weight: 600;
+        }
+
+
+        input,
+        select {
+
+            width: 100%;
+
+            height: 46px;
+
+            padding: 0 13px;
+
+            border: 1px solid #dededa;
+
+            border-radius: 9px;
+
+            background: #fbfbfa;
+
+            color: #333;
+
+            font-size: 14px;
+
+            outline: none;
+
+            transition:
+                border-color 0.2s ease,
+                box-shadow 0.2s ease,
+                background 0.2s ease;
+        }
+
+
+        input:hover,
+        select:hover {
+
+            border-color: #c8c8c3;
+        }
+
+
+        input:focus,
+        select:focus {
+
+            background: #ffffff;
+
+            border-color: #b8895e;
+
+            box-shadow:
+                0 0 0 3px rgba(184, 137, 94, 0.12);
+        }
+
+
+        /* =========================
+           PASSWORD
+        ========================== */
+
+        .password-wrapper {
+
+            position: relative;
+        }
+
+
+        .password-wrapper input {
+
+            padding-right: 45px;
+        }
+
+
+        .toggle-password {
+
+            position: absolute;
+
+            right: 13px;
+            top: 50%;
+
+            transform: translateY(-50%);
+
+            border: none;
+
+            background: transparent;
+
+            color: #999;
+
+            cursor: pointer;
+
+            font-size: 13px;
+        }
+
+
+        .toggle-password:hover {
+
+            color: #2f3e35;
+        }
+
+
+        /* =========================
+           ERRORS
+        ========================== */
+
+        .error {
+
+            display: block;
+
+            color: #c0392b;
+
+            font-size: 12px;
+
+            margin-top: 5px;
+        }
+
+
+        .non-field-errors {
+
+            background: #fff4f2;
+
+            border: 1px solid #f0d0cb;
+
+            color: #c0392b;
+
+            padding: 12px 14px;
+
+            border-radius: 9px;
+
+            margin-bottom: 20px;
+
+            font-size: 13px;
+        }
+
+
+        /* =========================
+           PASSWORD STRENGTH
+        ========================== */
+
+        .password-strength {
+
+            height: 4px;
+
+            width: 100%;
+
+            background: #eeeeeb;
+
+            border-radius: 10px;
+
+            overflow: hidden;
+
+            margin-top: 7px;
+        }
+
+
+        .strength-bar {
+
+            height: 100%;
+
+            width: 0%;
+
+            border-radius: 10px;
+
+            transition: width 0.3s ease;
+        }
+
+
+        .strength-text {
+
+            font-size: 11px;
+
+            color: #999;
+
+            margin-top: 5px;
+        }
+
+
+        /* =========================
+           LOGIN NOTE
+        ========================== */
+
+        .login-note {
+
+            display: flex;
+            align-items: flex-start;
+
+            gap: 12px;
+
+            background: #f3f7f4;
+
+            border: 1px solid #dce7df;
+
+            border-radius: 10px;
+
+            padding: 13px 15px;
+
+            margin-top: 4px;
+            margin-bottom: 18px;
+
+            transition:
+                transform 0.2s ease,
+                box-shadow 0.2s ease;
+        }
+
+
+        .login-note:hover {
+
+            transform: translateY(-1px);
+
+            box-shadow:
+                0 5px 15px rgba(47, 62, 53, 0.08);
+        }
+
+
+        .login-note-icon {
+
+            flex-shrink: 0;
+
+            width: 28px;
+            height: 28px;
+
+            border-radius: 8px;
+
+            background: #2f3e35;
+
+            color: #ffffff;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 13px;
+
+            font-weight: 700;
+        }
+
+
+        .login-note-content {
+
+            font-size: 12px;
+
+            line-height: 1.55;
+
+            color: #667069;
+        }
+
+
+        .login-note-content strong {
+
+            color: #2f3e35;
+
+            font-weight: 700;
+        }
+
+
+        .login-note-content .gmail {
+
+            color: #b8895e;
+
+            font-weight: 600;
+        }
+
+
+        /* =========================
+           BUTTON
+        ========================== */
+
+        .submit-btn {
+
+            width: 100%;
+
+            height: 48px;
+
+            border: none;
+
+            border-radius: 9px;
+
+            background: #2f3e35;
+
+            color: white;
+
+            font-size: 14px;
+
+            font-weight: 600;
+
+            cursor: pointer;
+
+            transition:
+                transform 0.2s ease,
+                background 0.2s ease,
+                box-shadow 0.2s ease;
+
+            margin-top: 5px;
+        }
+
+
+        .submit-btn:hover {
+
+            background: #253129;
+
+            transform: translateY(-1px);
+
+            box-shadow:
+                0 7px 18px rgba(47, 62, 53, 0.20);
+        }
+
+
+        .submit-btn:active {
+
+            transform: translateY(0);
+        }
+
+
+        .submit-btn.loading {
+
+            pointer-events: none;
+
+            opacity: 0.75;
+        }
+
+
+        /* =========================
+           FOOTER
+        ========================== */
+
+        .help-text {
+
+            text-align: center;
+
+            color: #999;
+
+            font-size: 11px;
+
+            margin-top: 18px;
+        }
+
+
+        /* =========================
+           RESPONSIVE
+        ========================== */
+
+        @media (max-width: 850px) {
+
+            body {
+
+                padding: 15px;
+            }
+
+
+            .setup-wrapper {
+
+                grid-template-columns: 1fr;
+
+                max-width: 600px;
+            }
+
+
+            .welcome-panel {
+
+                padding: 35px;
+
+                min-height: 330px;
+            }
+
+
+            .welcome-content h2 {
+
+                font-size: 30px;
+            }
+
+
+            .security-note {
+
+                margin-top: 25px;
+            }
+
+
+            .form-panel {
+
+                padding: 35px;
+            }
+
+        }
+
+
+        @media (max-width: 550px) {
+
+            .form-grid {
+
+                grid-template-columns: 1fr;
+            }
+
+
+            .form-panel {
+
+                padding: 28px 22px;
+            }
+
+
+            .welcome-panel {
+
+                padding: 30px 22px;
+            }
+
+
+            .form-header h1 {
+
+                font-size: 26px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="setup-wrapper">
+
+
+    <!-- =========================
+         LEFT SIDE
+    ========================== -->
+
+    <section class="welcome-panel">
+
+
+        <div class="brand">
+
+            <div class="brand-icon">
+                C
+            </div>
+
+            ClientSpace
+
+        </div>
+
+
+        <div class="welcome-content">
+
+
+            <h2>
+
+                Welcome to<br>
+
+                <span>ClientSpace.</span>
+
+            </h2>
+
+
+            <p>
+
+                Your manager has invited you to join the team.
+                Complete your account setup to access your
+                staff workspace.
+
+            </p>
+
+
+            <div class="staff-preview">
+
+
+                <div class="staff-label">
+
+                    Account being created
+
+                </div>
+
+
+                <div class="staff-name">
+
+                    {{ staff.first_name }} {{ staff.last_name }}
+
+                </div>
+
+
+                <div class="staff-email">
+
+                    {{ staff.email }}
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+        <div class="security-note">
+
+
+            <div class="security-icon">
+
+                ✓
+
+            </div>
+
+
+            <span>
+
+                Your invitation is valid for 7 days.
+
+            </span>
+
+
+        </div>
+
+
+    </section>
+
+
+
+    <!-- =========================
+         RIGHT SIDE
+    ========================== -->
+
+    <section class="form-panel">
+
+
+        <div class="form-header">
+
+
+            <h1>
+                Set Up Your Account
+            </h1>
+
+
+            <p>
+
+                Create your login credentials and tell us about
+                your role in the organization.
+
+            </p>
+
+
+        </div>
+
+
+
+        <div class="info-box">
+
+
+            <div class="info-icon">
+
+                i
+
+            </div>
+
+
+            <p>
+
+                Complete all the fields below. Your email address
+                is already associated with your staff invitation.
+
+            </p>
+
+
+        </div>
+
+
+
+        <form method="POST">
+
+
+            {% csrf_token %}
+
+
+
+            {% if form.non_field_errors %}
+
+                <div class="non-field-errors">
+
+                    {% for error in form.non_field_errors %}
+
+                        {{ error }}
+
+                    {% endfor %}
+
+                </div>
+
+            {% endif %}
+
+
+
+            <div class="form-grid">
+
+
+                <!-- Username -->
+
+                <div class="form-group">
+
+
+                    <label for="{{ form.username.id_for_label }}">
+
+                        Username
+
+                    </label>
+
+
+                    {{ form.username }}
+
+
+                    {% for error in form.username.errors %}
+
+                        <small class="error">
+
+                            {{ error }}
+
+                        </small>
+
+                    {% endfor %}
+
+
+                </div>
+
+
+
+                <!-- Job Role -->
+
+                <div class="form-group">
+
+
+                    <label for="{{ form.role.id_for_label }}">
+
+                        Job Role
+
+                    </label>
+
+
+                    {{ form.role }}
+
+
+                    {% for error in form.role.errors %}
+
+                        <small class="error">
+
+                            {{ error }}
+
+                        </small>
+
+                    {% endfor %}
+
+
+                </div>
+
+
+
+                <!-- Password -->
+
+                <div class="form-group">
+
+
+                    <label for="{{ form.password.id_for_label }}">
+
+                        Password
+
+                    </label>
+
+
+                    <div class="password-wrapper">
+
+
+                        {{ form.password }}
+
+
+                        <button
+                            type="button"
+                            class="toggle-password"
+                            onclick="togglePassword('{{ form.password.id_for_label }}', this)"
+                        >
+
+                            Show
+
+                        </button>
+
+
+                    </div>
+
+
+                    <div class="password-strength">
+
+                        <div
+                            class="strength-bar"
+                            id="strengthBar"
+                        ></div>
+
+                    </div>
+
+
+                    <div
+                        class="strength-text"
+                        id="strengthText"
+                    >
+
+                        Enter a password
+
+                    </div>
+
+
+                    {% for error in form.password.errors %}
+
+                        <small class="error">
+
+                            {{ error }}
+
+                        </small>
+
+                    {% endfor %}
+
+
+                </div>
+
+
+
+                <!-- Confirm Password -->
+
+                <div class="form-group">
+
+
+                    <label for="{{ form.confirm_password.id_for_label }}">
+
+                        Confirm Password
+
+                    </label>
+
+
+                    <div class="password-wrapper">
+
+
+                        {{ form.confirm_password }}
+
+
+                        <button
+                            type="button"
+                            class="toggle-password"
+                            onclick="togglePassword('{{ form.confirm_password.id_for_label }}', this)"
+                        >
+
+                            Show
+
+                        </button>
+
+
+                    </div>
+
+
+                    {% for error in form.confirm_password.errors %}
+
+                        <small class="error">
+
+                            {{ error }}
+
+                        </small>
+
+                    {% endfor %}
+
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- =========================
+                 LOGIN NOTE
+            ========================== -->
+
+            <div class="login-note">
+
+
+                <div class="login-note-icon">
+
+                    i
+
+                </div>
+
+
+                <div class="login-note-content">
+
+                    <strong>Note:</strong>
+
+                    Use your
+                    <span class="gmail">Gmail ID</span>
+                    and the
+                    <strong>password you created</strong>
+                    above to log in to
+                    <strong>ClientSpace</strong>.
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- =========================
+                 SUBMIT BUTTON
+            ========================== -->
+
+            <button
+                type="submit"
+                class="submit-btn"
+                id="submitButton"
+            >
+
+                Complete Account Setup
+
+            </button>
+
+
+        </form>
+
+
+
+        <p class="help-text">
+
+            Having trouble setting up your account?
+            Please contact your manager.
+
+        </p>
+
+
+    </section>
+
+
+</div>
+
+
+
+<script>
+
+
+    /* =========================
+       SHOW / HIDE PASSWORD
+    ========================== */
+
+    function togglePassword(inputId, button) {
+
+        const input = document.getElementById(inputId);
+
+
+        if (input.type === "password") {
+
+            input.type = "text";
+
+            button.textContent = "Hide";
+
+        } else {
+
+            input.type = "password";
+
+            button.textContent = "Show";
+
+        }
+
+    }
+
+
+
+    /* =========================
+       PASSWORD STRENGTH
+    ========================== */
+
+    const passwordInput =
+        document.getElementById(
+            "{{ form.password.id_for_label }}"
+        );
+
+
+    const strengthBar =
+        document.getElementById("strengthBar");
+
+
+    const strengthText =
+        document.getElementById("strengthText");
+
+
+
+    if (passwordInput) {
+
+        passwordInput.addEventListener(
+            "input",
+            function () {
+
+                const password = this.value;
+
+                let score = 0;
+
+
+                if (password.length >= 8)
+                    score++;
+
+
+                if (/[A-Z]/.test(password))
+                    score++;
+
+
+                if (/[a-z]/.test(password))
+                    score++;
+
+
+                if (/[0-9]/.test(password))
+                    score++;
+
+
+                if (/[^A-Za-z0-9]/.test(password))
+                    score++;
+
+
+
+                const percentages = [
+
+                    "0%",
+                    "20%",
+                    "40%",
+                    "60%",
+                    "80%",
+                    "100%"
+
+                ];
+
+
+                strengthBar.style.width =
+                    percentages[score];
+
+
+
+                if (password.length === 0) {
+
+                    strengthText.textContent =
+                        "Enter a password";
+
+                }
+
+                else if (score <= 2) {
+
+                    strengthText.textContent =
+                        "Weak password";
+
+                }
+
+                else if (score === 3) {
+
+                    strengthText.textContent =
+                        "Moderate password";
+
+                }
+
+                else if (score === 4) {
+
+                    strengthText.textContent =
+                        "Strong password";
+
+                }
+
+                else {
+
+                    strengthText.textContent =
+                        "Very strong password";
+
+                }
+
+            }
+        );
+
+    }
+
+
+
+    /* =========================
+       SUBMIT FEEDBACK
+    ========================== */
+
+    const setupForm =
+        document.querySelector("form");
+
+
+    const submitButton =
+        document.getElementById("submitButton");
+
+
+
+    if (setupForm) {
+
+        setupForm.addEventListener(
+            "submit",
+            function () {
+
+                if (setupForm.checkValidity()) {
+
+                    submitButton.classList.add("loading");
+
+                    submitButton.textContent =
+                        "Creating Your Account...";
+
+                }
+
+            }
+        );
+
+    }
+
+</script>
+
+
+</body>
+
+</html>

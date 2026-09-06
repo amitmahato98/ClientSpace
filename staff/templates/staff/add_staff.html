@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'staff/add_staff.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="add-staff-container">
+
+    <div class="page-header">
+        <div>
+            <h1>Add Staff</h1>
+            <p>Invite a new staff member to your organization.</p>
+        </div>
+
+        <a href="{% url 'staff' %}" class="back-btn">
+            ← Back to Staff
+        </a>
+    </div>
+
+
+    <div class="form-card">
+
+        <form method="POST">
+
+            {% csrf_token %}
+
+            <!-- Personal Information -->
+            <div class="section">
+
+                <h2>Personal Information</h2>
+
+                <div class="form-grid">
+
+                    <!-- First Name -->
+                    <div class="form-group">
+
+                        <label for="{{ form.first_name.id_for_label }}">
+                            First Name
+                        </label>
+
+                        {{ form.first_name }}
+
+                        {% for error in form.first_name.errors %}
+                            <small class="error">
+                                {{ error }}
+                            </small>
+                        {% endfor %}
+
+                    </div>
+
+
+                    <!-- Last Name -->
+                    <div class="form-group">
+
+                        <label for="{{ form.last_name.id_for_label }}">
+                            Last Name
+                        </label>
+
+                        {{ form.last_name }}
+
+                        {% for error in form.last_name.errors %}
+                            <small class="error">
+                                {{ error }}
+                            </small>
+                        {% endfor %}
+
+                    </div>
+
+
+                    <!-- Email -->
+                    <div class="form-group">
+
+                        <label for="{{ form.email.id_for_label }}">
+                            Email Address
+                        </label>
+
+                        {{ form.email }}
+
+                        {% for error in form.email.errors %}
+                            <small class="error">
+                                {{ error }}
+                            </small>
+                        {% endfor %}
+
+                    </div>
+
+
+                    <!-- Phone -->
+                    <div class="form-group">
+
+                        <label for="{{ form.phone.id_for_label }}">
+                            Phone Number
+                        </label>
+
+                        {{ form.phone }}
+
+                        {% for error in form.phone.errors %}
+                            <small class="error">
+                                {{ error }}
+                            </small>
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Invitation Information -->
+            <div class="invitation-info">
+
+                <div class="info-icon">
+                    ✉
+                </div>
+
+                <div>
+                    <h3>Account Setup</h3>
+
+                    <p>
+                        An invitation link will be sent to the staff
+                        member's email address. They will use the link
+                        to create their username, password, and job role.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <!-- Buttons -->
+            <div class="form-actions">
+
+                <a href="{% url 'staff' %}" class="cancel-btn">
+                    Cancel
+                </a>
+
+                <button type="submit" class="submit-btn">
+                    Send Invitation
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}
