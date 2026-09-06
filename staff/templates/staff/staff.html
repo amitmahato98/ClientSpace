@@ -1,152 +1,198 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Staff | ClientSpace{% endblock %}
-
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'staff/staff.css' %}">
 {% endblock %}
 
+
 {% block content %}
 
-<div class="staff-container">
 
-    <!-- =========================
-         HEADER
-    ========================== -->
+{% if messages %}
+    <div class="toast-container">
 
-    <div class="staff-header">
+        {% for message in messages %}
 
-        <div>
-            <h1>Staff</h1>
-            <p>Manage your team and distribute project work.</p>
-        </div>
+            <div class="toast-message">
+                <i class="fas fa-check-circle"></i>
+                <span>{{ message }}</span>
+            </div>
 
-        <a href="{% url 'add_staff' %}" class="add-staff-btn">
-            <span>+</span>
-            Add Staff
-        </a>
+        {% endfor %}
 
     </div>
+{% endif %}
+
+<div class="staff-page">
+
+    <!-- =====================================================
+         PAGE HEADER
+    ====================================================== -->
+
+    <div class="page-header">
+
+        <div class="page-heading">
+
+            <div class="page-title-row">
+
+                <div class="page-title-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+
+                <div>
+                    <h1>Staff</h1>
+
+                    <p>
+                        Manage your team and distribute project work.
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
 
 
-    <!-- =========================
-         SEARCH & FILTERS
-    ========================== -->
+        <!-- HEADER ACTIONS -->
 
-    <div class="staff-tools">
+        <div class="header-actions">
 
-        <div class="search-box">
-            <span>⌕</span>
-
-            <input
-                type="text"
-                id="staffSearch"
-                placeholder="Search staff..."
+            <a
+                href="{% url 'add_staff' %}"
+                class="header-btn primary-btn"
             >
+                <i class="fas fa-user-plus"></i>
+                <span>Add Staff</span>
+            </a>
+
+
+            <a
+                href="{% url 'assign_work' %}"
+                class="header-btn secondary-btn"
+            >
+                <i class="fas fa-tasks"></i>
+                <span>Assign Work</span>
+            </a>
+
         </div>
-
-        <select id="roleFilter">
-
-            <option value="">All Roles</option>
-
-            <option value="Developer">
-                Developer
-            </option>
-
-            <option value="Designer">
-                Designer
-            </option>
-
-            <option value="Tester">
-                Tester
-            </option>
-
-            <option value="Manager">
-                Manager
-            </option>
-
-        </select>
-
-
-        <select id="statusFilter">
-
-            <option value="">All Status</option>
-
-            <option value="Available">
-                Available
-            </option>
-
-            <option value="Working">
-                Working
-            </option>
-
-            <option value="On Leave">
-                On Leave
-            </option>
-
-        </select>
 
     </div>
 
 
-    <!-- =========================
+
+    <!-- =====================================================
          STATISTICS
-    ========================== -->
+    ====================================================== -->
 
-    <div class="staff-stats">
+    <div class="stats-grid">
+
+
+        <!-- TOTAL STAFF -->
 
         <div class="stat-card">
 
-            <div class="stat-icon">
-                👥
-            </div>
+            <div class="stat-card-left">
 
-            <div>
-                <p>Total Staff</p>
-                <h2>12</h2>
+                <div class="stat-icon total-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+
+                <div class="stat-info">
+
+                    <span class="stat-label">
+                        Total Staff
+                    </span>
+
+                    <h2>
+                        {{ total_staff }}
+                    </h2>
+
+                </div>
+
             </div>
 
         </div>
 
 
+
+        <!-- AVAILABLE -->
+
         <div class="stat-card">
 
-            <div class="stat-icon">
-                ✓
-            </div>
+            <div class="stat-card-left">
 
-            <div>
-                <p>Available</p>
-                <h2>5</h2>
+                <div class="stat-icon available-icon">
+                    <i class="fas fa-user-check"></i>
+                </div>
+
+                <div class="stat-info">
+
+                    <span class="stat-label">
+                        Available
+                    </span>
+
+                    <h2>
+                        {{ available_staff }}
+                    </h2>
+
+                </div>
+
             </div>
 
         </div>
 
 
+
+        <!-- WORKING -->
+
         <div class="stat-card">
 
-            <div class="stat-icon">
-                💻
-            </div>
+            <div class="stat-card-left">
 
-            <div>
-                <p>Working</p>
-                <h2>7</h2>
+                <div class="stat-icon working-icon">
+                    <i class="fas fa-briefcase"></i>
+                </div>
+
+                <div class="stat-info">
+
+                    <span class="stat-label">
+                        Working
+                    </span>
+
+                    <h2>
+                        {{ working_staff }}
+                    </h2>
+
+                </div>
+
             </div>
 
         </div>
 
 
+
+        <!-- ACTIVE TASKS -->
+
         <div class="stat-card">
 
-            <div class="stat-icon">
-                📋
-            </div>
+            <div class="stat-card-left">
 
-            <div>
-                <p>Active Tasks</p>
-                <h2>24</h2>
+                <div class="stat-icon task-icon">
+                    <i class="fas fa-list-check"></i>
+                </div>
+
+                <div class="stat-info">
+
+                    <span class="stat-label">
+                        Active Tasks
+                    </span>
+
+                    <h2>
+                        {{ active_tasks }}
+                    </h2>
+
+                </div>
+
             </div>
 
         </div>
@@ -154,35 +200,126 @@
     </div>
 
 
-    <!-- =========================
-         STAFF TABLE
-    ========================== -->
+
+    <!-- =====================================================
+         STAFF SECTION
+    ====================================================== -->
 
     <div class="staff-card">
 
 
-        <!-- Table Header -->
+        <!-- CARD HEADER -->
 
-        <div class="table-header">
+        <div class="staff-card-header">
 
-            <div>
+            <div class="section-heading">
 
-                <h2>Team Members</h2>
+                <h2>
+                    Team Members
+                </h2>
 
-                <p>
-                    Your current project team
-                </p>
+                <span id="memberCount">
+
+                    {{ total_staff }}
+                    member{{ total_staff|pluralize }}
+
+                </span>
 
             </div>
 
-            <span id="memberCount">
-                6 members
-            </span>
+
+            <!-- SEARCH -->
+
+            <div class="search-box">
+
+                <i class="fas fa-search"></i>
+
+                <input
+                    type="text"
+                    id="staffSearch"
+                    placeholder="Search staff..."
+                    autocomplete="off"
+                >
+
+            </div>
 
         </div>
 
 
-        <!-- Table -->
+
+        <!-- =================================================
+             FILTER BAR
+        ================================================== -->
+
+        <div class="filter-bar">
+
+            <div class="filter-left">
+
+                <span class="filter-label">
+                    <i class="fas fa-filter"></i>
+                    Filter by
+                </span>
+
+
+                <!-- ROLE -->
+
+                <select id="roleFilter">
+
+                    <option value="">
+                        All Roles
+                    </option>
+
+                    <option value="developer">
+                        Developer
+                    </option>
+
+                    <option value="designer">
+                        Designer
+                    </option>
+
+                    <option value="tester">
+                        Tester
+                    </option>
+
+                    <option value="manager">
+                        Manager
+                    </option>
+
+                </select>
+
+
+
+                <!-- STATUS -->
+
+                <select id="statusFilter">
+
+                    <option value="">
+                        All Status
+                    </option>
+
+                    <option value="available">
+                        Available
+                    </option>
+
+                    <option value="working">
+                        Working
+                    </option>
+
+                    <option value="on leave">
+                        On Leave
+                    </option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             STAFF TABLE
+        ================================================== -->
 
         <div class="table-wrapper">
 
@@ -193,7 +330,7 @@
                     <tr>
 
                         <th>
-                            Staff
+                            Staff Member
                         </th>
 
                         <th>
@@ -201,7 +338,7 @@
                         </th>
 
                         <th>
-                            Project
+                            Projects
                         </th>
 
                         <th>
@@ -212,8 +349,8 @@
                             Status
                         </th>
 
-                        <th>
-                            Action
+                        <th class="actions-column">
+                            Actions
                         </th>
 
                     </tr>
@@ -224,28 +361,56 @@
                 <tbody id="staffTable">
 
 
-                    <!-- =========================
-                         STAFF 1
-                    ========================== -->
+                    {% for staff in staff_members %}
 
-                    <tr>
+                    <tr
+                        data-name="{{ staff.first_name }} {{ staff.last_name }}"
+                        data-role="{{ staff.role|lower }}"
+                        data-status="{{ staff.status|lower }}"
+                    >
+
+
+                        <!-- =================================
+                             STAFF MEMBER
+                        ================================== -->
 
                         <td>
 
                             <div class="staff-info">
 
+
+                                <!-- AVATAR -->
+
                                 <div class="avatar">
-                                    AR
+
+                                    {% if staff.user %}
+
+                                        {{ staff.user.initials }}
+
+                                    {% else %}
+
+                                        {{ staff.first_name|first }}{{ staff.last_name|first }}
+
+                                    {% endif %}
+
                                 </div>
 
-                                <div>
+
+                                <!-- NAME -->
+
+                                <div class="staff-details">
 
                                     <strong>
-                                        Aashish Rai
+
+                                        {{ staff.first_name }}
+                                        {{ staff.last_name }}
+
                                     </strong>
 
                                     <small>
-                                        aashish@example.com
+
+                                        {{ staff.email }}
+
                                     </small>
 
                                 </div>
@@ -255,62 +420,189 @@
                         </td>
 
 
+
+                        <!-- =================================
+                             ROLE
+                        ================================== -->
+
                         <td>
 
-                            <span class="role">
-                                Developer
+                            {% if staff.role %}
+
+                                <span class="role-badge">
+
+                                    {{ staff.role }}
+
+                                </span>
+
+                            {% else %}
+
+                                <span class="role-badge unassigned">
+
+                                    Not Assigned
+
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+
+                        <!-- =================================
+                             PROJECTS
+                        ================================== -->
+
+                        <td>
+
+                            <div class="project-list">
+
+                                {% for assignment in staff.active_assignments %}
+
+                                    <div class="project-item">
+
+                                        <span class="project-dot"></span>
+
+                                        <span class="project-name">
+
+                                            {{ assignment.project.name }}
+
+                                        </span>
+
+                                    </div>
+
+                                {% empty %}
+
+                                    <span class="no-project">
+
+                                        No active project
+
+                                    </span>
+
+                                {% endfor %}
+
+                            </div>
+
+                        </td>
+
+
+
+                        <!-- =================================
+                             TASKS
+                        ================================== -->
+
+                        <td>
+
+                            <span class="task-badge">
+
+                                <i class="fas fa-check-circle"></i>
+
+                                {{ staff.active_assignments|length }}
+
+                                task{{ staff.active_assignments|length|pluralize }}
+
                             </span>
 
                         </td>
 
 
+
+                        <!-- =================================
+                             STATUS
+                        ================================== -->
+
                         <td>
 
-                            <span class="project-name">
-                                E-Commerce Website
-                            </span>
+                            {% if staff.status == "Working" %}
+
+                                <span class="status-badge working">
+
+                                    <span class="status-dot"></span>
+
+                                    Working
+
+                                </span>
+
+
+                            {% elif staff.status == "Available" %}
+
+                                <span class="status-badge available">
+
+                                    <span class="status-dot"></span>
+
+                                    Available
+
+                                </span>
+
+
+                            {% elif staff.status == "On Leave" %}
+
+                                <span class="status-badge leave">
+
+                                    <span class="status-dot"></span>
+
+                                    On Leave
+
+                                </span>
+
+
+                            {% else %}
+
+                                <span class="status-badge">
+
+                                    <span class="status-dot"></span>
+
+                                    {{ staff.status }}
+
+                                </span>
+
+                            {% endif %}
 
                         </td>
 
 
-                        <td>
 
-                            <span class="task-count">
-                                4 tasks
-                            </span>
-
-                        </td>
-
-
-                        <td>
-
-                            <span class="status working">
-
-                                <i></i>
-
-                                Working
-
-                            </span>
-
-                        </td>
-
+                        <!-- =================================
+                             ACTIONS
+                        ================================== -->
 
                         <td>
 
                             <div class="actions">
 
-                                <a
-                                    href="#"
-                                    class="view-btn"
+
+                                <!-- VIEW -->
+
+                                 <a 
+                                    href="{% url 'staff_view' staff.id %}" 
+                                    class="action-btn view-btn" 
+                                    title="View Staff" 
                                 >
-                                    View
+                                    <i class="fas fa-eye"></i>
+                                    <span>View</span>
                                 </a>
 
+
+                                <!-- ASSIGN -->
+
                                 <a
-                                    href="#"
-                                    class="more-btn"
+                                    href="{% url 'assign_work' %}?staff={{staff.id}}"
+                                    class="action-icon-btn assign-btn"
+                                    title="Assign Work"
                                 >
-                                    ⋮
+
+                                    <i class="fas fa-plus"></i>
+
+                                </a>
+
+                                 <a
+                                    href="{% url 'staff_manage' staff.id %}"
+                                    class="action-icon-btn more-btn"
+                                    title="More"
+                                >
+
+                                    <i class="fas fa-ellipsis-h"></i>
+
                                 </a>
 
                             </div>
@@ -320,93 +612,43 @@
                     </tr>
 
 
-                    <!-- =========================
-                         STAFF 2
-                    ========================== -->
+                    {% empty %}
 
-                    <tr>
 
-                        <td>
+                    <!-- =================================
+                         NO STAFF
+                    ================================== -->
 
-                            <div class="staff-info">
+                    <tr class="empty-row">
 
-                                <div class="avatar">
-                                    SS
-                                </div>
+                        <td colspan="6">
 
-                                <div>
+                            <div class="empty-state">
 
-                                    <strong>
-                                        Sita Sharma
-                                    </strong>
+                                <div class="empty-icon">
 
-                                    <small>
-                                        sita@example.com
-                                    </small>
+                                    <i class="fas fa-users"></i>
 
                                 </div>
 
-                            </div>
+                                <h3>
+                                    No staff members yet
+                                </h3>
 
-                        </td>
-
-
-                        <td>
-
-                            <span class="role">
-                                Designer
-                            </span>
-
-                        </td>
-
-
-                        <td>
-
-                            <span class="project-name">
-                                Banking Application
-                            </span>
-
-                        </td>
-
-
-                        <td>
-
-                            <span class="task-count">
-                                3 tasks
-                            </span>
-
-                        </td>
-
-
-                        <td>
-
-                            <span class="status available">
-
-                                <i></i>
-
-                                Available
-
-                            </span>
-
-                        </td>
-
-
-                        <td>
-
-                            <div class="actions">
+                                <p>
+                                    Add your first staff member
+                                    to get started.
+                                </p>
 
                                 <a
-                                    href="#"
-                                    class="view-btn"
+                                    href="{% url 'add_staff' %}"
+                                    class="empty-btn"
                                 >
-                                    View
-                                </a>
 
-                                <a
-                                    href="#"
-                                    class="more-btn"
-                                >
-                                    ⋮
+                                    <i class="fas fa-user-plus"></i>
+
+                                    Add Staff
+
                                 </a>
 
                             </div>
@@ -416,389 +658,7 @@
                     </tr>
 
 
-                    <!-- =========================
-                         STAFF 3
-                    ========================== -->
-
-                    <tr>
-
-                        <td>
-
-                            <div class="staff-info">
-
-                                <div class="avatar">
-                                    RT
-                                </div>
-
-                                <div>
-
-                                    <strong>
-                                        Roshan Thapa
-                                    </strong>
-
-                                    <small>
-                                        roshan@example.com
-                                    </small>
-
-                                </div>
-
-                            </div>
-
-                        </td>
-
-
-                        <td>
-
-                            <span class="role">
-                                Tester
-                            </span>
-
-                        </td>
-
-
-                        <td>
-
-                            <span class="project-name">
-                                Hospital Management
-                            </span>
-
-                        </td>
-
-
-                        <td>
-
-                            <span class="task-count">
-                                6 tasks
-                            </span>
-
-                        </td>
-
-
-                        <td>
-
-                            <span class="status working">
-
-                                <i></i>
-
-                                Working
-
-                            </span>
-
-                        </td>
-
-
-                        <td>
-
-                            <div class="actions">
-
-                                <a
-                                    href="#"
-                                    class="view-btn"
-                                >
-                                    View
-                                </a>
-
-                                <a
-                                    href="#"
-                                    class="more-btn"
-                                >
-                                    ⋮
-                                </a>
-
-                            </div>
-
-                        </td>
-
-                    </tr>
-
-
-                    <!-- =========================
-                         STAFF 4
-                    ========================== -->
-
-                    <tr>
-
-                        <td>
-
-                            <div class="staff-info">
-
-                                <div class="avatar">
-                                    PL
-                                </div>
-
-                                <div>
-
-                                    <strong>
-                                        Pratik Limbu
-                                    </strong>
-
-                                    <small>
-                                        pratik@example.com
-                                    </small>
-
-                                </div>
-
-                            </div>
-
-                        </td>
-
-
-                        <td>
-
-                            <span class="role">
-                                Developer
-                            </span>
-
-                        </td>
-
-
-                        <td>
-
-                            <span class="project-name">
-                                ClientSpace
-                            </span>
-
-                        </td>
-
-
-                        <td>
-
-                            <span class="task-count">
-                                7 tasks
-                            </span>
-
-                        </td>
-
-
-                        <td>
-
-                            <span class="status working">
-
-                                <i></i>
-
-                                Working
-
-                            </span>
-
-                        </td>
-
-
-                        <td>
-
-                            <div class="actions">
-
-                                <a
-                                    href="#"
-                                    class="view-btn"
-                                >
-                                    View
-                                </a>
-
-                                <a
-                                    href="#"
-                                    class="more-btn"
-                                >
-                                    ⋮
-                                </a>
-
-                            </div>
-
-                        </td>
-
-                    </tr>
-
-
-                    <!-- =========================
-                         STAFF 5
-                    ========================== -->
-
-                    <tr>
-
-                        <td>
-
-                            <div class="staff-info">
-
-                                <div class="avatar">
-                                    NK
-                                </div>
-
-                                <div>
-
-                                    <strong>
-                                        Nisha Karki
-                                    </strong>
-
-                                    <small>
-                                        nisha@example.com
-                                    </small>
-
-                                </div>
-
-                            </div>
-
-                        </td>
-
-
-                        <td>
-
-                            <span class="role">
-                                Manager
-                            </span>
-
-                        </td>
-
-
-                        <td>
-
-                            <span class="project-name">
-                                CRM System
-                            </span>
-
-                        </td>
-
-
-                        <td>
-
-                            <span class="task-count">
-                                4 tasks
-                            </span>
-
-                        </td>
-
-
-                        <td>
-
-                            <span class="status available">
-
-                                <i></i>
-
-                                Available
-
-                            </span>
-
-                        </td>
-
-
-                        <td>
-
-                            <div class="actions">
-
-                                <a
-                                    href="#"
-                                    class="view-btn"
-                                >
-                                    View
-                                </a>
-
-                                <a
-                                    href="#"
-                                    class="more-btn"
-                                >
-                                    ⋮
-                                </a>
-
-                            </div>
-
-                        </td>
-
-                    </tr>
-
-
-                    <!-- =========================
-                         STAFF 6
-                    ========================== -->
-
-                    <tr>
-
-                        <td>
-
-                            <div class="staff-info">
-
-                                <div class="avatar">
-                                    BG
-                                </div>
-
-                                <div>
-
-                                    <strong>
-                                        Bibek Gurung
-                                    </strong>
-
-                                    <small>
-                                        bibek@example.com
-                                    </small>
-
-                                </div>
-
-                            </div>
-
-                        </td>
-
-
-                        <td>
-
-                            <span class="role">
-                                Developer
-                            </span>
-
-                        </td>
-
-
-                        <td>
-
-                            <span class="project-name">
-                                Food Delivery App
-                            </span>
-
-                        </td>
-
-
-                        <td>
-
-                            <span class="task-count">
-                                2 tasks
-                            </span>
-
-                        </td>
-
-
-                        <td>
-
-                            <span class="status available">
-
-                                <i></i>
-
-                                Available
-
-                            </span>
-
-                        </td>
-
-
-                        <td>
-
-                            <div class="actions">
-
-                                <a
-                                    href="#"
-                                    class="view-btn"
-                                >
-                                    View
-                                </a>
-
-                                <a
-                                    href="#"
-                                    class="more-btn"
-                                >
-                                    ⋮
-                                </a>
-
-                            </div>
-
-                        </td>
-
-                    </tr>
-
+                    {% endfor %}
 
                 </tbody>
 
@@ -811,126 +671,145 @@
 </div>
 
 
-<!-- =========================
-     SEARCH & FILTER JAVASCRIPT
-========================== -->
+
+<!-- =====================================================
+     SEARCH + FILTER JAVASCRIPT
+====================================================== -->
 
 <script>
 
-const searchInput =
-    document.getElementById("staffSearch");
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
 
-const roleFilter =
-    document.getElementById("roleFilter");
+        const searchInput =
+            document.getElementById("staffSearch");
 
-const statusFilter =
-    document.getElementById("statusFilter");
+        const roleFilter =
+            document.getElementById("roleFilter");
 
-const staffTable =
-    document.getElementById("staffTable");
+        const statusFilter =
+            document.getElementById("statusFilter");
 
-const memberCount =
-    document.getElementById("memberCount");
+        const table =
+            document.getElementById("staffTable");
 
-
-function filterStaff() {
-
-    const searchValue =
-        searchInput.value.toLowerCase().trim();
-
-    const roleValue =
-        roleFilter.value.toLowerCase();
-
-    const statusValue =
-        statusFilter.value.toLowerCase();
+        const memberCount =
+            document.getElementById("memberCount");
 
 
-    const rows =
-        staffTable.querySelectorAll("tr");
+        function filterStaff() {
+
+            const searchValue =
+                searchInput.value
+                    .toLowerCase()
+                    .trim();
 
 
-    let visibleCount = 0;
+            const roleValue =
+                roleFilter.value
+                    .toLowerCase();
 
 
-    rows.forEach(row => {
-
-        const rowText =
-            row.innerText.toLowerCase();
-
-
-        const role =
-            row.cells[1].innerText
-                .toLowerCase()
-                .trim();
+            const statusValue =
+                statusFilter.value
+                    .toLowerCase();
 
 
-        const status =
-            row.cells[4].innerText
-                .toLowerCase()
-                .trim();
+            const rows =
+                table.querySelectorAll(
+                    "tr[data-name]"
+                );
 
 
-        const matchesSearch =
-            rowText.includes(searchValue);
+            let visibleCount = 0;
 
 
-        const matchesRole =
-            roleValue === "" ||
-            role.includes(roleValue);
+            rows.forEach(
+                function (row) {
+
+                    const name =
+                        row.dataset.name
+                            .toLowerCase();
 
 
-        const matchesStatus =
-            statusValue === "" ||
-            status.includes(statusValue);
+                    const role =
+                        row.dataset.role
+                            .toLowerCase();
 
 
-        if (
-            matchesSearch &&
-            matchesRole &&
-            matchesStatus
-        ) {
+                    const status =
+                        row.dataset.status
+                            .toLowerCase();
 
-            row.style.display = "";
 
-            visibleCount++;
+                    const matchesSearch =
+                        name.includes(
+                            searchValue
+                        );
 
-        } else {
 
-            row.style.display = "none";
+                    const matchesRole =
+                        !roleValue ||
+                        role === roleValue;
+
+
+                    const matchesStatus =
+                        !statusValue ||
+                        status === statusValue;
+
+
+                    if (
+                        matchesSearch &&
+                        matchesRole &&
+                        matchesStatus
+                    ) {
+
+                        row.style.display = "";
+
+                        visibleCount++;
+
+                    }
+                    else {
+
+                        row.style.display = "none";
+
+                    }
+
+                }
+            );
+
+
+            memberCount.textContent =
+                visibleCount +
+                " member" +
+                (
+                    visibleCount !== 1
+                        ? "s"
+                        : ""
+                );
 
         }
 
-    });
+
+        searchInput.addEventListener(
+            "input",
+            filterStaff
+        );
 
 
-    memberCount.innerText =
-        visibleCount +
-        (visibleCount === 1 ? " member" : " members");
-
-}
-
-
-/* Search */
-
-searchInput.addEventListener(
-    "input",
-    filterStaff
-);
+        roleFilter.addEventListener(
+            "change",
+            filterStaff
+        );
 
 
-/* Role */
+        statusFilter.addEventListener(
+            "change",
+            filterStaff
+        );
 
-roleFilter.addEventListener(
-    "change",
-    filterStaff
-);
-
-
-/* Status */
-
-statusFilter.addEventListener(
-    "change",
-    filterStaff
+    }
 );
 
 </script>

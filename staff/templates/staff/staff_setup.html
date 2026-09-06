@@ -1,0 +1,1045 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ClientSpace - Account Setup</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+
+            background:
+                radial-gradient(
+                    circle at top left,
+                    rgba(82, 121, 111, 0.18),
+                    transparent 35%
+                ),
+                radial-gradient(
+                    circle at bottom right,
+                    rgba(184, 137, 94, 0.18),
+                    transparent 35%
+                ),
+                #f5f2ec;
+        }
+
+        .setup-wrapper {
+            width: 100%;
+            max-width: 1050px;
+            min-height: 620px;
+
+            display: grid;
+            grid-template-columns: 42% 58%;
+
+            background: #ffffff;
+            border-radius: 22px;
+            overflow: hidden;
+
+            box-shadow:
+                0 25px 60px rgba(31, 41, 55, 0.15);
+
+            animation: fadeIn 0.6s ease;
+        }
+
+        /* =========================
+           LEFT WELCOME PANEL
+        ========================= */
+
+        .welcome-panel {
+            position: relative;
+
+            padding: 50px 42px;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+
+            color: white;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    #315c50,
+                    #52796f
+                );
+        }
+
+        .welcome-panel::before {
+            content: "";
+            position: absolute;
+
+            width: 280px;
+            height: 280px;
+
+            border-radius: 50%;
+
+            background: rgba(255, 255, 255, 0.06);
+
+            top: -100px;
+            right: -100px;
+        }
+
+        .welcome-panel::after {
+            content: "";
+            position: absolute;
+
+            width: 200px;
+            height: 200px;
+
+            border-radius: 50%;
+
+            background: rgba(184, 137, 94, 0.15);
+
+            bottom: -80px;
+            left: -70px;
+        }
+
+        .brand {
+            position: relative;
+            z-index: 2;
+
+            display: flex;
+            align-items: center;
+            gap: 12px;
+
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .brand-icon {
+            width: 42px;
+            height: 42px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 12px;
+
+            background: rgba(255, 255, 255, 0.16);
+
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .welcome-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .welcome-content h1 {
+            font-size: 36px;
+            line-height: 1.15;
+            margin-bottom: 18px;
+        }
+
+        .welcome-content p {
+            color: rgba(255, 255, 255, 0.82);
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        .staff-preview {
+            position: relative;
+            z-index: 2;
+
+            margin-top: 30px;
+            padding: 20px;
+
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 14px;
+
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .staff-preview-label {
+            margin-bottom: 8px;
+
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .staff-name {
+            font-size: 20px;
+            font-weight: 600;
+
+            margin-bottom: 5px;
+        }
+
+        .staff-email {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.72);
+
+            word-break: break-word;
+        }
+
+        .security-note {
+            position: relative;
+            z-index: 2;
+
+            display: flex;
+            align-items: center;
+            gap: 10px;
+
+            font-size: 12px;
+
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .security-icon {
+            width: 28px;
+            height: 28px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 8px;
+
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        /* =========================
+           RIGHT FORM PANEL
+        ========================= */
+
+        .form-panel {
+            padding: 48px 55px;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .form-header {
+            margin-bottom: 28px;
+        }
+
+        .form-header h2 {
+            color: #263b35;
+            font-size: 30px;
+            margin-bottom: 8px;
+        }
+
+        .form-header p {
+            color: #7b817d;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .info-box {
+            padding: 13px 16px;
+            margin-bottom: 25px;
+
+            border-left: 4px solid #52796f;
+            border-radius: 8px;
+
+            background: #f3f7f5;
+
+            color: #56645f;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        /* =========================
+           FORM FIELDS
+        ========================= */
+
+        .form-group {
+            margin-bottom: 19px;
+        }
+
+        .form-group label {
+            display: block;
+
+            margin-bottom: 8px;
+
+            color: #37443f;
+
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .form-panel input,
+        .form-panel select {
+            width: 100%;
+            height: 48px;
+
+            padding: 0 15px;
+
+            border: 1px solid #d7ddd9;
+            border-radius: 10px;
+
+            background: #ffffff;
+
+            color: #27332f;
+            font-size: 14px;
+
+            outline: none;
+
+            transition:
+                border-color 0.2s ease,
+                box-shadow 0.2s ease;
+        }
+
+        .form-panel input::placeholder {
+            color: #a2aaa6;
+        }
+
+        .form-panel input:hover,
+        .form-panel select:hover {
+            border-color: #aebcb6;
+        }
+
+        .form-panel input:focus,
+        .form-panel select:focus {
+            border-color: #52796f;
+
+            box-shadow:
+                0 0 0 3px rgba(82, 121, 111, 0.12);
+        }
+
+        /* =========================
+           PASSWORD
+        ========================= */
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-wrapper input {
+            padding-right: 75px;
+        }
+
+        .show-password {
+            position: absolute;
+
+            right: 8px;
+            top: 50%;
+
+            transform: translateY(-50%);
+
+            border: none;
+            background: transparent;
+
+            color: #52796f;
+
+            font-size: 12px;
+            font-weight: 600;
+
+            cursor: pointer;
+
+            padding: 7px;
+        }
+
+        .show-password:hover {
+            color: #315c50;
+        }
+
+        /* =========================
+           PASSWORD STRENGTH
+        ========================= */
+
+        .strength-container {
+            margin-top: 8px;
+        }
+
+        .strength-bar {
+            width: 100%;
+            height: 5px;
+
+            border-radius: 10px;
+
+            background: #e8ebe9;
+
+            overflow: hidden;
+        }
+
+        .strength-progress {
+            width: 0%;
+            height: 100%;
+
+            border-radius: 10px;
+
+            background: #d6d6d6;
+
+            transition: 0.25s ease;
+        }
+
+        .strength-text {
+            margin-top: 5px;
+
+            font-size: 11px;
+
+            color: #8b938f;
+        }
+
+        /* =========================
+           ERRORS
+        ========================= */
+
+        .error {
+            margin-top: 6px;
+
+            color: #c24141;
+
+            font-size: 12px;
+        }
+
+        .non-field-errors {
+            margin-bottom: 15px;
+
+            color: #c24141;
+
+            font-size: 13px;
+        }
+
+        /* =========================
+           SUBMIT BUTTON
+        ========================= */
+
+        .submit-btn {
+            width: 100%;
+            height: 50px;
+
+            margin-top: 5px;
+
+            border: none;
+            border-radius: 10px;
+
+            background: #52796f;
+
+            color: white;
+
+            font-size: 14px;
+            font-weight: 600;
+
+            cursor: pointer;
+
+            transition:
+                background 0.2s ease,
+                transform 0.2s ease,
+                box-shadow 0.2s ease;
+        }
+
+        .submit-btn:hover {
+            background: #315c50;
+
+            transform: translateY(-1px);
+
+            box-shadow:
+                0 8px 18px rgba(49, 92, 80, 0.18);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .submit-btn.loading {
+            opacity: 0.7;
+            cursor: wait;
+        }
+
+        /* =========================
+           LOGIN NOTE
+        ========================= */
+
+        .login-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 11px;
+
+            margin-top: 14px;
+            padding: 13px 15px;
+
+            border-radius: 10px;
+
+            background: #faf7f2;
+            border: 1px solid #eee5d9;
+
+            color: #68635c;
+
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .login-note-icon {
+            flex-shrink: 0;
+
+            width: 21px;
+            height: 21px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 50%;
+
+            background: #b8895e;
+            color: white;
+
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .login-note-content strong {
+            color: #4c4944;
+        }
+
+        .gmail {
+            color: #52796f;
+            font-weight: 600;
+        }
+
+        .help-text {
+            margin-top: 20px;
+
+            text-align: center;
+
+            color: #929995;
+
+            font-size: 11px;
+        }
+
+        /* =========================
+           ANIMATION
+        ========================= */
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* =========================
+           RESPONSIVE
+        ========================= */
+
+        @media (max-width: 850px) {
+
+            body {
+                padding: 15px;
+            }
+
+            .setup-wrapper {
+                grid-template-columns: 1fr;
+            }
+
+            .welcome-panel {
+                padding: 35px;
+                min-height: 330px;
+            }
+
+            .welcome-content h1 {
+                font-size: 29px;
+            }
+
+            .security-note {
+                margin-top: 30px;
+            }
+
+            .form-panel {
+                padding: 35px;
+            }
+        }
+
+        @media (max-width: 500px) {
+
+            .welcome-panel,
+            .form-panel {
+                padding: 28px 22px;
+            }
+
+            .form-header h2 {
+                font-size: 25px;
+            }
+
+            .welcome-content h1 {
+                font-size: 26px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="setup-wrapper">
+
+    <!-- =========================
+         LEFT SIDE
+    ========================== -->
+
+    <div class="welcome-panel">
+
+        <div class="brand">
+
+            <div class="brand-icon">
+                C
+            </div>
+
+            <span>ClientSpace</span>
+
+        </div>
+
+
+        <div class="welcome-content">
+
+            <h1>
+                Welcome to the team.
+            </h1>
+
+            <p>
+                Your staff account is almost ready.
+                Complete the setup below to create your
+                ClientSpace login credentials.
+            </p>
+
+
+            <div class="staff-preview">
+
+                <div class="staff-preview-label">
+                    Account invited for
+                </div>
+
+                <div class="staff-name">
+                    {{ staff.first_name }} {{ staff.last_name }}
+                </div>
+
+                <div class="staff-email">
+                    {{ staff.email }}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="security-note">
+
+            <div class="security-icon">
+                🔒
+            </div>
+
+            <span>
+                Your invitation is valid for 7 days.
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         RIGHT SIDE
+    ========================== -->
+
+    <div class="form-panel">
+
+        <div class="form-header">
+
+            <h2>
+                Set Up Your Account
+            </h2>
+
+            <p>
+                Create your username, job role and password
+                to access ClientSpace.
+            </p>
+
+        </div>
+
+
+        <div class="info-box">
+
+            Please complete all the fields below.
+            Your email address is already registered with
+            your staff invitation.
+
+        </div>
+
+
+        <form method="POST" id="setupForm">
+
+            {% csrf_token %}
+
+
+            <!-- NON FIELD ERRORS -->
+
+            {% if form.non_field_errors %}
+
+                <div class="non-field-errors">
+
+                    {{ form.non_field_errors }}
+
+                </div>
+
+            {% endif %}
+
+
+            <!-- USERNAME -->
+
+            <div class="form-group">
+
+                <label for="{{ form.username.id_for_label }}">
+                    Username
+                </label>
+
+                {{ form.username }}
+
+                {% if form.username.errors %}
+
+                    <div class="error">
+                        {{ form.username.errors }}
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- ROLE -->
+
+            <div class="form-group">
+
+                <label for="{{ form.role.id_for_label }}">
+                    Job Role
+                </label>
+
+                {{ form.role }}
+
+                {% if form.role.errors %}
+
+                    <div class="error">
+                        {{ form.role.errors }}
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- PASSWORD -->
+
+            <div class="form-group">
+
+                <label for="{{ form.password.id_for_label }}">
+                    Password
+                </label>
+
+                <div class="password-wrapper">
+
+                    {{ form.password }}
+
+                    <button
+                        type="button"
+                        class="show-password"
+                        onclick="togglePassword(
+                            '{{ form.password.id_for_label }}',
+                            this
+                        )"
+                    >
+                        Show
+                    </button>
+
+                </div>
+
+
+                <div class="strength-container">
+
+                    <div class="strength-bar">
+
+                        <div
+                            class="strength-progress"
+                            id="strengthProgress"
+                        ></div>
+
+                    </div>
+
+                    <div
+                        class="strength-text"
+                        id="strengthText"
+                    >
+                        Password strength
+                    </div>
+
+                </div>
+
+
+                {% if form.password.errors %}
+
+                    <div class="error">
+                        {{ form.password.errors }}
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- CONFIRM PASSWORD -->
+
+            <div class="form-group">
+
+                <label for="{{ form.confirm_password.id_for_label }}">
+                    Confirm Password
+                </label>
+
+                <div class="password-wrapper">
+
+                    {{ form.confirm_password }}
+
+                    <button
+                        type="button"
+                        class="show-password"
+                        onclick="togglePassword(
+                            '{{ form.confirm_password.id_for_label }}',
+                            this
+                        )"
+                    >
+                        Show
+                    </button>
+
+                </div>
+
+
+                {% if form.confirm_password.errors %}
+
+                    <div class="error">
+                        {{ form.confirm_password.errors }}
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- SUBMIT -->
+
+            <button
+                type="submit"
+                class="submit-btn"
+                id="submitButton"
+            >
+                Complete Account Setup
+            </button>
+
+
+            <!-- LOGIN NOTE -->
+
+            <div class="login-note">
+
+                <div class="login-note-icon">
+                    i
+                </div>
+
+                <div class="login-note-content">
+
+                    <strong>Note:</strong>
+
+                    After completing your account setup,
+                    use your
+                    <span class="gmail">Gmail ID</span>
+                    and the
+                    <strong>password you created</strong>
+                    to log in to
+                    <strong>ClientSpace</strong>.
+
+                </div>
+
+            </div>
+
+        </form>
+
+
+        <div class="help-text">
+
+            Having trouble setting up your account?
+            Please contact your manager.
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    /* =========================
+       SHOW / HIDE PASSWORD
+    ========================== */
+
+    function togglePassword(inputId, button) {
+
+        const input = document.getElementById(inputId);
+
+        if (!input) {
+            return;
+        }
+
+        if (input.type === "password") {
+
+            input.type = "text";
+
+            button.textContent = "Hide";
+
+        } else {
+
+            input.type = "password";
+
+            button.textContent = "Show";
+
+        }
+    }
+
+
+    /* =========================
+       PASSWORD STRENGTH
+    ========================== */
+
+    const passwordInput =
+        document.getElementById(
+            "{{ form.password.id_for_label }}"
+        );
+
+    const strengthProgress =
+        document.getElementById(
+            "strengthProgress"
+        );
+
+    const strengthText =
+        document.getElementById(
+            "strengthText"
+        );
+
+
+    if (passwordInput) {
+
+        passwordInput.addEventListener(
+            "input",
+            function () {
+
+                const password = this.value;
+
+                let score = 0;
+
+
+                if (password.length >= 8) {
+                    score++;
+                }
+
+                if (/[A-Z]/.test(password)) {
+                    score++;
+                }
+
+                if (/[a-z]/.test(password)) {
+                    score++;
+                }
+
+                if (/[0-9]/.test(password)) {
+                    score++;
+                }
+
+                if (/[^A-Za-z0-9]/.test(password)) {
+                    score++;
+                }
+
+
+                const percentage =
+                    (score / 5) * 100;
+
+                strengthProgress.style.width =
+                    percentage + "%";
+
+
+                if (password.length === 0) {
+
+                    strengthText.textContent =
+                        "Password strength";
+
+                } else if (score <= 2) {
+
+                    strengthText.textContent =
+                        "Weak password";
+
+                } else if (score === 3) {
+
+                    strengthText.textContent =
+                        "Moderate password";
+
+                } else if (score === 4) {
+
+                    strengthText.textContent =
+                        "Strong password";
+
+                } else {
+
+                    strengthText.textContent =
+                        "Very strong password";
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /* =========================
+       SUBMIT FEEDBACK
+    ========================== */
+
+    const setupForm =
+        document.getElementById("setupForm");
+
+    const submitButton =
+        document.getElementById("submitButton");
+
+
+    if (setupForm) {
+
+        setupForm.addEventListener(
+            "submit",
+            function (event) {
+
+                if (!setupForm.checkValidity()) {
+                    return;
+                }
+
+                submitButton.classList.add("loading");
+
+                submitButton.textContent =
+                    "Creating Your Account...";
+
+            }
+        );
+
+    }
+
+</script>
+
+</body>
+</html>

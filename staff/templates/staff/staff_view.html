@@ -1,0 +1,969 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_head %}
+
+<style>
+
+    * {
+        box-sizing: border-box;
+    }
+
+    .staff-view-page {
+        padding: 30px;
+        max-width: 1250px;
+        margin: 0 auto;
+    }
+
+
+    /* ==============================
+       TOP HEADER
+    ============================== */
+
+    .view-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        margin-bottom: 28px;
+    }
+
+    .view-heading {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .back-button {
+        width: 40px;
+        height: 40px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 9px;
+
+        color: #52796f;
+        background: #ffffff;
+
+        border: 1px solid #dce8e3;
+
+        text-decoration: none;
+
+        transition: 0.2s;
+    }
+
+    .back-button:hover {
+        background: #52796f;
+        color: white;
+    }
+
+    .view-heading h1 {
+        margin: 0;
+        font-size: 26px;
+        color: #26332f;
+    }
+
+    .view-heading p {
+        margin: 5px 0 0;
+        color: #7a8581;
+        font-size: 13px;
+    }
+
+
+    /* ==============================
+       PROFILE HEADER
+    ============================== */
+
+    .profile-card {
+        background: #ffffff;
+
+        border: 1px solid #e4ebe8;
+        border-radius: 16px;
+
+        padding: 28px;
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        gap: 25px;
+
+        margin-bottom: 22px;
+
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.03);
+    }
+
+    .profile-left {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .large-avatar {
+        width: 82px;
+        height: 82px;
+
+        border-radius: 50%;
+
+        background: #e2eee9;
+        color: #52796f;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        font-size: 26px;
+        font-weight: 700;
+    }
+
+    .profile-name h2 {
+        margin: 0 0 7px;
+
+        font-size: 23px;
+        color: #26332f;
+    }
+
+    .profile-email {
+        color: #7a8581;
+        font-size: 14px;
+        margin-bottom: 10px;
+    }
+
+    .profile-badges {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .badge {
+        padding: 6px 12px;
+
+        border-radius: 20px;
+
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .role-badge {
+        background: #eef3f1;
+        color: #52796f;
+    }
+
+    .status-working {
+        background: #e8f4ec;
+        color: #3f7653;
+    }
+
+    .status-available {
+        background: #edf5f2;
+        color: #52796f;
+    }
+
+    .status-leave {
+        background: #fff4e8;
+        color: #a96d2e;
+    }
+
+
+    /* ==============================
+       GRID
+    ============================== */
+
+    .details-grid {
+        display: grid;
+
+        grid-template-columns: repeat(2, 1fr);
+
+        gap: 22px;
+
+        margin-bottom: 22px;
+    }
+
+    .details-card {
+        background: #ffffff;
+
+        border: 1px solid #e4ebe8;
+
+        border-radius: 14px;
+
+        padding: 24px;
+
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.025);
+    }
+
+    .card-title {
+        display: flex;
+        align-items: center;
+
+        gap: 10px;
+
+        margin-bottom: 20px;
+    }
+
+    .card-title i {
+        color: #52796f;
+        font-size: 17px;
+    }
+
+    .card-title h3 {
+        margin: 0;
+
+        font-size: 17px;
+
+        color: #26332f;
+    }
+
+
+    /* ==============================
+       INFORMATION ROW
+    ============================== */
+
+    .info-row {
+        display: flex;
+
+        justify-content: space-between;
+
+        padding: 13px 0;
+
+        border-bottom: 1px solid #edf1ef;
+
+        gap: 20px;
+    }
+
+    .info-row:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        color: #8a9591;
+
+        font-size: 13px;
+    }
+
+    .info-value {
+        color: #34423d;
+
+        font-size: 13px;
+
+        font-weight: 600;
+
+        text-align: right;
+    }
+
+
+    /* ==============================
+       PROJECTS
+    ============================== */
+
+    .project-item {
+        display: flex;
+
+        align-items: center;
+
+        justify-content: space-between;
+
+        padding: 15px;
+
+        border: 1px solid #e7eeeb;
+
+        border-radius: 10px;
+
+        margin-bottom: 10px;
+    }
+
+    .project-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .project-left {
+        display: flex;
+
+        align-items: center;
+
+        gap: 12px;
+    }
+
+    .project-icon {
+        width: 40px;
+        height: 40px;
+
+        display: flex;
+
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 9px;
+
+        background: #eef4f1;
+
+        color: #52796f;
+    }
+
+    .project-name {
+        font-size: 14px;
+
+        font-weight: 600;
+
+        color: #34423d;
+    }
+
+    .project-work {
+        margin-top: 4px;
+
+        color: #8a9591;
+
+        font-size: 12px;
+    }
+
+    .active-label {
+        font-size: 11px;
+
+        padding: 5px 9px;
+
+        border-radius: 15px;
+
+        background: #e8f4ec;
+
+        color: #3f7653;
+
+        font-weight: 600;
+    }
+
+
+    /* ==============================
+       NO PROJECT
+    ============================== */
+
+    .empty-project {
+        text-align: center;
+
+        padding: 25px;
+
+        border: 1px dashed #d9e2de;
+
+        border-radius: 10px;
+
+        color: #899590;
+
+        font-size: 13px;
+    }
+
+    .empty-project i {
+        display: block;
+
+        font-size: 24px;
+
+        margin-bottom: 9px;
+    }
+
+
+    /* ==============================
+       ASSIGNMENT HISTORY
+    ============================== */
+
+    .history-card {
+        background: #ffffff;
+
+        border: 1px solid #e4ebe8;
+
+        border-radius: 14px;
+
+        padding: 24px;
+
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.025);
+    }
+
+    .history-table-wrapper {
+        overflow-x: auto;
+    }
+
+    .history-table {
+        width: 100%;
+
+        border-collapse: collapse;
+    }
+
+    .history-table th {
+        text-align: left;
+
+        padding: 13px;
+
+        font-size: 11px;
+
+        text-transform: uppercase;
+
+        letter-spacing: 0.5px;
+
+        color: #899590;
+
+        border-bottom: 1px solid #e4ebe8;
+    }
+
+    .history-table td {
+        padding: 15px 13px;
+
+        font-size: 13px;
+
+        color: #45534e;
+
+        border-bottom: 1px solid #edf1ef;
+    }
+
+    .history-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .history-status {
+        padding: 5px 9px;
+
+        border-radius: 15px;
+
+        font-size: 11px;
+
+        font-weight: 600;
+    }
+
+    .history-active {
+        background: #e8f4ec;
+        color: #3f7653;
+    }
+
+    .history-completed {
+        background: #f0f2f1;
+        color: #697570;
+    }
+
+
+    /* ==============================
+       RESPONSIVE
+    ============================== */
+
+    @media (max-width: 800px) {
+
+        .staff-view-page {
+            padding: 20px;
+        }
+
+        .details-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .profile-card {
+            align-items: flex-start;
+
+            flex-direction: column;
+        }
+
+        .profile-left {
+            align-items: flex-start;
+        }
+
+    }
+
+
+    @media (max-width: 500px) {
+
+        .profile-left {
+            flex-direction: column;
+        }
+
+        .large-avatar {
+            width: 65px;
+            height: 65px;
+
+            font-size: 21px;
+        }
+
+        .view-header {
+            align-items: flex-start;
+
+            flex-direction: column;
+        }
+
+    }
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="staff-view-page">
+
+
+    <!-- ==============================
+         HEADER
+    ============================== -->
+
+    <div class="view-header">
+
+        <div class="view-heading">
+
+            <a
+                href="{% url 'staff' %}"
+                class="back-button"
+                title="Back to Staff"
+            >
+                <i class="fas fa-arrow-left"></i>
+            </a>
+
+            <div>
+
+                <h1>
+                    Staff Profile
+                </h1>
+
+                <p>
+                    View complete information about this staff member.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ==============================
+         PROFILE
+    ============================== -->
+
+    <div class="profile-card">
+
+        <div class="profile-left">
+
+            <div class="large-avatar">
+
+                {% if staff.user %}
+
+                    {{ staff.user.first_name|first }}{{ staff.user.last_name|first }}
+
+                {% else %}
+
+                    {{ staff.first_name|first }}{{ staff.last_name|first }}
+
+                {% endif %}
+
+            </div>
+
+
+            <div class="profile-name">
+
+                <h2>
+                    {{ staff.first_name }}
+                    {{ staff.last_name }}
+                </h2>
+
+                <div class="profile-email">
+                    {{ staff.email }}
+                </div>
+
+                <div class="profile-badges">
+
+                    <span class="badge role-badge">
+                        {{ staff.role }}
+                    </span>
+
+
+                    {% if staff.status == "Working" %}
+
+                        <span class="badge status-working">
+                            <i class="fas fa-circle"></i>
+                            Working
+                        </span>
+
+                    {% elif staff.status == "Available" %}
+
+                        <span class="badge status-available">
+                            <i class="fas fa-circle"></i>
+                            Available
+                        </span>
+
+                    {% elif staff.status == "On Leave" %}
+
+                        <span class="badge status-leave">
+                            <i class="fas fa-circle"></i>
+                            On Leave
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ==============================
+         INFORMATION GRID
+    ============================== -->
+
+    <div class="details-grid">
+
+
+        <!-- PERSONAL INFORMATION -->
+
+        <div class="details-card">
+
+            <div class="card-title">
+
+                <i class="fas fa-user"></i>
+
+                <h3>
+                    Personal Information
+                </h3>
+
+            </div>
+
+
+            <div class="info-row">
+
+                <span class="info-label">
+                    First Name
+                </span>
+
+                <span class="info-value">
+                    {{ staff.first_name }}
+                </span>
+
+            </div>
+
+
+            <div class="info-row">
+
+                <span class="info-label">
+                    Last Name
+                </span>
+
+                <span class="info-value">
+                    {{ staff.last_name }}
+                </span>
+
+            </div>
+
+
+            <div class="info-row">
+
+                <span class="info-label">
+                    Email
+                </span>
+
+                <span class="info-value">
+                    {{ staff.email }}
+                </span>
+
+            </div>
+
+
+            <div class="info-row">
+
+                <span class="info-label">
+                    Phone
+                </span>
+
+                <span class="info-value">
+
+                    {% if staff.phone %}
+                        {{ staff.phone }}
+                    {% else %}
+                        Not provided
+                    {% endif %}
+
+                </span>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ACCOUNT INFORMATION -->
+
+        <div class="details-card">
+
+            <div class="card-title">
+
+                <i class="fas fa-id-card"></i>
+
+                <h3>
+                    Account Information
+                </h3>
+
+            </div>
+
+
+            <div class="info-row">
+
+                <span class="info-label">
+                    Username
+                </span>
+
+                <span class="info-value">
+
+                    {% if staff.user %}
+                        {{ staff.user.username }}
+                    {% else %}
+                        Not created
+                    {% endif %}
+
+                </span>
+
+            </div>
+
+
+            <div class="info-row">
+
+                <span class="info-label">
+                    Account Email
+                </span>
+
+                <span class="info-value">
+
+                    {% if staff.user %}
+                        {{ staff.user.email }}
+                    {% else %}
+                        Not available
+                    {% endif %}
+
+                </span>
+
+            </div>
+
+
+            <div class="info-row">
+
+                <span class="info-label">
+                    Date Joined
+                </span>
+
+                <span class="info-value">
+
+                    {% if staff.user %}
+                        {{ staff.user.date_joined|date:"M d, Y" }}
+                    {% else %}
+                        -
+                    {% endif %}
+
+                </span>
+
+            </div>
+
+
+            <div class="info-row">
+
+                <span class="info-label">
+                    Staff Added
+                </span>
+
+                <span class="info-value">
+                    {{ staff.created_at|date:"M d, Y" }}
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ==============================
+         CURRENT PROJECTS
+    ============================== -->
+
+    <div class="details-card" style="margin-bottom: 22px;">
+
+        <div class="card-title">
+
+            <i class="fas fa-briefcase"></i>
+
+            <h3>
+                Current Projects
+            </h3>
+
+        </div>
+
+
+        {% for assignment in active_assignments %}
+
+            <div class="project-item">
+
+                <div class="project-left">
+
+                    <div class="project-icon">
+                        <i class="fas fa-folder-open"></i>
+                    </div>
+
+                    <div>
+
+                        <div class="project-name">
+                            {{ assignment.project.name }}
+                        </div>
+
+                        <div class="project-work">
+                            {{ assignment.work }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <span class="active-label">
+                    Active
+                </span>
+
+            </div>
+
+        {% empty %}
+
+            <div class="empty-project">
+
+                <i class="fas fa-folder-open"></i>
+
+                No active projects assigned.
+
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+
+
+    <!-- ==============================
+         ASSIGNMENT HISTORY
+    ============================== -->
+
+    <div class="history-card">
+
+        <div class="card-title">
+
+            <i class="fas fa-clock-rotate-left"></i>
+
+            <h3>
+                Assignment History
+            </h3>
+
+        </div>
+
+
+        <div class="history-table-wrapper">
+
+            <table class="history-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Project
+                        </th>
+
+                        <th>
+                            Work
+                        </th>
+
+                        <th>
+                            Assigned
+                        </th>
+
+                        <th>
+                            Completed
+                        </th>
+
+                        <th>
+                            Status
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for assignment in assignment_history %}
+
+                        <tr>
+
+                            <td>
+                                {{ assignment.project.name }}
+                            </td>
+
+                            <td>
+                                {{ assignment.work }}
+                            </td>
+
+                            <td>
+                                {{ assignment.assigned_at|date:"M d, Y" }}
+                            </td>
+
+                            <td>
+
+                                {% if assignment.completed_at %}
+
+                                    {{ assignment.completed_at|date:"M d, Y" }}
+
+                                {% else %}
+
+                                    —
+
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                {% if assignment.is_active %}
+
+                                    <span class="history-status history-active">
+                                        Active
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="history-status history-completed">
+                                        Completed
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                    {% empty %}
+
+                        <tr>
+
+                            <td colspan="5" style="text-align:center; padding:30px; color:#899590;">
+
+                                No assignment history available.
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+{% endblock %}

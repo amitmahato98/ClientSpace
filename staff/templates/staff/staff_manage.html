@@ -1,0 +1,699 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_head %}
+
+<style>
+
+    .manage-staff-page {
+        padding: 30px;
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+
+    /* ==============================
+       HEADER
+    ============================== */
+
+    .manage-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 28px;
+    }
+
+    .page-title h1 {
+        margin: 0;
+        font-size: 28px;
+        color: #26332f;
+    }
+
+    .page-title p {
+        margin-top: 6px;
+        color: #7a8581;
+        font-size: 14px;
+    }
+
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+
+        text-decoration: none;
+
+        padding: 10px 16px;
+
+        border-radius: 8px;
+
+        border: 1px solid #dce8e3;
+
+        background: #ffffff;
+        color: #52796f;
+
+        font-size: 13px;
+        font-weight: 600;
+
+        transition: 0.2s;
+    }
+
+    .back-btn:hover {
+        background: #52796f;
+        color: #ffffff;
+    }
+
+
+    /* ==============================
+       STAFF PROFILE
+    ============================== */
+
+    .staff-profile {
+        background: #ffffff;
+
+        border: 1px solid #e5ebe8;
+        border-radius: 14px;
+
+        padding: 25px;
+
+        display: flex;
+        align-items: center;
+
+        gap: 18px;
+
+        margin-bottom: 22px;
+
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+
+    .avatar {
+        width: 70px;
+        height: 70px;
+
+        border-radius: 50%;
+
+        background: #dfece7;
+        color: #52796f;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        font-size: 22px;
+        font-weight: bold;
+    }
+
+    .staff-info h2 {
+        margin: 0 0 6px;
+
+        font-size: 21px;
+
+        color: #26332f;
+    }
+
+    .staff-info p {
+        margin: 0 0 10px;
+
+        font-size: 13px;
+
+        color: #7a8581;
+    }
+
+    .staff-meta {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .badge {
+        padding: 5px 10px;
+
+        border-radius: 20px;
+
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .role-badge {
+        background: #eef3f1;
+        color: #52796f;
+    }
+
+    .status-badge {
+        background: #e8f4ec;
+        color: #3f7653;
+    }
+
+
+    /* ==============================
+       SECTION
+    ============================== */
+
+    .section {
+        background: #ffffff;
+
+        border: 1px solid #e5ebe8;
+        border-radius: 14px;
+
+        padding: 25px;
+
+        margin-bottom: 22px;
+
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+
+    .section-title {
+        display: flex;
+        align-items: center;
+
+        gap: 10px;
+
+        margin-bottom: 5px;
+    }
+
+    .section-title i {
+        color: #52796f;
+        font-size: 17px;
+    }
+
+    .section-title h3 {
+        margin: 0;
+
+        font-size: 18px;
+
+        color: #26332f;
+    }
+
+    .section-description {
+        margin: 0 0 20px;
+
+        font-size: 13px;
+
+        color: #7a8581;
+    }
+
+
+    /* ==============================
+       CURRENT PROJECT
+    ============================== */
+
+    .project-box {
+        border: 1px solid #e2e9e6;
+
+        border-radius: 10px;
+
+        padding: 18px;
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        gap: 20px;
+    }
+
+    .project-details {
+        display: flex;
+        align-items: center;
+
+        gap: 15px;
+    }
+
+    .project-icon {
+        width: 45px;
+        height: 45px;
+
+        border-radius: 10px;
+
+        background: #eef4f1;
+        color: #52796f;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .project-details h4 {
+        margin: 0 0 5px;
+
+        font-size: 15px;
+
+        color: #26332f;
+    }
+
+    .project-details p {
+        margin: 0;
+
+        font-size: 13px;
+
+        color: #7a8581;
+    }
+
+
+    /* ==============================
+       BUTTONS
+    ============================== */
+
+    .btn {
+        border: none;
+
+        cursor: pointer;
+
+        display: inline-flex;
+
+        align-items: center;
+        justify-content: center;
+
+        gap: 8px;
+
+        padding: 10px 16px;
+
+        border-radius: 8px;
+
+        font-size: 13px;
+        font-weight: 600;
+
+        transition: 0.2s;
+    }
+
+    .terminate-btn {
+        background: #fff4e8;
+
+        color: #a96d2e;
+
+        border: 1px solid #f1dfc9;
+    }
+
+    .terminate-btn:hover {
+        background: #a96d2e;
+        color: #ffffff;
+    }
+
+
+    /* ==============================
+       NO PROJECT
+    ============================== */
+
+    .no-project {
+        padding: 25px;
+
+        text-align: center;
+
+        border: 1px dashed #d8e1dd;
+
+        border-radius: 10px;
+
+        color: #7a8581;
+
+        font-size: 14px;
+    }
+
+    .no-project i {
+        display: block;
+
+        margin-bottom: 10px;
+
+        font-size: 25px;
+
+        color: #9aaba5;
+    }
+
+
+    /* ==============================
+       DELETE SECTION
+    ============================== */
+
+    .danger-section {
+        background: #fffafa;
+
+        border: 1px solid #efd9d9;
+    }
+
+    .danger-section .section-title i {
+        color: #b94a48;
+    }
+
+    .danger-section .section-title h3 {
+        color: #9f3d3b;
+    }
+
+    .danger-content {
+        display: flex;
+
+        align-items: center;
+
+        justify-content: space-between;
+
+        gap: 25px;
+    }
+
+    .danger-text h4 {
+        margin: 0 0 7px;
+
+        font-size: 15px;
+
+        color: #5e3a3a;
+    }
+
+    .danger-text p {
+        margin: 0;
+
+        max-width: 650px;
+
+        font-size: 13px;
+
+        line-height: 1.5;
+
+        color: #8a6d6d;
+    }
+
+    .delete-btn {
+        background: #b94a48;
+
+        color: #ffffff;
+
+        white-space: nowrap;
+    }
+
+    .delete-btn:hover {
+        background: #963b39;
+    }
+
+
+    /* ==============================
+       RESPONSIVE
+    ============================== */
+
+    @media (max-width: 700px) {
+
+        .manage-staff-page {
+            padding: 20px;
+        }
+
+        .manage-header {
+            align-items: flex-start;
+
+            flex-direction: column;
+
+            gap: 15px;
+        }
+
+        .staff-profile {
+            align-items: flex-start;
+        }
+
+        .project-box {
+            align-items: flex-start;
+
+            flex-direction: column;
+        }
+
+        .terminate-btn {
+            width: 100%;
+        }
+
+        .danger-content {
+            align-items: flex-start;
+
+            flex-direction: column;
+        }
+
+        .delete-btn {
+            width: 100%;
+        }
+
+    }
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="manage-staff-page">
+
+
+    <!-- ==============================
+         HEADER
+    ============================== -->
+
+    <div class="manage-header">
+
+        <div class="page-title">
+
+            <h1>
+                Manage Staff
+            </h1>
+
+            <p>
+                Manage this staff member's current project and account.
+            </p>
+
+        </div>
+
+
+        <a
+            href="{% url 'staff' %}"
+            class="back-btn"
+        >
+
+            <i class="fas fa-arrow-left"></i>
+
+            Back to Staff
+
+        </a>
+
+    </div>
+
+
+
+    <!-- ==============================
+         STAFF PROFILE
+    ============================== -->
+
+    <div class="staff-profile">
+
+        <div class="avatar">
+
+            {% if staff.user %}
+
+                {{ staff.user.first_name|first }}{{ staff.user.last_name|first }}
+
+            {% else %}
+
+                {{ staff.first_name|first }}{{ staff.last_name|first }}
+
+            {% endif %}
+
+        </div>
+
+
+        <div class="staff-info">
+
+            <h2>
+                {{ staff.first_name }}
+                {{ staff.last_name }}
+            </h2>
+
+            <p>
+                {{ staff.email }}
+            </p>
+
+
+            <div class="staff-meta">
+
+                <span class="badge role-badge">
+                    {{ staff.role }}
+                </span>
+
+
+                <span class="badge status-badge">
+                    {{ staff.status }}
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ==============================
+         CURRENT PROJECT
+    ============================== -->
+
+    <div class="section">
+
+        <div class="section-title">
+
+            <i class="fas fa-briefcase"></i>
+
+            <h3>
+                Current Project
+            </h3>
+
+        </div>
+
+        <p class="section-description">
+            Manage the project currently assigned to this staff member.
+        </p>
+
+
+        {% if active_assignment %}
+
+            <div class="project-box">
+
+                <div class="project-details">
+
+                    <div class="project-icon">
+
+                        <i class="fas fa-folder-open"></i>
+
+                    </div>
+
+
+                    <div>
+
+                        <h4>
+                            {{ active_assignment.project.name }}
+                        </h4>
+
+                        <p>
+                            {{ active_assignment.work }}
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <form
+                    method="POST"
+                    action="{% url 'terminate_project' staff.id %}"
+                    onsubmit="return confirmTerminate();"
+                >
+
+                    {% csrf_token %}
+
+                    <button
+                        type="submit"
+                        class="btn terminate-btn"
+                    >
+
+                        <i class="fas fa-user-minus"></i>
+
+                        Terminate Project
+
+                    </button>
+
+                </form>
+
+            </div>
+
+        {% else %}
+
+            <div class="no-project">
+
+                <i class="fas fa-folder-open"></i>
+
+                This staff member is not currently assigned to a project.
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+
+    <!-- ==============================
+         DELETE STAFF ACCOUNT
+    ============================== -->
+
+    <div class="section danger-section">
+
+        <div class="section-title">
+
+            <i class="fas fa-triangle-exclamation"></i>
+
+            <h3>
+                Delete Staff Account
+            </h3>
+
+        </div>
+
+        <p class="section-description">
+            Permanently remove this staff member from the organization.
+        </p>
+
+
+        <div class="danger-content">
+
+            <div class="danger-text">
+
+                <h4>
+                    Permanently delete
+                    {{ staff.first_name }}
+                    {{ staff.last_name }}?
+                </h4>
+
+                <p>
+                    This will permanently delete the staff record and
+                    their existing account. Their project assignments
+                    will also be removed. This action cannot be undone.
+                </p>
+
+            </div>
+
+
+            <form
+                method="POST"
+                action="{% url 'delete_staff' staff.id %}"
+                onsubmit="return confirmDelete();"
+            >
+
+                {% csrf_token %}
+
+                <button
+                    type="submit"
+                    class="btn delete-btn"
+                >
+
+                    <i class="fas fa-trash"></i>
+
+                    Delete Staff
+
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    function confirmTerminate() {
+
+        return confirm(
+            "Are you sure you want to terminate this staff member's current project? " +
+            "The staff member will become available for another project."
+        );
+
+    }
+
+
+    function confirmDelete() {
+
+        return confirm(
+            "Are you sure you want to permanently delete this staff account? " +
+            "This action cannot be undone."
+        );
+
+    }
+
+</script>
+
+{% endblock %}

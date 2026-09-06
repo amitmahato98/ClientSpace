@@ -1,8 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Add Staff | ClientSpace{% endblock %}
-
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'staff/add_staff.css' %}">
 {% endblock %}
@@ -11,52 +9,45 @@
 
 <div class="add-staff-container">
 
-    <!-- Header -->
-    <div class="add-staff-header">
-
+    <div class="page-header">
         <div>
-            <a href="{% url 'staff' %}" class="back-btn">
-                ← Back to Staff
-            </a>
-
-            <h1>Add Staff Member</h1>
-            <p>Add a new member to your team.</p>
+            <h1>Add Staff</h1>
+            <p>Invite a new staff member to your organization.</p>
         </div>
 
+        <a href="{% url 'staff' %}" class="back-btn">
+            ← Back to Staff
+        </a>
     </div>
 
 
-    <!-- Form Card -->
     <div class="form-card">
 
-        <form method="POST" action="">
+        <form method="POST">
 
             {% csrf_token %}
 
             <!-- Personal Information -->
-            <div class="form-section">
+            <div class="section">
 
                 <h2>Personal Information</h2>
-                <p class="section-description">
-                    Enter the basic information of the staff member.
-                </p>
 
                 <div class="form-grid">
 
                     <!-- First Name -->
                     <div class="form-group">
 
-                        <label for="first_name">
+                        <label for="{{ form.first_name.id_for_label }}">
                             First Name
                         </label>
 
-                        <input
-                            type="text"
-                            id="first_name"
-                            name="first_name"
-                            placeholder="Enter first name"
-                            required
-                        >
+                        {{ form.first_name }}
+
+                        {% for error in form.first_name.errors %}
+                            <small class="error">
+                                {{ error }}
+                            </small>
+                        {% endfor %}
 
                     </div>
 
@@ -64,17 +55,17 @@
                     <!-- Last Name -->
                     <div class="form-group">
 
-                        <label for="last_name">
+                        <label for="{{ form.last_name.id_for_label }}">
                             Last Name
                         </label>
 
-                        <input
-                            type="text"
-                            id="last_name"
-                            name="last_name"
-                            placeholder="Enter last name"
-                            required
-                        >
+                        {{ form.last_name }}
+
+                        {% for error in form.last_name.errors %}
+                            <small class="error">
+                                {{ error }}
+                            </small>
+                        {% endfor %}
 
                     </div>
 
@@ -82,17 +73,17 @@
                     <!-- Email -->
                     <div class="form-group">
 
-                        <label for="email">
+                        <label for="{{ form.email.id_for_label }}">
                             Email Address
                         </label>
 
-                        <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            placeholder="example@email.com"
-                            required
-                        >
+                        {{ form.email }}
+
+                        {% for error in form.email.errors %}
+                            <small class="error">
+                                {{ error }}
+                            </small>
+                        {% endfor %}
 
                     </div>
 
@@ -100,16 +91,17 @@
                     <!-- Phone -->
                     <div class="form-group">
 
-                        <label for="phone">
+                        <label for="{{ form.phone.id_for_label }}">
                             Phone Number
                         </label>
 
-                        <input
-                            type="tel"
-                            id="phone"
-                            name="phone"
-                            placeholder="98XXXXXXXX"
-                        >
+                        {{ form.phone }}
+
+                        {% for error in form.phone.errors %}
+                            <small class="error">
+                                {{ error }}
+                            </small>
+                        {% endfor %}
 
                     </div>
 
@@ -118,192 +110,21 @@
             </div>
 
 
-            <!-- Staff Information -->
-            <div class="form-section">
+            <!-- Invitation Information -->
+            <div class="invitation-info">
 
-                <h2>Staff Information</h2>
-
-                <p class="section-description">
-                    Assign a role and working status to the staff member.
-                </p>
-
-
-                <div class="form-grid">
-
-                    <!-- Role -->
-                    <div class="form-group">
-
-                        <label for="role">
-                            Role
-                        </label>
-
-                        <select id="role" name="role" required>
-
-                            <option value="">
-                                Select a role
-                            </option>
-
-                            <option value="Developer">
-                                Developer
-                            </option>
-
-                            <option value="Designer">
-                                Designer
-                            </option>
-
-                            <option value="Tester">
-                                Tester
-                            </option>
-
-                            <option value="Manager">
-                                Manager
-                            </option>
-
-                        </select>
-
-                    </div>
-
-
-                    <!-- Status -->
-                    <div class="form-group">
-
-                        <label for="status">
-                            Status
-                        </label>
-
-                        <select id="status" name="status" required>
-
-                            <option value="">
-                                Select status
-                            </option>
-
-                            <option value="Available">
-                                Available
-                            </option>
-
-                            <option value="Working">
-                                Working
-                            </option>
-
-                            <option value="On Leave">
-                                On Leave
-                            </option>
-
-                        </select>
-
-                    </div>
-
-
-                    <!-- Project -->
-                    <div class="form-group full-width">
-
-                        <label for="project">
-                            Project
-                        </label>
-
-                        <select id="project" name="project">
-
-                            <option value="">
-                                Select a project
-                            </option>
-
-                            <option value="E-Commerce Website">
-                                E-Commerce Website
-                            </option>
-
-                            <option value="Banking Application">
-                                Banking Application
-                            </option>
-
-                            <option value="Hospital Management">
-                                Hospital Management
-                            </option>
-
-                            <option value="ClientSpace">
-                                ClientSpace
-                            </option>
-
-                            <option value="CRM System">
-                                CRM System
-                            </option>
-
-                            <option value="Food Delivery App">
-                                Food Delivery App
-                            </option>
-
-                        </select>
-
-                    </div>
-
+                <div class="info-icon">
+                    ✉
                 </div>
 
-            </div>
+                <div>
+                    <h3>Account Setup</h3>
 
-
-            <!-- Account Information -->
-            <div class="form-section">
-
-                <h2>Account Information</h2>
-
-                <p class="section-description">
-                    Create login credentials for the staff member.
-                </p>
-
-                <div class="form-grid">
-
-                    <!-- Username -->
-                    <div class="form-group">
-
-                        <label for="username">
-                            Username
-                        </label>
-
-                        <input
-                            type="text"
-                            id="username"
-                            name="username"
-                            placeholder="Enter username"
-                            required
-                        >
-
-                    </div>
-
-
-                    <!-- Password -->
-                    <div class="form-group">
-
-                        <label for="password">
-                            Password
-                        </label>
-
-                        <input
-                            type="password"
-                            id="password"
-                            name="password"
-                            placeholder="Enter password"
-                            required
-                        >
-
-                    </div>
-
-
-                    <!-- Confirm Password -->
-                    <div class="form-group">
-
-                        <label for="confirm_password">
-                            Confirm Password
-                        </label>
-
-                        <input
-                            type="password"
-                            id="confirm_password"
-                            name="confirm_password"
-                            placeholder="Confirm password"
-                            required
-                        >
-
-                    </div>
-
+                    <p>
+                        An invitation link will be sent to the staff
+                        member's email address. They will use the link
+                        to create their username, password, and job role.
+                    </p>
                 </div>
 
             </div>
@@ -316,8 +137,8 @@
                     Cancel
                 </a>
 
-                <button type="submit" class="save-btn">
-                    Add Staff
+                <button type="submit" class="submit-btn">
+                    Send Invitation
                 </button>
 
             </div>
