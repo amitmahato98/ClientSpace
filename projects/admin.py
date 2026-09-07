@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Project, Task
+from .models import Project, Task, ProjectActivity
 from staff.models import StaffAssignment
 
 
@@ -85,3 +85,22 @@ class TaskAdmin(admin.ModelAdmin):
             "fields": ("created_by", "created_at", "updated_at"),
         }),
     )
+
+
+@admin.register(ProjectActivity)
+class ProjectActivityAdmin(admin.ModelAdmin):
+    list_display   = ("project", "actor", "action_type", "short_description", "created_at")
+    list_filter    = ("action_type", "created_at")
+    search_fields  = ("project__name", "actor__username", "actor__first_name", "description")
+    readonly_fields = ("project", "actor", "action_type", "description", "created_at")
+    ordering        = ("-created_at",)
+
+    def has_add_permission(self, request):
+        return False  # activity records are append-only
+
+    def has_change_permission(self, request, obj=None):
+        return False  # immutable audit trail
+
+    @admin.display(description="Description")
+    def short_description(self, obj):
+        return obj.description[:80] + ("…" if len(obj.description) > 80 else "")

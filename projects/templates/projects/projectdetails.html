@@ -484,38 +484,72 @@
 
 
     <!-- =====================================================
-         ACTIVITY TAB
+         ACTIVITY TAB  (MANAGER + STAFF only — hidden from CLIENT)
          ===================================================== -->
     <div id="tab-activity" class="project-tab-content hidden">
-        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-            <h3 class="text-sm font-bold text-gray-900">Recent activity</h3>
-            <p class="text-xs text-gray-400 mt-1">Recent changes made to this project.</p>
-            <div class="mt-5 space-y-4">
-                <div class="flex gap-3">
-                    <div class="w-7 h-7 rounded-full bg-[#f8eee4] text-[#8b6f55] flex items-center justify-center shrink-0">
-                        <i class="fas fa-plus text-[10px]"></i>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-700">
-                            Project created by
-                            <strong>{{ project.created_by.get_full_name|default:project.created_by.username }}</strong>.
-                        </p>
-                        <p class="text-[10px] text-gray-400 mt-0.5">{{ project.created_at|date:"M j, Y \a\t g:i A" }}</p>
-                    </div>
-                </div>
-                {% if project.updated_at != project.created_at %}
-                <div class="flex gap-3">
-                    <div class="w-7 h-7 rounded-full bg-[#f8eee4] text-[#8b6f55] flex items-center justify-center shrink-0">
-                        <i class="fas fa-pencil-alt text-[10px]"></i>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-700">Project was last updated.</p>
-                        <p class="text-[10px] text-gray-400 mt-0.5">{{ project.updated_at|date:"M j, Y \a\t g:i A" }}</p>
-                    </div>
-                </div>
-                {% endif %}
+      {% if user.is_manager or user.is_staff_member %}
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+
+          <div class="flex items-center justify-between mb-5">
+            <div>
+              <h3 class="text-sm font-bold text-gray-900">Activity</h3>
+              <p class="text-[11px] text-gray-400 mt-0.5">Full audit trail for this project</p>
             </div>
+            {% if activities %}
+            <span class="text-[11px] text-gray-400">{{ activities|length }} event{{ activities|length|pluralize }}</span>
+            {% endif %}
+          </div>
+
+          {% if activities %}
+          <!-- Timeline -->
+          <div class="relative">
+            <!-- Vertical line -->
+            <div class="absolute left-[13px] top-2 bottom-2 w-px bg-gray-100"></div>
+
+            <div class="space-y-5">
+              {% for activity in activities %}
+              <div class="flex gap-3 relative">
+
+                <!-- Icon dot -->
+                {% with icon_data=activity.icon_css %}
+                <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0 z-10 {{ icon_data.bg }}">
+                  <i class="fas {{ icon_data.icon }} text-[10px]"></i>
+                </div>
+                {% endwith %}
+
+                <!-- Content -->
+                <div class="min-w-0 flex-1 pt-0.5">
+                  <p class="text-xs text-gray-700 leading-relaxed">{{ activity.description }}</p>
+                  <p class="text-[10px] text-gray-400 mt-0.5">
+                    {{ activity.created_at|date:"M j, Y" }}
+                    <span class="mx-1">&middot;</span>
+                    {{ activity.created_at|date:"g:i A" }}
+                  </p>
+                </div>
+
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          {% else %}
+          <div class="py-10 text-center">
+            <i class="far fa-clock text-gray-300 text-2xl mb-3"></i>
+            <p class="text-xs text-gray-500">No activity recorded yet.</p>
+            <p class="text-[11px] text-gray-400 mt-1">Actions like assigning staff and creating tasks will appear here.</p>
+          </div>
+          {% endif %}
+
         </div>
+
+      {% else %}
+        <!-- CLIENT: activity log is hidden entirely -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
+          <i class="far fa-eye-slash text-gray-300 text-xl mb-3"></i>
+          <p class="text-xs text-gray-500">Activity details are not available for your role.</p>
+        </div>
+      {% endif %}
     </div>
 
 </div>

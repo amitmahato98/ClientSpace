@@ -15,8 +15,17 @@ from django.utils import timezone as tz
 from accounts.decorators import manager_required, staff_or_above
 from accounts.models import OrganizationMembership
 from accounts.views import get_user_organization
+from .activity import (
+    log_project_created,
+    log_staff_assigned,
+    log_staff_removed,
+    log_task_added,
+    log_task_updated,
+    log_task_deleted,
+    log_task_status,
+)
 from .forms import ProjectForm, ProjectStaffAssignForm, TaskForm, TaskStatusUpdateForm
-from .models import Project, Task
+from .models import Project, Task, ProjectActivity
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
@@ -264,6 +273,9 @@ def project_create(request):
                     project.organization = manager_org   # server-side only
                     project.save()
 
+                    # Phase 4 — Activity: project created
+                    log_project_created(actor=request.user, project=project)
+
                     # ── Schedule the outbound email after commit ──────────
                     # Capture all values in the closure NOW, before the
                     # request object may be recycled.
@@ -397,11 +409,22 @@ def project_detail(request, pk):
             organization=project.organization,
         )
 
+    # Activity log — visible to MANAGER and STAFF only; hidden from CLIENT
+    activities = None
+    if not request.user.is_client:
+        activities = (
+            ProjectActivity.objects
+            .filter(project=project)
+            .select_related("actor")
+            .order_by("-created_at")[:50]   # latest 50 entries
+        )
+
     return render(request, "projects/projectdetails.html", {
         "project": project,
         "assigned_staff": assigned_staff,
         "assign_form": assign_form,
         "tasks": tasks,
+        "activities": activities,
     })
 
 
@@ -486,6 +509,13 @@ def assign_staff(request, pk):
                     staff_user=staff_member.user,
                     project=project,
                 )
+            # Phase 4 — Activity: staff assigned
+            staff_full = f"{staff_member.first_name} {staff_member.last_name}".strip()
+            log_staff_assigned(
+                actor=request.user,
+                project=project,
+                staff_name=staff_full,
+            )
 
     if newly_assigned:
         if len(newly_assigned) == 1:
@@ -550,6 +580,9 @@ def remove_staff(request, pk, assignment_id):
     assignment.completed_at = tz.now()
     assignment.save(update_fields=["is_active", "completed_at"])
 
+    # Phase 4 — Activity: staff removed
+    log_staff_removed(actor=request.user, project=project, staff_name=staff_name)
+
     messages.success(request, f"{staff_name} has been removed from this project.")
     return redirect("projects:project_detail", pk=pk)
 
@@ -591,6 +624,9 @@ def task_create(request, pk):
             if task.assigned_to:
                 from notifications.service import notify_task_assigned
                 notify_task_assigned(actor=request.user, task=task)
+
+            # Phase 4 — Activity: task created
+            log_task_added(actor=request.user, project=project, task=task)
 
             assignee = task.assigned_display_name
             messages.success(
@@ -651,6 +687,9 @@ def task_edit(request, pk, task_id):
                     previous_user=previous_assignee,
                 )
 
+            # Phase 4 — Activity: task updated
+            log_task_updated(actor=request.user, project=project, task=task)
+
             messages.success(request, f'Task "{task.title}" updated successfully.')
             return redirect("projects:project_detail", pk=pk)
     else:
@@ -692,6 +731,10 @@ def task_delete(request, pk, task_id):
 
     title = task.title
     task.delete()
+
+    # Phase 4 — Activity: task deleted
+    log_task_deleted(actor=request.user, project=project, task_title=title)
+
     messages.success(request, f'Task "{title}" has been deleted.')
     return redirect("projects:project_detail", pk=pk)
 
@@ -773,6 +816,9 @@ def task_status_update(request, task_id):
         # Phase 3 — Event C: notify manager(s) of the status change
         from notifications.service import notify_task_status_updated
         notify_task_status_updated(actor=request.user, task=task)
+
+        # Phase 4 — Activity: task status changed
+        log_task_status(actor=request.user, project=task.project, task=task)
 
         messages.success(
             request,

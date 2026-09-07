@@ -248,3 +248,94 @@ class Project(models.Model):
             self.Status.COMPLETED:   "on-track",
             self.Status.ON_HOLD:     "planning",
         }.get(self.status, "planning")
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# ProjectActivity — permanent audit trail for a project
+# ═══════════════════════════════════════════════════════════════════════════
+
+class ProjectActivity(models.Model):
+    """
+    Immutable record of a single action that occurred inside a project.
+
+    Design notes
+    ────────────
+    • Records are append-only — never edited or deleted by application code.
+    • The description is the fully-rendered human-readable string stored at
+      creation time so it remains accurate even if referenced objects are
+      later renamed or deleted.
+    • actor is SET_NULL (not CASCADE) so deleting a user does not remove
+      historical audit records.
+    • Visibility: MANAGER and STAFF see all activities; CLIENT sees nothing
+      (enforced in the template and in project_detail context).
+
+    Phase hook points
+    ─────────────────
+    PROJECT_CREATED  → project_create view
+    STAFF_ASSIGNED   → assign_staff view
+    STAFF_REMOVED    → remove_staff view
+    TASK_ADDED       → task_create view
+    TASK_UPDATED     → task_edit view
+    TASK_STATUS      → task_status_update view
+    TASK_DELETED     → task_delete view
+    """
+
+    class ActionType(models.TextChoices):
+        PROJECT_CREATED = "PROJECT_CREATED", "Project Created"
+        STAFF_ASSIGNED  = "STAFF_ASSIGNED",  "Staff Assigned"
+        STAFF_REMOVED   = "STAFF_REMOVED",   "Staff Removed"
+        TASK_ADDED      = "TASK_ADDED",      "Task Added"
+        TASK_UPDATED    = "TASK_UPDATED",    "Task Updated"
+        TASK_STATUS     = "TASK_STATUS",     "Task Status Changed"
+        TASK_DELETED    = "TASK_DELETED",    "Task Deleted"
+
+    project = models.ForeignKey(
+        "projects.Project",
+        on_delete=models.CASCADE,
+        related_name="activities",
+    )
+
+    actor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="project_activities",
+    )
+
+    action_type = models.CharField(
+        max_length=30,
+        choices=ActionType.choices,
+    )
+
+    # Fully-rendered human-readable sentence stored at creation time.
+    description = models.CharField(max_length=500)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Project Activity"
+        verbose_name_plural = "Project Activities"
+
+    def __str__(self):
+        return f"[{self.project.name}] {self.description}"
+
+    # ------------------------------------------------------------------ #
+    # Icon helper for the timeline UI                                     #
+    # ------------------------------------------------------------------ #
+
+    @property
+    def icon_css(self):
+        """Font Awesome icon class + background colour for the timeline dot."""
+        mapping = {
+            self.ActionType.PROJECT_CREATED: ("fa-plus",        "bg-[#e8f0fe] text-[#1a73e8]"),
+            self.ActionType.STAFF_ASSIGNED:  ("fa-user-plus",   "bg-[#e6f4ea] text-[#137333]"),
+            self.ActionType.STAFF_REMOVED:   ("fa-user-minus",  "bg-[#fce8e6] text-[#c5221f]"),
+            self.ActionType.TASK_ADDED:      ("fa-tasks",       "bg-[#f5e6d0] text-[#8b6f55]"),
+            self.ActionType.TASK_UPDATED:    ("fa-pen",         "bg-[#fef7e0] text-[#b06000]"),
+            self.ActionType.TASK_STATUS:     ("fa-check-circle","bg-[#e6f4ea] text-[#137333]"),
+            self.ActionType.TASK_DELETED:    ("fa-trash-alt",   "bg-[#fce8e6] text-[#c5221f]"),
+        }
+        icon, bg = mapping.get(self.action_type, ("fa-circle", "bg-gray-100 text-gray-500"))
+        return {"icon": icon, "bg": bg}
