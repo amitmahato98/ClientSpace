@@ -8,9 +8,11 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
 from django.db import transaction
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone as tz
+from django.views.decorators.http import require_http_methods
 
 from accounts.decorators import manager_required, staff_or_above
 from accounts.models import OrganizationMembership
@@ -371,10 +373,18 @@ def project_detail(request, pk):
       CLIENT           → can only view projects where project.client == request.user
                          silently 404s on mismatch to avoid leaking existence
 
+    Phase 5: Task filtering via GET parameters:
+      ?status=PENDING|IN_PROGRESS|COMPLETED
+      ?priority=LOW|MEDIUM|HIGH
+      ?assigned_to=<user_id>
+
     Context extras:
       assigned_staff   — active StaffAssignment queryset (Phase 1)
       assign_form      — ProjectStaffAssignForm for the modal (MANAGER only)
-      tasks            — Task queryset for this project
+      tasks            — Task queryset for this project (filtered if params present)
+      filter_status    — current status filter value (for form persistence)
+      filter_priority  — current priority filter value
+      filter_assigned  — current assigned user ID filter value
     """
     from staff.models import StaffAssignment
 
@@ -393,13 +403,26 @@ def project_detail(request, pk):
         .order_by("assigned_at")
     )
 
-    # Tasks for this project — visible to MANAGER, STAFF, and CLIENT
+    # Tasks for this project — start with base queryset
     tasks = (
         Task.objects
         .filter(project=project)
         .select_related("assigned_to", "created_by")
-        .order_by("due_date", "-priority", "title")
     )
+
+    # Phase 5: Apply filters from GET parameters
+    filter_status = request.GET.get("status", "")
+    filter_priority = request.GET.get("priority", "")
+    filter_assigned = request.GET.get("assigned_to", "")
+
+    if filter_status:
+        tasks = tasks.filter(status=filter_status)
+    if filter_priority:
+        tasks = tasks.filter(priority=filter_priority)
+    if filter_assigned:
+        tasks = tasks.filter(assigned_to_id=filter_assigned)
+
+    tasks = tasks.order_by("due_date", "-priority", "title")
 
     # Assign form — only built for managers (avoids unnecessary query for others)
     assign_form = None
@@ -425,6 +448,9 @@ def project_detail(request, pk):
         "assign_form": assign_form,
         "tasks": tasks,
         "activities": activities,
+        "filter_status": filter_status,
+        "filter_priority": filter_priority,
+        "filter_assigned": filter_assigned,
     })
 
 
@@ -828,3 +854,73 @@ def task_status_update(request, task_id):
         messages.error(request, "Invalid status value.")
 
     return redirect("projects:my_tasks")
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# AJAX TASK STATUS UPDATE  — Phase 5
+# ──────────────────────────────────────────────────────────────────────────────
+
+@staff_or_above
+@require_http_methods(["POST"])
+def task_status_update_ajax(request, task_id):
+    """
+    AJAX endpoint: Allow a Staff member to update the status of their own assigned task.
+
+    Returns JSON: {"success": true, "message": "...", "new_status": "...", "new_status_display": "..."}
+
+    Security:
+      • @staff_or_above  — authenticated STAFF or MANAGER
+      • task.assigned_to == request.user  — ownership check (STAFF only)
+        Managers are redirected to use task_edit instead.
+      • Triggers Phase 3 notifications and Phase 4 activity log exactly as before.
+
+    POST body: {"status": "PENDING"|"IN_PROGRESS"|"COMPLETED"}
+    """
+    # Only STAFF may use this endpoint; redirect managers
+    if request.user.is_manager:
+        return JsonResponse({
+            "success": False,
+            "error": "Managers should use the task edit page.",
+        }, status=403)
+
+    # Ownership check — staff can only update their own tasks
+    task = get_object_or_404(Task, pk=task_id, assigned_to=request.user)
+
+    # Parse JSON body
+    import json
+    try:
+        data = json.loads(request.body)
+        new_status = data.get("status", "").upper()
+    except (json.JSONDecodeError, AttributeError):
+        return JsonResponse({
+            "success": False,
+            "error": "Invalid JSON body.",
+        }, status=400)
+
+    # Validate status choice
+    valid_statuses = [choice[0] for choice in Task.Status.choices]
+    if new_status not in valid_statuses:
+        return JsonResponse({
+            "success": False,
+            "error": f"Invalid status. Must be one of: {', '.join(valid_statuses)}",
+        }, status=400)
+
+    # Update task
+    old_status = task.status
+    task.status = new_status
+    task.save(update_fields=["status", "updated_at"])
+
+    # Phase 3 — Event C: notify manager(s) of the status change
+    from notifications.service import notify_task_status_updated
+    notify_task_status_updated(actor=request.user, task=task)
+
+    # Phase 4 — Activity: task status changed
+    log_task_status(actor=request.user, project=task.project, task=task)
+
+    return JsonResponse({
+        "success": True,
+        "message": f'Task "{task.title}" marked as {task.get_status_display()}.',
+        "new_status": task.status,
+        "new_status_display": task.get_status_display(),
+        "old_status": old_status,
+    })

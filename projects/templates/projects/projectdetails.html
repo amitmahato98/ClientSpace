@@ -381,18 +381,76 @@
     <div id="tab-tasks" class="project-tab-content hidden">
 
         <!-- Header row: title + Create Task button (manager only) -->
-        <div class="flex items-center justify-between mb-4">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
             <div>
                 <h3 class="text-sm font-bold text-gray-900">Tasks</h3>
                 <p class="text-[11px] text-gray-400 mt-0.5">All tasks for this project</p>
             </div>
             {% if user.is_manager %}
             <a href="{% url 'projects:task_create' project.pk %}"
-               class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#d4a373] hover:bg-[#b8895e] text-white text-xs font-medium rounded-lg shadow-sm transition">
+               class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#d4a373] hover:bg-[#b8895e] text-white text-xs font-medium rounded-lg shadow-sm transition shrink-0">
                 <i class="fas fa-plus text-[10px]"></i>
                 Create Task
             </a>
             {% endif %}
+        </div>
+
+        <!-- Phase 5: Filter Bar -->
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 mb-4">
+            <form method="GET" id="taskFilterForm" class="flex flex-wrap items-end gap-3">
+                <!-- Status filter -->
+                <div class="flex-1 min-w-[140px]">
+                    <label for="filterStatus" class="block text-[11px] font-medium text-gray-500 mb-1.5 uppercase tracking-wide">Status</label>
+                    <select name="status" id="filterStatus"
+                            class="w-full text-xs px-3 py-2 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#d4a373]/30 focus:border-[#d4a373] transition">
+                        <option value="">All Statuses</option>
+                        <option value="PENDING" {% if filter_status == "PENDING" %}selected{% endif %}>Pending</option>
+                        <option value="IN_PROGRESS" {% if filter_status == "IN_PROGRESS" %}selected{% endif %}>In Progress</option>
+                        <option value="COMPLETED" {% if filter_status == "COMPLETED" %}selected{% endif %}>Completed</option>
+                    </select>
+                </div>
+
+                <!-- Priority filter -->
+                <div class="flex-1 min-w-[140px]">
+                    <label for="filterPriority" class="block text-[11px] font-medium text-gray-500 mb-1.5 uppercase tracking-wide">Priority</label>
+                    <select name="priority" id="filterPriority"
+                            class="w-full text-xs px-3 py-2 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#d4a373]/30 focus:border-[#d4a373] transition">
+                        <option value="">All Priorities</option>
+                        <option value="LOW" {% if filter_priority == "LOW" %}selected{% endif %}>Low</option>
+                        <option value="MEDIUM" {% if filter_priority == "MEDIUM" %}selected{% endif %}>Medium</option>
+                        <option value="HIGH" {% if filter_priority == "HIGH" %}selected{% endif %}>High</option>
+                    </select>
+                </div>
+
+                <!-- Assigned staff filter (Manager only) -->
+                {% if user.is_manager and assigned_staff %}
+                <div class="flex-1 min-w-[140px]">
+                    <label for="filterAssigned" class="block text-[11px] font-medium text-gray-500 mb-1.5 uppercase tracking-wide">Assigned To</label>
+                    <select name="assigned_to" id="filterAssigned"
+                            class="w-full text-xs px-3 py-2 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#d4a373]/30 focus:border-[#d4a373] transition">
+                        <option value="">All Staff</option>
+                        {% for assignment in assigned_staff %}
+                        <option value="{{ assignment.staff.user.id }}" {% if filter_assigned|stringformat:"s" == assignment.staff.user.id|stringformat:"s" %}selected{% endif %}>
+                            {{ assignment.staff.first_name }} {{ assignment.staff.last_name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+
+                <!-- Filter buttons -->
+                <div class="flex items-center gap-2">
+                    <button type="submit"
+                            class="px-4 py-2 text-xs font-medium text-white bg-[#d4a373] hover:bg-[#b8895e] rounded-lg transition whitespace-nowrap">
+                        <i class="fas fa-filter mr-1.5 text-[10px]"></i>
+                        Apply
+                    </button>
+                    <a href="{% url 'projects:project_detail' project.pk %}?#tasks"
+                       class="px-4 py-2 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition whitespace-nowrap">
+                        Clear
+                    </a>
+                </div>
+            </form>
         </div>
 
         {% if tasks %}
@@ -664,27 +722,41 @@ document.addEventListener("DOMContentLoaded", function () {
     const tabs        = document.querySelectorAll(".project-tab");
     const tabContents = document.querySelectorAll(".project-tab-content");
 
+    function switchTab(targetTab) {
+        tabs.forEach(function (t) {
+            t.classList.remove("active", "text-[#8b6f55]", "border-[#d4a373]");
+            t.classList.add("text-gray-400", "border-transparent");
+        });
+        tabContents.forEach(function (c) { c.classList.add("hidden"); });
+
+        const activeTab = document.querySelector(`[data-tab="${targetTab}"]`);
+        if (activeTab) {
+            activeTab.classList.add("active", "text-[#8b6f55]", "border-[#d4a373]");
+            activeTab.classList.remove("text-gray-400", "border-transparent");
+            if (typeof activeTab.scrollIntoView === "function") {
+                activeTab.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+            }
+        }
+
+        const selected = document.getElementById("tab-" + targetTab);
+        if (selected) selected.classList.remove("hidden");
+    }
+
     tabs.forEach(function (tab) {
         tab.addEventListener("click", function () {
             const target = tab.dataset.tab;
-
-            tabs.forEach(function (t) {
-                t.classList.remove("active", "text-[#8b6f55]", "border-[#d4a373]");
-                t.classList.add("text-gray-400", "border-transparent");
-            });
-            tabContents.forEach(function (c) { c.classList.add("hidden"); });
-
-            tab.classList.add("active", "text-[#8b6f55]", "border-[#d4a373]");
-            tab.classList.remove("text-gray-400", "border-transparent");
-
-            const selected = document.getElementById("tab-" + target);
-            if (selected) selected.classList.remove("hidden");
-
-            if (typeof tab.scrollIntoView === "function") {
-                tab.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
-            }
+            switchTab(target);
+            window.location.hash = target;
         });
     });
+
+    // Phase 5: Check URL hash on page load to restore tab state
+    if (window.location.hash) {
+        const hash = window.location.hash.substring(1); // remove #
+        if (hash) {
+            switchTab(hash);
+        }
+    }
 
     /* ── Share-portal modal ───────────────────────────────────── */
     const modal        = document.getElementById("projectModal");
@@ -765,6 +837,36 @@ document.addEventListener("DOMContentLoaded", function () {
             if (e.key === "Escape" && !assignModal.classList.contains("hidden")) hideAssignModal();
         });
     }
+
+    /* ══════════════════════════════════════════════════════════
+       PHASE 5: TASK FILTER AUTO-SUBMIT
+       ══════════════════════════════════════════════════════════ */
+    const filterStatus = document.getElementById("filterStatus");
+    const filterPriority = document.getElementById("filterPriority");
+    const filterAssigned = document.getElementById("filterAssigned");
+    const taskFilterForm = document.getElementById("taskFilterForm");
+
+    function submitFiltersAndSwitchToTasks() {
+        if (!taskFilterForm) return;
+        
+        // Build query string
+        const params = new URLSearchParams();
+        if (filterStatus && filterStatus.value) params.set("status", filterStatus.value);
+        if (filterPriority && filterPriority.value) params.set("priority", filterPriority.value);
+        if (filterAssigned && filterAssigned.value) params.set("assigned_to", filterAssigned.value);
+        
+        // Navigate with hash to preserve tasks tab
+        const queryString = params.toString();
+        const url = queryString ? `?${queryString}#tasks` : "#tasks";
+        window.location.href = url;
+    }
+
+    // Auto-submit on select change
+    [filterStatus, filterPriority, filterAssigned].forEach(select => {
+        if (select) {
+            select.addEventListener("change", submitFiltersAndSwitchToTasks);
+        }
+    });
 
 });
 </script>

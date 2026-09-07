@@ -110,3 +110,133 @@
 
 </div>
 {% endblock %}
+
+{% block extra_scripts %}
+<script>
+// ══════════════════════════════════════════════════════════
+// PHASE 5: AJAX TASK STATUS UPDATE
+// ══════════════════════════════════════════════════════════
+document.addEventListener("DOMContentLoaded", function () {
+    const statusSelects = document.querySelectorAll(".task-status-ajax");
+
+    // CSRF token helper (reuse from base.html)
+    function getCsrfToken() {
+        const name = 'csrftoken';
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Status CSS class mapping (matches projects/models.py)
+    function getStatusCssClass(status) {
+        const mapping = {
+            "PENDING": "bg-[#f3f4f6] text-[#6b7280]",
+            "IN_PROGRESS": "bg-[#e8f0fe] text-[#1a73e8]",
+            "COMPLETED": "bg-[#e6f4ea] text-[#137333]",
+        };
+        return mapping[status] || "bg-gray-100 text-gray-600";
+    }
+
+    // Show toast notification (simple inline version)
+    function showToast(message, type = "success") {
+        const toast = document.createElement("div");
+        toast.className = `fixed top-20 right-4 z-50 px-4 py-3 rounded-lg shadow-lg text-xs font-medium transition-all transform translate-x-0 ${
+            type === "success" 
+                ? "bg-[#e6f4ea] text-[#137333] border border-[#b7dfbe]" 
+                : "bg-[#fce8e6] text-[#c5221f] border border-[#f5c2be]"
+        }`;
+        toast.innerHTML = `
+            <div class="flex items-center gap-2">
+                <i class="fas ${type === "success" ? "fa-check-circle" : "fa-exclamation-circle"}"></i>
+                <span>${message}</span>
+            </div>
+        `;
+        document.body.appendChild(toast);
+        
+        // Auto-dismiss after 4 seconds
+        setTimeout(() => {
+            toast.style.opacity = "0";
+            toast.style.transform = "translateX(100%)";
+            setTimeout(() => toast.remove(), 300);
+        }, 4000);
+    }
+
+    statusSelects.forEach(select => {
+        const taskId = select.dataset.taskId;
+        const container = select.closest(".flex");
+        const spinner = container.querySelector(".task-status-spinner");
+        const indicator = container.querySelector(".task-status-indicator");
+
+        select.addEventListener("change", function (e) {
+            const newStatus = this.value;
+            const oldStatus = this.dataset.oldStatus || this.querySelector("option[selected]")?.value;
+
+            // Prevent redundant updates
+            if (newStatus === oldStatus) return;
+
+            // Show spinner
+            if (spinner) spinner.classList.remove("hidden");
+            this.disabled = true;
+
+            fetch(`/projects/ajax/tasks/${taskId}/update-status/`, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": getCsrfToken(),
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ status: newStatus }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update badge
+                    const badge = document.querySelector(`[data-task-status-badge="${taskId}"]`);
+                    if (badge) {
+                        // Remove old classes
+                        badge.className = badge.className.replace(/bg-\[.*?\]/g, "").replace(/text-\[.*?\]/g, "");
+                        // Add new classes
+                        badge.className += " " + getStatusCssClass(data.new_status);
+                        badge.textContent = data.new_status_display;
+                    }
+
+                    // Show success indicator briefly
+                    if (indicator) {
+                        indicator.classList.remove("hidden");
+                        setTimeout(() => indicator.classList.add("hidden"), 2000);
+                    }
+
+                    // Show toast
+                    showToast(data.message);
+
+                    // Store new status
+                    select.dataset.oldStatus = newStatus;
+                } else {
+                    showToast(data.error || "Failed to update task status.", "error");
+                    // Revert selection
+                    select.value = oldStatus;
+                }
+            })
+            .catch(error => {
+                console.error("Error updating task status:", error);
+                showToast("Network error. Please try again.", "error");
+                // Revert selection
+                select.value = oldStatus;
+            })
+            .finally(() => {
+                if (spinner) spinner.classList.add("hidden");
+                select.disabled = false;
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

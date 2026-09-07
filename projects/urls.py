@@ -24,4 +24,7 @@ urlpatterns = [
     # project-scoped, so they sit at the /projects/tasks/... level.
     path("tasks/my/",                  views.my_tasks,            name="my_tasks"),
     path("tasks/<int:task_id>/status/", views.task_status_update,  name="task_status_update"),
+
+    # ── Phase 5: AJAX endpoints ──────────────────────────────────────────────
+    path("ajax/tasks/<int:task_id>/update-status/", views.task_status_update_ajax, name="ajax_task_status_update"),
 ]
