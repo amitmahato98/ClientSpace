@@ -22,6 +22,7 @@ urlpatterns = [
     # ── Phase 2: Task views (Staff) ──────────────────────────────────────────
     # Note: these have no project-pk prefix — they are user-scoped, not
     # project-scoped, so they sit at the /projects/tasks/... level.
+    path("tasks/overview/", views.task_overview, name="task_overview"),
     path("tasks/my/",                  views.my_tasks,            name="my_tasks"),
     path("tasks/<int:task_id>/status/", views.task_status_update,  name="task_status_update"),
 

@@ -45,6 +45,7 @@ urlpatterns = [
     path("dashboard/", include("dashboard.urls")),
     path("staff/", include("staff.urls")),
     path("notifications/", include("notifications.urls", namespace="notifications")),
+    path("help/", include("helpcenter.urls", namespace="helpcenter")),
 
     # Root URL — smart redirect based on authentication + organization state
     path("", home_view, name="home"),

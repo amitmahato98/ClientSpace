@@ -1,0 +1,1169 @@
+{% extends 'base.html' %}
+
+{% block title %}Help Center — ClientSpace{% endblock %}
+{% block page_heading %}Help Center{% endblock %}
+{% block page_subheading %}Find quick answers and practical guidance{% endblock %}
+
+{% block content %}
+
+<style>
+    /* =========================================================
+     CLIENTSPACE HELP CENTER
+     Existing ghee / beige palette
+     ========================================================= */
+
+    #helpCenter {
+        --ghee: #d4a373;
+        --ghee-light: #f5e6d0;
+        --ghee-soft: #faf1e3;
+        --brown-dark: #4a3520;
+        --brown: #5a3e2b;
+        --brown-medium: #6b4f3a;
+        --brown-light: #8b6f55;
+        --brown-muted: #b8895e;
+        --border: #e8dccc;
+        --cream: #fffaf3;
+    }
+
+    /* ---------------------------------------------------------
+     Hero
+     --------------------------------------------------------- */
+
+    .help-hero {
+        position: relative;
+        overflow: hidden;
+        border-radius: 24px;
+        background:
+            radial-gradient(circle at 90% 15%,
+                rgba(212, 163, 115, 0.20),
+                transparent 30%),
+            radial-gradient(circle at 75% 100%,
+                rgba(245, 230, 208, 0.10),
+                transparent 35%),
+            var(--brown);
+        padding: 34px;
+        color: white;
+        box-shadow: 0 12px 35px rgba(74, 53, 32, 0.12);
+    }
+
+    .help-hero::before {
+        content: "";
+        position: absolute;
+        width: 180px;
+        height: 180px;
+        right: -55px;
+        top: -70px;
+        border: 24px solid rgba(212, 163, 115, 0.18);
+        border-radius: 50%;
+    }
+
+    .help-hero::after {
+        content: "";
+        position: absolute;
+        width: 130px;
+        height: 130px;
+        right: 90px;
+        bottom: -85px;
+        border: 14px solid rgba(245, 230, 208, 0.08);
+        border-radius: 50%;
+    }
+
+    .help-hero-content {
+        position: relative;
+        z-index: 2;
+        max-width: 760px;
+    }
+
+    .help-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--ghee-light);
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.13em;
+    }
+
+    .help-kicker-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        border-radius: 9px;
+        background: rgba(255, 255, 255, 0.12);
+        color: var(--ghee);
+    }
+
+    .help-hero h2 {
+        margin-top: 16px;
+        font-size: clamp(25px, 4vw, 36px);
+        line-height: 1.12;
+        font-weight: 800;
+        letter-spacing: -0.025em;
+    }
+
+    .help-hero-description {
+        max-width: 620px;
+        margin-top: 12px;
+        color: var(--ghee-light);
+        font-size: 14px;
+        line-height: 1.7;
+    }
+
+    /* ---------------------------------------------------------
+     Search
+     --------------------------------------------------------- */
+
+    .help-search-wrapper {
+        position: relative;
+        margin-top: 25px;
+        max-width: 650px;
+    }
+
+    .help-search-icon {
+        position: absolute;
+        left: 17px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--brown-light);
+        pointer-events: none;
+        transition: color 0.2s ease;
+    }
+
+    .help-search {
+        width: 100%;
+        height: 52px;
+        padding: 0 48px 0 48px;
+        border: 1px solid transparent;
+        border-radius: 15px;
+        background: white;
+        color: var(--brown-dark);
+        font-size: 13px;
+        outline: none;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        transition:
+            border-color 0.2s ease,
+            box-shadow 0.2s ease,
+            transform 0.2s ease;
+    }
+
+    .help-search::placeholder {
+        color: #a49a91;
+    }
+
+    .help-search:focus {
+        border-color: var(--ghee);
+        box-shadow:
+            0 8px 25px rgba(0, 0, 0, 0.12),
+            0 0 0 4px rgba(212, 163, 115, 0.18);
+        transform: translateY(-1px);
+    }
+
+    .help-search:focus+.help-search-clear {
+        opacity: 1;
+    }
+
+    .help-search-clear {
+        position: absolute;
+        right: 13px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 30px;
+        height: 30px;
+        border: 0;
+        border-radius: 8px;
+        background: var(--ghee-soft);
+        color: var(--brown-light);
+        cursor: pointer;
+        opacity: 0;
+        transition:
+            opacity 0.2s ease,
+            background 0.2s ease,
+            color 0.2s ease;
+    }
+
+    .help-search-clear:hover {
+        background: var(--ghee-light);
+        color: var(--brown);
+    }
+
+    /* ---------------------------------------------------------
+     Category filters
+     --------------------------------------------------------- */
+
+    .help-filter-area {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        margin-top: 25px;
+        margin-bottom: 18px;
+    }
+
+    .help-filter-title {
+        color: var(--brown-dark);
+        font-size: 13px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .help-filters {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding: 3px;
+        scrollbar-width: none;
+    }
+
+    .help-filters::-webkit-scrollbar {
+        display: none;
+    }
+
+    .help-filter {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        flex-shrink: 0;
+        height: 38px;
+        padding: 0 14px;
+        border: 1px solid var(--border);
+        border-radius: 11px;
+        background: white;
+        color: var(--brown-medium);
+        font-size: 11px;
+        font-weight: 700;
+        cursor: pointer;
+        transition:
+            background 0.2s ease,
+            border-color 0.2s ease,
+            color 0.2s ease,
+            transform 0.2s ease,
+            box-shadow 0.2s ease;
+    }
+
+    .help-filter:hover {
+        border-color: var(--ghee);
+        background: var(--ghee-soft);
+        color: var(--brown);
+        transform: translateY(-1px);
+    }
+
+    .help-filter.active {
+        border-color: var(--brown);
+        background: var(--brown);
+        color: white;
+        box-shadow: 0 5px 14px rgba(90, 62, 43, 0.16);
+    }
+
+    .help-filter.active:hover {
+        background: var(--brown-dark);
+        border-color: var(--brown-dark);
+    }
+
+    /* ---------------------------------------------------------
+     Category cards
+     --------------------------------------------------------- */
+
+    .help-category {
+        overflow: hidden;
+        border: 1px solid #eee6dd;
+        border-radius: 18px;
+        background: white;
+        box-shadow: 0 4px 18px rgba(74, 53, 32, 0.045);
+        transition:
+            transform 0.25s ease,
+            box-shadow 0.25s ease,
+            border-color 0.25s ease;
+    }
+
+    .help-category:hover {
+        border-color: var(--border);
+        box-shadow: 0 10px 30px rgba(74, 53, 32, 0.08);
+        transform: translateY(-2px);
+    }
+
+    .help-category-header {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        padding: 18px 19px;
+        border-bottom: 1px solid #f2ece5;
+        background:
+            linear-gradient(135deg,
+                rgba(250, 241, 227, 0.75),
+                rgba(255, 255, 255, 0.95));
+    }
+
+    .help-category-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        background: var(--ghee-light);
+        color: var(--brown-light);
+        font-size: 15px;
+        transition:
+            background 0.25s ease,
+            color 0.25s ease,
+            transform 0.25s ease;
+    }
+
+    .help-category:hover .help-category-icon {
+        background: var(--ghee);
+        color: white;
+        transform: rotate(-3deg) scale(1.04);
+    }
+
+    .help-category-name {
+        color: var(--brown-dark);
+        font-size: 13px;
+        font-weight: 800;
+    }
+
+    .help-category-description {
+        margin-top: 3px;
+        color: #91877d;
+        font-size: 11px;
+        line-height: 1.5;
+    }
+
+    /* ---------------------------------------------------------
+     FAQ
+     --------------------------------------------------------- */
+
+    .help-faq {
+        border-bottom: 1px solid #f4efe9;
+    }
+
+    .help-faq:last-child {
+        border-bottom: 0;
+    }
+
+    .help-faq-summary {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        min-height: 60px;
+        padding: 15px 19px;
+        color: #5f554c;
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1.5;
+        cursor: pointer;
+        list-style: none;
+        user-select: none;
+        outline: none;
+        transition:
+            background 0.2s ease,
+            color 0.2s ease,
+            padding 0.25s ease;
+    }
+
+    .help-faq-summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .help-faq-summary:hover {
+        background: #fffaf4;
+        color: var(--brown);
+    }
+
+    .help-faq-question {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .help-faq-dot {
+        flex-shrink: 0;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--ghee);
+        opacity: 0;
+        transform: scale(0);
+        transition:
+            opacity 0.2s ease,
+            transform 0.2s ease;
+    }
+
+    .help-faq[open] .help-faq-dot {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    /* Plus / Minus button */
+
+    .help-faq-icon {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        width: 30px;
+        height: 30px;
+        border: 1px solid var(--border);
+        border-radius: 9px;
+        background: white;
+        color: var(--brown-muted);
+        transition:
+            background 0.25s ease,
+            border-color 0.25s ease,
+            color 0.25s ease,
+            transform 0.25s ease;
+    }
+
+    .help-faq-icon::before,
+    .help-faq-icon::after {
+        content: "";
+        position: absolute;
+        width: 10px;
+        height: 1.5px;
+        border-radius: 5px;
+        background: currentColor;
+        transition:
+            transform 0.25s ease,
+            opacity 0.25s ease;
+    }
+
+    .help-faq-icon::after {
+        transform: rotate(90deg);
+    }
+
+    .help-faq[open] .help-faq-icon {
+        border-color: var(--ghee);
+        background: var(--ghee-soft);
+        color: var(--brown);
+        transform: rotate(180deg);
+    }
+
+    .help-faq[open] .help-faq-icon::after {
+        opacity: 0;
+        transform: rotate(90deg) scale(0);
+    }
+
+    .help-faq[open] .help-faq-summary {
+        color: var(--brown);
+        background: #fffaf4;
+    }
+
+    /* Answer */
+
+    .help-faq-answer-wrapper {
+        display: grid;
+        grid-template-rows: 0fr;
+        transition:
+            grid-template-rows 0.28s ease,
+            opacity 0.25s ease;
+        opacity: 0;
+    }
+
+    .help-faq[open] .help-faq-answer-wrapper {
+        grid-template-rows: 1fr;
+        opacity: 1;
+    }
+
+    .help-faq-answer-inner {
+        overflow: hidden;
+    }
+
+    .help-faq-answer {
+        padding: 0 55px 18px 35px;
+        color: #80766d;
+        font-size: 11px;
+        line-height: 1.75;
+    }
+
+    /* ---------------------------------------------------------
+     Empty state
+     --------------------------------------------------------- */
+
+    .help-empty {
+        display: none;
+        padding: 45px 20px;
+        border: 1px dashed var(--ghee);
+        border-radius: 18px;
+        background: white;
+        text-align: center;
+    }
+
+    .help-empty.show {
+        display: block;
+    }
+
+    .help-empty-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 52px;
+        height: 52px;
+        margin: 0 auto;
+        border-radius: 15px;
+        background: var(--ghee-soft);
+        color: var(--brown-muted);
+        font-size: 18px;
+    }
+
+    .help-empty-title {
+        margin-top: 13px;
+        color: var(--brown-dark);
+        font-size: 13px;
+        font-weight: 800;
+    }
+
+    .help-empty-text {
+        margin-top: 5px;
+        color: #968c82;
+        font-size: 11px;
+    }
+
+    /* ---------------------------------------------------------
+     Bottom support card
+     --------------------------------------------------------- */
+
+    .help-support {
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        margin-top: 22px;
+        padding: 20px;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        background:
+            linear-gradient(135deg,
+                #faf1e3,
+                #fffaf4);
+    }
+
+    .help-support::after {
+        content: "";
+        position: absolute;
+        width: 100px;
+        height: 100px;
+        right: -45px;
+        bottom: -50px;
+        border: 12px solid rgba(212, 163, 115, 0.14);
+        border-radius: 50%;
+    }
+
+    .help-support-content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: flex-start;
+        gap: 13px;
+    }
+
+    .help-support-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        width: 40px;
+        height: 40px;
+        border-radius: 11px;
+        background: white;
+        color: var(--brown-muted);
+        box-shadow: 0 3px 12px rgba(74, 53, 32, 0.07);
+    }
+
+    .help-support-title {
+        color: var(--brown-dark);
+        font-size: 13px;
+        font-weight: 800;
+    }
+
+    .help-support-text {
+        max-width: 600px;
+        margin-top: 4px;
+        color: var(--brown-light);
+        font-size: 11px;
+        line-height: 1.6;
+    }
+
+    .help-support-button {
+        position: relative;
+        z-index: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        flex-shrink: 0;
+        min-height: 40px;
+        padding: 0 15px;
+        border-radius: 10px;
+        background: var(--brown);
+        color: white;
+        font-size: 11px;
+        font-weight: 700;
+        text-decoration: none;
+        box-shadow: 0 5px 15px rgba(90, 62, 43, 0.14);
+        transition:
+            background 0.2s ease,
+            transform 0.2s ease,
+            box-shadow 0.2s ease;
+    }
+
+    .help-support-button:hover {
+        background: var(--brown-dark);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(90, 62, 43, 0.18);
+    }
+
+    /* ---------------------------------------------------------
+     Responsive
+     --------------------------------------------------------- */
+
+    @media (max-width: 768px) {
+        .help-hero {
+            padding: 25px 20px;
+            border-radius: 19px;
+        }
+
+        .help-hero h2 {
+            font-size: 26px;
+        }
+
+        .help-hero-description {
+            font-size: 12px;
+        }
+
+        .help-filter-area {
+            display: block;
+        }
+
+        .help-filter-title {
+            display: block;
+            margin-bottom: 9px;
+        }
+
+        .help-category-header {
+            padding: 15px;
+        }
+
+        .help-faq-summary {
+            padding: 14px 15px;
+        }
+
+        .help-faq-answer {
+            padding: 0 45px 16px 15px;
+        }
+
+        .help-support {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .help-support-button {
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .help-hero {
+            padding: 22px 16px;
+        }
+
+        .help-search {
+            height: 48px;
+        }
+
+        .help-category {
+            border-radius: 15px;
+        }
+
+        .help-faq-question {
+            gap: 7px;
+        }
+
+        .help-faq-summary {
+            font-size: 11px;
+        }
+
+        .help-faq-icon {
+            width: 28px;
+            height: 28px;
+        }
+    }
+
+    /* ---------------------------------------------------------
+     Utility animation
+     --------------------------------------------------------- */
+
+    .help-category {
+        animation: helpCardIn 0.4s ease both;
+    }
+
+    @keyframes helpCardIn {
+        from {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+
+<div class="max-w-5xl mx-auto" id="helpCenter">
+
+    <!-- =======================================================
+       HERO / SEARCH
+       ======================================================= -->
+
+    <section class="help-hero">
+
+        <div class="help-hero-content">
+
+            <div class="help-kicker">
+                <span class="help-kicker-icon">
+                    <i class="far fa-compass"></i>
+                </span>
+                <span>ClientSpace Guide</span>
+            </div>
+
+            <h2>
+                A clearer path through your workspace.
+            </h2>
+
+            <p class="help-hero-description">
+                Search the answers below for projects, tasks, notifications,
+                account settings, and everyday questions that come up while
+                work is moving.
+            </p>
+
+            <div class="help-search-wrapper">
+
+                <i class="fas fa-search help-search-icon"></i>
+
+                <input id="helpSearch" type="search" class="help-search"
+                    placeholder="Search help, for example: notifications" autocomplete="off">
+
+                <button type="button" id="helpSearchClear" class="help-search-clear" aria-label="Clear search">
+                    <i class="fas fa-times"></i>
+                </button>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =======================================================
+       FILTERS
+       ======================================================= -->
+
+    <div class="help-filter-area">
+
+        <div class="help-filter-title">
+            Browse topics
+        </div>
+
+        <div class="help-filters" id="helpFilters">
+
+            <button type="button" data-category="all" class="help-filter active">
+                <i class="fas fa-layer-group"></i>
+                <span>All topics</span>
+            </button>
+
+            {% for category in help_categories %}
+
+            <button type="button" data-category="{{ category.key }}" class="help-filter">
+                <i class="fas {{ category.icon }}"></i>
+                <span>{{ category.label }}</span>
+            </button>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+
+    <!-- =======================================================
+       EMPTY SEARCH STATE
+       ======================================================= -->
+
+    <div id="helpEmptyState" class="help-empty">
+
+        <div class="help-empty-icon">
+            <i class="fas fa-search"></i>
+        </div>
+
+        <div class="help-empty-title">
+            No matching help articles
+        </div>
+
+        <p class="help-empty-text">
+            Try a shorter search or choose another topic.
+        </p>
+
+    </div>
+
+
+    <!-- =======================================================
+       FAQ CATEGORY CARDS
+       ======================================================= -->
+
+    <div id="helpCategories" class="grid gap-5 lg:grid-cols-2">
+
+        {% for category in help_categories %}
+
+        <section class="help-category" data-category="{{ category.key }}">
+
+            <!-- Category header -->
+
+            <div class="help-category-header">
+
+                <div class="help-category-icon">
+                    <i class="fas {{ category.icon }}"></i>
+                </div>
+
+                <div class="min-w-0">
+
+                    <h2 class="help-category-name">
+                        {{ category.label }}
+                    </h2>
+
+                    <p class="help-category-description">
+                        {{ category.description }}
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- FAQ list -->
+
+            <div>
+
+                {% for faq in category.faqs %}
+
+                <details class="help-faq" data-search="{{ faq.question|lower }} {{ faq.answer|lower }}">
+
+                    <summary class="help-faq-summary">
+
+                        <span class="help-faq-question">
+
+                            <span class="help-faq-dot"></span>
+
+                            <span>
+                                {{ faq.question }}
+                            </span>
+
+                        </span>
+
+                        <span class="help-faq-icon" aria-hidden="true"></span>
+
+                    </summary>
+
+
+                    <div class="help-faq-answer-wrapper">
+
+                        <div class="help-faq-answer-inner">
+
+                            <p class="help-faq-answer">
+                                {{ faq.answer }}
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </details>
+
+                {% endfor %}
+
+            </div>
+
+        </section>
+
+        {% endfor %}
+
+    </div>
+
+
+    <!-- =======================================================
+       SUPPORT CARD
+       ======================================================= -->
+
+    <section class="help-support">
+
+        <div class="help-support-content">
+
+            <div class="help-support-icon">
+                <i class="fas fa-headset"></i>
+            </div>
+
+            <div>
+
+                <h2 class="help-support-title">
+                    Still need a hand?
+                </h2>
+
+                <p class="help-support-text">
+                    Tell your workspace manager what you were trying to do
+                    and which page you were on. That gives them the context
+                    needed to help quickly.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <a href="{% url 'notifications:list' %}" class="help-support-button">
+            <i class="far fa-bell"></i>
+            <span>Review notifications</span>
+        </a>
+
+    </section>
+
+</div>
+
+
+{% endblock %}
+
+
+{% block extra_scripts %}
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        /* ==========================================================
+           ELEMENTS
+           ========================================================== */
+
+        const helpCenter = document.getElementById("helpCenter");
+
+        if (!helpCenter) {
+            return;
+        }
+
+        const searchInput = document.getElementById("helpSearch");
+        const searchClear = document.getElementById("helpSearchClear");
+        const filterButtons = helpCenter.querySelectorAll(".help-filter");
+        const categories = helpCenter.querySelectorAll(".help-category");
+        const emptyState = document.getElementById("helpEmptyState");
+
+        let selectedCategory = "all";
+
+
+        /* ==========================================================
+           FAQ ACCORDION
+           Only one FAQ can remain open
+           ========================================================== */
+
+        const faqItems = helpCenter.querySelectorAll(".help-faq");
+
+        faqItems.forEach(function (faq) {
+
+            faq.addEventListener("toggle", function () {
+
+                if (!faq.open) {
+                    return;
+                }
+
+                faqItems.forEach(function (otherFaq) {
+
+                    if (otherFaq !== faq && otherFaq.open) {
+                        otherFaq.open = false;
+                    }
+
+                });
+
+            });
+
+        });
+
+
+        /* ==========================================================
+           FILTER BUTTON ACTIVE STATE
+           ========================================================== */
+
+        filterButtons.forEach(function (button) {
+
+            button.addEventListener("click", function () {
+
+                selectedCategory = button.dataset.category;
+
+                filterButtons.forEach(function (item) {
+
+                    item.classList.remove("active");
+
+                });
+
+                button.classList.add("active");
+
+                applyFilters();
+
+            });
+
+        });
+
+
+        /* ==========================================================
+           SEARCH
+           ========================================================== */
+
+        searchInput.addEventListener("input", function () {
+
+            updateClearButton();
+
+            applyFilters();
+
+        });
+
+
+        /* ==========================================================
+           CLEAR SEARCH
+           ========================================================== */
+
+        searchClear.addEventListener("click", function () {
+
+            searchInput.value = "";
+
+            updateClearButton();
+
+            searchInput.focus();
+
+            applyFilters();
+
+        });
+
+
+        /* ==========================================================
+           SHOW / HIDE CLEAR BUTTON
+           ========================================================== */
+
+        function updateClearButton() {
+
+            if (searchInput.value.trim() !== "") {
+
+                searchClear.style.opacity = "1";
+                searchClear.style.pointerEvents = "auto";
+
+            } else {
+
+                searchClear.style.opacity = "0";
+                searchClear.style.pointerEvents = "none";
+
+            }
+
+        }
+
+
+        /* ==========================================================
+           APPLY FILTERS + SEARCH
+           ========================================================== */
+
+        function applyFilters() {
+
+            const query = searchInput.value
+                .trim()
+                .toLowerCase();
+
+            let visibleCategories = 0;
+
+
+            categories.forEach(function (category) {
+
+                const categoryMatches =
+                    selectedCategory === "all" ||
+                    category.dataset.category === selectedCategory;
+
+                const faqItemsInside =
+                    category.querySelectorAll(".help-faq");
+
+                let matchingFaqs = 0;
+
+
+                faqItemsInside.forEach(function (faq) {
+
+                    const searchText =
+                        faq.dataset.search || "";
+
+                    const searchMatches =
+                        !query ||
+                        searchText.includes(query);
+
+                    const shouldShow =
+                        categoryMatches &&
+                        searchMatches;
+
+
+                    faq.style.display =
+                        shouldShow ? "" : "none";
+
+
+                    if (shouldShow) {
+
+                        matchingFaqs++;
+
+                    } else if (faq.open) {
+
+                        faq.open = false;
+
+                    }
+
+                });
+
+
+                const showCategory =
+                    categoryMatches &&
+                    matchingFaqs > 0;
+
+
+                category.style.display =
+                    showCategory ? "" : "none";
+
+
+                if (showCategory) {
+
+                    visibleCategories++;
+
+                }
+
+            });
+
+
+            if (visibleCategories === 0) {
+
+                emptyState.classList.add("show");
+
+            } else {
+
+                emptyState.classList.remove("show");
+
+            }
+
+        }
+
+
+        /* ==========================================================
+           INITIALIZE
+           ========================================================== */
+
+        updateClearButton();
+
+        applyFilters();
+
+    });
+</script>
+
+{% endblock %}
