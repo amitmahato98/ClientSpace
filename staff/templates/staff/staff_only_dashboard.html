@@ -231,6 +231,22 @@
 
                 </div>
 
+                 <div class="detail-row">
+
+                <span>
+                    Manager
+                </span>
+
+                <strong>
+                    {% if manager %}
+                        {{ manager.user.get_full_name }}
+                    {% else %}
+                        Not available
+                    {% endif %}
+                </strong>
+
+                </div>
+
 
                 <div class="detail-row">
 

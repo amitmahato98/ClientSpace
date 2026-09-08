@@ -17,7 +17,7 @@ from .forms import Add_staffForm, StaffSetupForm, StaffAssignmentForm
 from .models import Staff,StaffAssignment
 from projects.models import Project
 
-from accounts.models import OrganizationMembership
+from accounts.models import OrganizationMembership,Organization
 
 
 User = get_user_model()
@@ -79,6 +79,10 @@ def staff(request):
             "first_name",
             "last_name"
         )
+        manager = OrganizationMembership.objects.filter(
+        organization=staff_member.organization,
+        role=OrganizationMembership.Role.MANAGER
+    ).select_related("user").first()
 
         # ---------------------------------------------
         # COUNTS
@@ -95,6 +99,7 @@ def staff(request):
             "staff/staff_only_dashboard.html",
             {
                 "staff": staff_member,
+                "manager": manager,
                 "assignments": active_assignments,
                 "completed_assignments": completed_assignments,
                 "fellow_staff": fellow_staff,
