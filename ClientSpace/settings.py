@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'dashboard',
     'staff',
     'notifications',
+    'helpcenter',
 ]
 
 AUTH_USER_MODEL = "accounts.User"

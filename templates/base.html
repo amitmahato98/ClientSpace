@@ -200,11 +200,11 @@
             </div>
 
             <!-- Help -->
-            <button type="button" title="Help"
+            <a href="{% url 'helpcenter:home' %}" title="Help"
               class="w-8 h-8 rounded-full border border-gray-200 bg-white/80 hidden sm:flex items-center justify-center
                      text-gray-500 hover:bg-white hover:text-[#b8895e] text-xs transition">
               <i class="far fa-question-circle"></i>
-            </button>
+            </a>
 
             {% if user.is_authenticated %}
               <!-- User avatar / initials -->
@@ -324,6 +324,12 @@
           class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition">
           <i class="fas fa-folder-open w-5 text-center text-[#b8895e]"></i>
           <span>Projects</span>
+        </a>
+
+        <a href="{% url 'helpcenter:home' %}" data-nav="help"
+          class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition">
+          <i class="far fa-question-circle w-5 text-center text-[#b8895e]"></i>
+          <span>Help Center</span>
         </a>
 
         {% if user.is_authenticated and user.is_staff_member %}
