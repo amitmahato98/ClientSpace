@@ -102,14 +102,16 @@
               </a>
             {% endif %}
 
-            {% if user.is_authenticated and not user.is_client %}
-              <!-- Tasks — MANAGER and STAFF only -->
-              <a href="#" data-nav="tasks"
+            {% if user.is_authenticated and user.is_manager %}
+              <!-- Tasks — MANAGER only -->
+              <a href="{% url 'projects:task_overview' %}" data-nav="tasks"
                 class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#6b4f3a] hover:text-[#4a3520] text-sm transition">
                 <i class="fas fa-tasks w-5 text-center text-[#b8895e]"></i>
                 <span>Tasks</span>
               </a>
+            {% endif %}
 
+            {% if user.is_authenticated and not user.is_client %}
               <!-- Payments — MANAGER and STAFF only -->
               <a href="#" data-nav="payments"
                 class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#6b4f3a] hover:text-[#4a3520] text-sm transition">
@@ -233,10 +235,10 @@
 
         <!-- ===== DJANGO MESSAGES AS TOAST NOTIFICATIONS (Phase 5) ===== -->
         {% if messages %}
-        <div id="toastContainer" class="fixed top-20 right-4 z-[60] space-y-2 pointer-events-none">
+        <div id="toastContainer" class="fixed top-20 right-4 z[60] space-y-2 pointer-events-none">
           {% for message in messages %}
           <div class="toast-message pointer-events-auto transform translate-x-0 transition-all duration-300 ease-out
-                      px-4 py-3 rounded-lg shadow-lg text-xs font-medium flex items-center gap-2.5 min-w-[280px] max-w-sm
+                      px-4 py-3 rounded-lg shadow-lg text-xs font-medium flex items-center gap-2.5 min-w[280px] max-w-sm
                       {% if message.tags == 'success' %}bg-[#e6f4ea] text-[#137333] border border-[#b7dfbe]
                       {% elif message.tags == 'error' %}bg-[#fce8e6] text-[#c5221f] border border-[#f5c2be]
                       {% elif message.tags == 'warning' %}bg-[#fef7e0] text-[#b06000] border border-[#f5e1a4]
@@ -334,12 +336,15 @@
           </a>
         {% endif %}
 
-        {% if user.is_authenticated and not user.is_client %}
-          <a href="#" data-nav="tasks"
+        {% if user.is_authenticated and user.is_manager %}
+          <a href="{% url 'projects:task_overview' %}" data-nav="tasks"
             class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition">
             <i class="fas fa-tasks w-5 text-center text-[#b8895e]"></i>
             <span>Tasks</span>
           </a>
+        {% endif %}
+
+        {% if user.is_authenticated and not user.is_client %}
           <a href="#" data-nav="payments"
             class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition">
             <i class="fas fa-credit-card w-5 text-center text-[#b8895e]"></i>
