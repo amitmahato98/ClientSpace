@@ -13,6 +13,7 @@
     gap: 20px;
     margin-bottom: 24px;
 }
+
 #avatarPreview {
     width: 72px;
     height: 72px;
@@ -30,6 +31,7 @@
     background-position: center;
     letter-spacing: 0.05em;
 }
+
 /* ── Form elements ── */
 .sett-label {
     display: block;
@@ -38,6 +40,7 @@
     color: #374151;
     margin-bottom: 6px;
 }
+
 .sett-input {
     width: 100%;
     padding: 10px 14px;
@@ -49,14 +52,17 @@
     outline: none;
     transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
 }
+
 .sett-input:focus {
     background: #fff;
     border-color: #b8895e;
     box-shadow: 0 0 0 3px rgba(184,137,94,0.15);
 }
+
 .sett-field {
     margin-bottom: 16px;
 }
+
 /* ── Outline button ── */
 .btn-outline {
     display: inline-flex;
@@ -72,210 +78,857 @@
     cursor: pointer;
     transition: background 0.15s, border-color 0.15s;
 }
+
 .btn-outline:hover {
     background: #f3f4f6;
     border-color: #9ca3af;
 }
+
+/* ── Disabled organization inputs ── */
+.organization-input:disabled {
+    cursor: default;
+    background-color: #f9fafb;
+    color: #374151;
+    opacity: 1;
+}
+
+/* ── File input disabled ── */
+#organization-logo:disabled {
+    cursor: default;
+    opacity: 0.7;
+}
 </style>
 {% endblock %}
+
 
 {% block content %}
 
 <div class="max-w-5xl mx-auto">
-    
+
     <div class="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-5 items-start">
 
-        <!-- ── Sidebar Navigation ── -->
+        <!-- ══════════════════════════════════════════════ -->
+        <!-- SIDEBAR NAVIGATION -->
+        <!-- ══════════════════════════════════════════════ -->
+
         <nav class="flex flex-col gap-1">
-            <button class="sett-tab-btn active w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-transparent border-none cursor-pointer transition hover:bg-gray-100 hover:text-gray-900" id="tab-btn-profile" onclick="settSwitch('profile')">Profile</button>
-            <button class="sett-tab-btn w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-transparent border-none cursor-pointer transition hover:bg-gray-100 hover:text-gray-900" id="tab-btn-workspace" onclick="settSwitch('workspace')">Workspace</button>
-            <button class="sett-tab-btn w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-transparent border-none cursor-pointer transition hover:bg-gray-100 hover:text-gray-900" id="tab-btn-notification" onclick="settSwitch('notification')">Notifications</button>
-            <button class="sett-tab-btn w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-transparent border-none cursor-pointer transition hover:bg-gray-100 hover:text-gray-900" id="tab-btn-portal" onclick="settSwitch('portal')">Client Portal</button>
-            <button class="sett-tab-btn w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-transparent border-none cursor-pointer transition hover:bg-gray-100 hover:text-gray-900" id="tab-btn-billing" onclick="settSwitch('billing')">Billing &amp; Plan</button>
+
+            <button
+                class="sett-tab-btn active w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-transparent border-none cursor-pointer transition hover:bg-gray-100 hover:text-gray-900"
+                id="tab-btn-profile"
+                onclick="settSwitch('profile')"
+            >
+                Profile
+            </button>
+
+            <button
+                class="sett-tab-btn w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-transparent border-none cursor-pointer transition hover:bg-gray-100 hover:text-gray-900"
+                id="tab-btn-workspace"
+                onclick="settSwitch('workspace')"
+            >
+                Workspace
+            </button>
+
+            <button
+                class="sett-tab-btn w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-transparent border-none cursor-pointer transition hover:bg-gray-100 hover:text-gray-900"
+                id="tab-btn-notification"
+                onclick="settSwitch('notification')"
+            >
+                Notifications
+            </button>
+
+            <button
+                class="sett-tab-btn w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-transparent border-none cursor-pointer transition hover:bg-gray-100 hover:text-gray-900"
+                id="tab-btn-portal"
+                onclick="settSwitch('portal')"
+            >
+                Client Portal
+            </button>
+
+            <button
+                class="sett-tab-btn w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-transparent border-none cursor-pointer transition hover:bg-gray-100 hover:text-gray-900"
+                id="tab-btn-billing"
+                onclick="settSwitch('billing')"
+            >
+                Billing &amp; Plan
+            </button>
+
         </nav>
 
+
         <div>
-            <!-- Django Messages -->
+
+            <!-- ══════════════════════════════════════════════ -->
+            <!-- DJANGO MESSAGES -->
+            <!-- ══════════════════════════════════════════════ -->
+
             {% if messages %}
+
                 <div style="margin-bottom: 20px;">
+
                     {% for message in messages %}
-                        <div style="padding: 12px 16px; border-radius: 8px; margin-bottom: 8px; font-size: 14px; font-weight: 500;
-                            {% if message.tags == 'error' %}background-color: #fef2f2; color: #dc2626; border: 1px solid #fecaca;
-                            {% else %}background-color: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0;{% endif %}">
+
+                        <div
+                            style="
+                                padding: 12px 16px;
+                                border-radius: 8px;
+                                margin-bottom: 8px;
+                                font-size: 14px;
+                                font-weight: 500;
+
+                                {% if message.tags == 'error' %}
+                                    background-color: #fef2f2;
+                                    color: #dc2626;
+                                    border: 1px solid #fecaca;
+                                {% else %}
+                                    background-color: #f0fdf4;
+                                    color: #16a34a;
+                                    border: 1px solid #bbf7d0;
+                                {% endif %}
+                            "
+                        >
                             {{ message }}
                         </div>
+
                     {% endfor %}
+
                 </div>
+
             {% endif %}
 
-            <!-- ════════════ PROFILE ════════════ -->
-            <div id="panel-profile" class="bg-white rounded-xl p-8 border border-gray-200 shadow-sm">
 
-                <h2 class="text-lg font-bold text-gray-900 mb-6">Profile</h2>
+            <!-- ══════════════════════════════════════════════ -->
+            <!-- PROFILE -->
+            <!-- ══════════════════════════════════════════════ -->
 
-                <form method="POST" action="{% url 'sett:settings' %}" enctype="multipart/form-data">
+            <div
+                id="panel-profile"
+                class="bg-white rounded-xl p-8 border border-gray-200 shadow-sm"
+            >
+
+                <h2 class="text-lg font-bold text-gray-900 mb-6">
+                    Profile
+                </h2>
+
+
+                <!-- ══════════════════════════════════════ -->
+                <!-- PROFILE FORM -->
+                <!-- ══════════════════════════════════════ -->
+
+                <form
+                    method="POST"
+                    action="{% url 'sett:settings' %}"
+                    enctype="multipart/form-data"
+                >
+
                     {% csrf_token %}
-                    <input type="hidden" name="action" value="profile">
+
+                    <input
+                        type="hidden"
+                        name="action"
+                        value="profile"
+                    >
+
 
                     <!-- Avatar -->
+
                     <div class="sett-avatar">
-                        <div id="avatarPreview"
+
+                        <div
+                            id="avatarPreview"
+
                             {% if user.profile_picture %}
-                                style="background-image:url('{{ user.profile_picture.url }}');background-size:cover;background-position:center;"
-                            {% endif %}>
-                            {% if not user.profile_picture %}{{ user.initials }}{% endif %}
+                                style="
+                                    background-image:url('{{ user.profile_picture.url }}');
+                                    background-size:cover;
+                                    background-position:center;
+                                "
+                            {% endif %}
+                        >
+
+                            {% if not user.profile_picture %}
+                                {{ user.initials }}
+                            {% endif %}
+
                         </div>
+
+
                         <div>
-                            <input type="file" id="photoInput" name="profile_picture" class="hidden" accept="image/*" onchange="settPreviewPhoto(event)">
-                            <button type="button" class="btn-outline" onclick="document.getElementById('photoInput').click()">
-                                <i class="fas fa-camera"></i> Change photo
+
+                            <input
+                                type="file"
+                                id="photoInput"
+                                name="profile_picture"
+                                class="hidden"
+                                accept="image/*"
+                                onchange="settPreviewPhoto(event)"
+                            >
+
+                            <button
+                                type="button"
+                                class="btn-outline"
+                                onclick="document.getElementById('photoInput').click()"
+                            >
+                                <i class="fas fa-camera"></i>
+                                Change photo
                             </button>
-                            <p class="text-xs text-gray-400 mt-1">PNG, JPG up to 2MB</p>
+
+                            <p class="text-xs text-gray-400 mt-1">
+                                PNG, JPG up to 2MB
+                            </p>
+
                         </div>
+
                     </div>
+
 
                     <!-- Full name & Display name -->
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+
                         <div>
-                            <label class="sett-label">Full name</label>
-                            <input class="sett-input" type="text" name="full_name"
+
+                            <label class="sett-label">
+                                Full name
+                            </label>
+
+                            <input
+                                class="sett-input"
+                                type="text"
+                                name="full_name"
                                 value="{{ user.get_full_name }}"
-                                placeholder="Enter your Full Name">
+                                placeholder="Enter your Full Name"
+                            >
+
                         </div>
+
+
                         <div>
-                            <label class="sett-label">Display name</label>
-                            <input class="sett-input" type="text" name="display_name"
+
+                            <label class="sett-label">
+                                Display name
+                            </label>
+
+                            <input
+                                class="sett-input"
+                                type="text"
+                                name="display_name"
                                 value="{{ user.display_name }}"
-                                placeholder="Enter your Display name">
+                                placeholder="Enter your Display name"
+                            >
+
                         </div>
+
                     </div>
+
 
                     <!-- Email -->
+
                     <div class="sett-field">
-                        <label class="sett-label">Email</label>
-                        <input class="sett-input" type="email" name="email"
+
+                        <label class="sett-label">
+                            Email
+                        </label>
+
+                        <input
+                            class="sett-input"
+                            type="email"
+                            name="email"
                             value="{{ user.email }}"
-                            placeholder="abcd@gmail.com" required>
+                            placeholder="abcd@gmail.com"
+                            required
+                        >
+
                     </div>
+
 
                     <!-- New password -->
+
                     <div class="mb-4">
-                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">New password</label>
-                        <input class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 outline-none transition focus:bg-white focus:border-[#b8895e] focus:ring-2 focus:ring-[#b8895e] focus:ring-opacity-20" type="password" name="new_password" placeholder="Enter your new password">
+
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+                            New password
+                        </label>
+
+                        <input
+                            class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 outline-none transition focus:bg-white focus:border-[#b8895e] focus:ring-2 focus:ring-[#b8895e] focus:ring-opacity-20"
+                            type="password"
+                            name="new_password"
+                            placeholder="Enter your new password"
+                        >
+
                     </div>
+
 
                     <!-- Confirm password -->
+
                     <div class="mb-6">
-                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Confirm new password</label>
-                        <input class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 outline-none transition focus:bg-white focus:border-[#b8895e] focus:ring-2 focus:ring-[#b8895e] focus:ring-opacity-20" type="password" name="confirm_password" placeholder="Enter confirm password">
+
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+                            Confirm new password
+                        </label>
+
+                        <input
+                            class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 outline-none transition focus:bg-white focus:border-[#b8895e] focus:ring-2 focus:ring-[#b8895e] focus:ring-opacity-20"
+                            type="password"
+                            name="confirm_password"
+                            placeholder="Enter confirm password"
+                        >
+
                     </div>
 
-                    <button type="submit" class="px-5 py-2.5 text-sm font-semibold text-white bg-[#d4a373] rounded-lg hover:bg-[#b8895e] transition">Save Profile</button>
+
+                    <!-- Save Profile -->
+
+                    <button
+                        type="submit"
+                        class="px-5 py-2.5 text-sm font-semibold text-white bg-[#d4a373] rounded-lg hover:bg-[#b8895e] transition"
+                    >
+                        Save Profile
+                    </button>
+
                 </form>
+
+
+                <!-- ══════════════════════════════════════════════ -->
+                <!-- ORGANIZATION DETAILS - MANAGER ONLY -->
+                <!-- ══════════════════════════════════════════════ -->
+
+                {% if user.role == user.Role.MANAGER and organization %}
+
+                <div class="mt-8 pt-8 border-t border-gray-200">
+
+
+                    <!-- Organization heading -->
+
+                    <div class="flex items-center justify-between mb-6">
+
+                        <div>
+
+                            <h2 class="text-lg font-bold text-gray-900">
+                                Organization Details
+                            </h2>
+
+                            <p class="text-sm text-gray-500 mt-1">
+                                Manage the details of your organization.
+                            </p>
+
+                        </div>
+
+
+                        <!-- Change Details -->
+
+                        <button
+                            type="button"
+                            id="change-org-btn"
+                            onclick="enableOrganizationEdit()"
+                            class="px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                        >
+                            <i class="fas fa-pen mr-1"></i>
+                            Change Details
+                        </button>
+
+                    </div>
+
+
+                    <!-- ══════════════════════════════════════ -->
+                    <!-- ORGANIZATION FORM -->
+                    <!-- ══════════════════════════════════════ -->
+
+                    <form
+                        method="POST"
+                        action="{% url 'sett:settings' %}"
+                        enctype="multipart/form-data"
+                        id="organization-form"
+                    >
+
+                        {% csrf_token %}
+
+                        <input
+                            type="hidden"
+                            name="action"
+                            value="organization"
+                        >
+
+
+                        <!-- Organization Name -->
+
+                        <div class="sett-field">
+
+                            <label class="sett-label">
+                                Organization Name
+                            </label>
+
+                            <input
+                                class="sett-input organization-input"
+                                type="text"
+                                name="name"
+                                value="{{ organization.name }}"
+                                placeholder="Enter organization name"
+                                disabled
+                                required
+                            >
+
+                        </div>
+
+
+                        <!-- Description -->
+
+                        <div class="sett-field">
+
+                            <label class="sett-label">
+                                Description
+                            </label>
+
+                            <textarea
+                                class="sett-input organization-input"
+                                name="description"
+                                rows="4"
+                                placeholder="Enter organization description"
+                                disabled
+                            >{{ organization.description }}</textarea>
+
+                        </div>
+
+
+                        <!-- Organization Email -->
+
+                        <div class="sett-field">
+
+                            <label class="sett-label">
+                                Organization Email
+                            </label>
+
+                            <input
+                                class="sett-input organization-input"
+                                type="email"
+                                name="organization_email"
+                                value="{{ organization.email }}"
+                                placeholder="organization@example.com"
+                                disabled
+                            >
+
+                        </div>
+
+
+                        <!-- Phone -->
+
+                        <div class="sett-field">
+
+                            <label class="sett-label">
+                                Phone
+                            </label>
+
+                            <input
+                                class="sett-input organization-input"
+                                type="text"
+                                name="phone"
+                                value="{{ organization.phone }}"
+                                placeholder="Enter organization phone"
+                                disabled
+                            >
+
+                        </div>
+
+
+                        <!-- Address -->
+
+                        <div class="sett-field">
+
+                            <label class="sett-label">
+                                Address
+                            </label>
+
+                            <textarea
+                                class="sett-input organization-input"
+                                name="address"
+                                rows="3"
+                                placeholder="Enter organization address"
+                                disabled
+                            >{{ organization.address }}</textarea>
+
+                        </div>
+
+
+                        <!-- Website -->
+
+                        <div class="sett-field">
+
+                            <label class="sett-label">
+                                Website
+                            </label>
+
+                            <input
+                                class="sett-input organization-input"
+                                type="url"
+                                name="website"
+                                value="{{ organization.website }}"
+                                placeholder="https://example.com"
+                                disabled
+                            >
+
+                        </div>
+
+
+                        <!-- Organization Logo -->
+
+                        <div class="sett-field">
+
+                            <label class="sett-label">
+                                Organization Logo
+                            </label>
+
+
+                            {% if organization.logo %}
+
+                                <div
+                                    id="current-org-logo"
+                                    class="mb-3"
+                                >
+
+                                    <img
+                                        src="{{ organization.logo.url }}"
+                                        alt="Organization Logo"
+                                        class="w-20 h-20 object-cover rounded-lg border border-gray-200"
+                                    >
+
+                                </div>
+
+                            {% endif %}
+
+
+                            <input
+                                type="file"
+                                name="logo"
+                                id="organization-logo"
+                                accept="image/*"
+                                disabled
+                                class="block w-full text-sm text-gray-600
+                                       file:mr-4 file:py-2 file:px-4
+                                       file:rounded-lg file:border-0
+                                       file:text-sm file:font-semibold
+                                       file:bg-gray-100 file:text-gray-700
+                                       hover:file:bg-gray-200"
+                            >
+
+                            <p class="text-xs text-gray-400 mt-1">
+                                PNG, JPG up to 2MB
+                            </p>
+
+                        </div>
+
+
+                        <!-- Save / Cancel -->
+
+                        <div
+                            id="organization-actions"
+                            class="hidden flex flex-wrap gap-3"
+                        >
+
+                            <button
+                                type="submit"
+                                class="px-5 py-2.5 text-sm font-semibold text-white bg-[#d4a373] rounded-lg hover:bg-[#b8895e] transition"
+                            >
+                                Save Organization Details
+                            </button>
+
+
+                            <button
+                                type="button"
+                                onclick="cancelOrganizationEdit()"
+                                class="px-4 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                            >
+                                Cancel
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+                {% endif %}
 
             </div>
 
 
-            <!-- ════════════ WORKSPACE ════════════ -->
-            <div id="panel-workspace" class="bg-white rounded-xl p-8 border border-gray-200 shadow-sm" style="display:none;">
+            <!-- ══════════════════════════════════════════════ -->
+            <!-- WORKSPACE -->
+            <!-- ══════════════════════════════════════════════ -->
 
-                <h2 class="text-lg font-bold text-gray-900 mb-6">Workspace</h2>
+            <div
+                id="panel-workspace"
+                class="bg-white rounded-xl p-8 border border-gray-200 shadow-sm"
+                style="display:none;"
+            >
+
+                <h2 class="text-lg font-bold text-gray-900 mb-6">
+                    Workspace
+                </h2>
+
 
                 <form onsubmit="event.preventDefault(); settToast('Workspace saved successfully!');">
+
                     <!-- Workspace Name -->
+
                     <div class="mb-4">
-                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Studio / Workspace name</label>
-                        <input class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 outline-none transition focus:bg-white focus:border-[#b8895e] focus:ring-2 focus:ring-[#b8895e] focus:ring-opacity-20" type="text" name="workspace_name" placeholder="Enter your workspace name " required>
+
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+                            Studio / Workspace name
+                        </label>
+
+                        <input
+                            class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 outline-none transition focus:bg-white focus:border-[#b8895e] focus:ring-2 focus:ring-[#b8895e] focus:ring-opacity-20"
+                            type="text"
+                            name="workspace_name"
+                            placeholder="Enter your workspace name "
+                            required
+                        >
+
                     </div>
+
 
                     <!-- Role -->
+
                     <div class="mb-4">
-                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Your role</label>
-                        <input class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 outline-none transition focus:bg-white focus:border-[#b8895e] focus:ring-2 focus:ring-[#b8895e] focus:ring-opacity-20" type="text" name="role" placeholder="Enter your role" required>
+
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+                            Your role
+                        </label>
+
+                        <input
+                            class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 outline-none transition focus:bg-white focus:border-[#b8895e] focus:ring-2 focus:ring-[#b8895e] focus:ring-opacity-20"
+                            type="text"
+                            name="role"
+                            placeholder="Enter your role"
+                            required
+                        >
+
                     </div>
+
 
                     <!-- Currency -->
+
                     <div class="mb-6">
-                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Currency</label>
-                        <select class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 outline-none transition focus:bg-white focus:border-[#b8895e] focus:ring-2 focus:ring-[#b8895e] focus:ring-opacity-20" name="currency" required>
-                            <option value="NPR" selected>NPR - Nepalese Rupee</option>
-                            <option value="USD">$ USD</option>
-                            <option value="EUR">€ EUR</option>
-                            <option value="INR">₹ INR — Indian Rupee</option>
+
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+                            Currency
+                        </label>
+
+                        <select
+                            class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 outline-none transition focus:bg-white focus:border-[#b8895e] focus:ring-2 focus:ring-[#b8895e] focus:ring-opacity-20"
+                            name="currency"
+                            required
+                        >
+
+                            <option value="NPR" selected>
+                                NPR - Nepalese Rupee
+                            </option>
+
+                            <option value="USD">
+                                $ USD
+                            </option>
+
+                            <option value="EUR">
+                                € EUR
+                            </option>
+
+                            <option value="INR">
+                                ₹ INR — Indian Rupee
+                            </option>
+
                         </select>
+
                     </div>
 
-                    <button type="submit" class="px-5 py-2.5 text-sm font-semibold text-white bg-[#d4a373] rounded-lg hover:bg-[#b8895e] transition">Save Workspace</button>
+
+                    <button
+                        type="submit"
+                        class="px-5 py-2.5 text-sm font-semibold text-white bg-[#d4a373] rounded-lg hover:bg-[#b8895e] transition"
+                    >
+                        Save Workspace
+                    </button>
+
                 </form>
 
             </div>
 
 
-            <!-- ════════════ CLIENT PORTAL ════════════ -->
-            <div id="panel-portal" class="bg-white rounded-xl p-8 border border-gray-200 shadow-sm" style="display:none;">
+            <!-- ══════════════════════════════════════════════ -->
+            <!-- CLIENT PORTAL -->
+            <!-- ══════════════════════════════════════════════ -->
 
-                <h2 class="text-lg font-bold text-gray-900 mb-6">Client Portal Settings</h2>
+            <div
+                id="panel-portal"
+                class="bg-white rounded-xl p-8 border border-gray-200 shadow-sm"
+                style="display:none;"
+            >
+
+                <h2 class="text-lg font-bold text-gray-900 mb-6">
+                    Client Portal Settings
+                </h2>
+
 
                 <form onsubmit="event.preventDefault(); settToast('Portal settings saved!');">
 
-                    <!-- Portal header message -->
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Portal header message</label>
-                    <input class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 outline-none transition focus:bg-white focus:border-[#b8895e] focus:ring-2 focus:ring-[#b8895e] focus:ring-opacity-20" type="text" placeholder="Enter your Portal header message here">
+                    <!-- Portal header -->
+
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Portal header message
+                    </label>
+
+                    <input
+                        class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 outline-none transition focus:bg-white focus:border-[#b8895e] focus:ring-2 focus:ring-[#b8895e] focus:ring-opacity-20"
+                        type="text"
+                        placeholder="Enter your Portal header message here"
+                    >
+
 
                     <hr class="border-t border-gray-200 my-6">
 
+
                     <!-- Toggle list -->
+
                     <div class="flex flex-col border-t border-gray-100">
 
-                        <div class="flex items-center justify-between py-4 border-b border-gray-100">
-                            <div>
-                                <p class="text-sm font-bold text-gray-900 mb-1">Show task list to clients</p>
-                                <p class="text-sm text-[#d4a373]">Clients can see project tasks (read-only)</p>
-                            </div>
-                            <label class="relative w-11 h-6 flex-shrink-0">
-                                <input type="checkbox" checked class="opacity-0 w-0 h-0 peer">
-                                <span class="absolute inset-0 bg-gray-300 rounded-full cursor-pointer transition peer-checked:bg-[#4338ca] before:content-[''] before:absolute before:left-1 before:top-1 before:w-4 before:h-4 before:bg-white before:rounded-full before:shadow before:transition peer-checked:before:translate-x-5"></span>
-                            </label>
-                        </div>
 
                         <div class="flex items-center justify-between py-4 border-b border-gray-100">
+
                             <div>
-                                <p class="text-sm font-bold text-gray-900 mb-1">Show payment status</p>
-                                <p class="text-sm text-[#d4a373]">Clients can see what they've paid and owe</p>
+
+                                <p class="text-sm font-bold text-gray-900 mb-1">
+                                    Show task list to clients
+                                </p>
+
+                                <p class="text-sm text-[#d4a373]">
+                                    Clients can see project tasks (read-only)
+                                </p>
+
                             </div>
+
+
                             <label class="relative w-11 h-6 flex-shrink-0">
-                                <input type="checkbox" checked class="opacity-0 w-0 h-0 peer">
+
+                                <input
+                                    type="checkbox"
+                                    checked
+                                    class="opacity-0 w-0 h-0 peer"
+                                >
+
                                 <span class="absolute inset-0 bg-gray-300 rounded-full cursor-pointer transition peer-checked:bg-[#4338ca] before:content-[''] before:absolute before:left-1 before:top-1 before:w-4 before:h-4 before:bg-white before:rounded-full before:shadow before:transition peer-checked:before:translate-x-5"></span>
+
                             </label>
+
                         </div>
 
+
                         <div class="flex items-center justify-between py-4 border-b border-gray-100">
+
                             <div>
-                                <p class="text-sm font-bold text-gray-900 mb-1">Show files</p>
-                                <p class="text-sm text-[#d4a373]">Clients can download shared files</p>
+
+                                <p class="text-sm font-bold text-gray-900 mb-1">
+                                    Show payment status
+                                </p>
+
+                                <p class="text-sm text-[#d4a373]">
+                                    Clients can see what they've paid and owe
+                                </p>
+
                             </div>
+
+
                             <label class="relative w-11 h-6 flex-shrink-0">
-                                <input type="checkbox" class="opacity-0 w-0 h-0 peer">
+
+                                <input
+                                    type="checkbox"
+                                    checked
+                                    class="opacity-0 w-0 h-0 peer"
+                                >
+
                                 <span class="absolute inset-0 bg-gray-300 rounded-full cursor-pointer transition peer-checked:bg-[#4338ca] before:content-[''] before:absolute before:left-1 before:top-1 before:w-4 before:h-4 before:bg-white before:rounded-full before:shadow before:transition peer-checked:before:translate-x-5"></span>
+
                             </label>
+
                         </div>
+
+
+                        <div class="flex items-center justify-between py-4 border-b border-gray-100">
+
+                            <div>
+
+                                <p class="text-sm font-bold text-gray-900 mb-1">
+                                    Show files
+                                </p>
+
+                                <p class="text-sm text-[#d4a373]">
+                                    Clients can download shared files
+                                </p>
+
+                            </div>
+
+
+                            <label class="relative w-11 h-6 flex-shrink-0">
+
+                                <input
+                                    type="checkbox"
+                                    class="opacity-0 w-0 h-0 peer"
+                                >
+
+                                <span class="absolute inset-0 bg-gray-300 rounded-full cursor-pointer transition peer-checked:bg-[#4338ca] before:content-[''] before:absolute before:left-1 before:top-1 before:w-4 before:h-4 before:bg-white before:rounded-full before:shadow before:transition peer-checked:before:translate-x-5"></span>
+
+                            </label>
+
+                        </div>
+
 
                         <div class="flex items-center justify-between py-4">
+
                             <div>
-                                <p class="text-sm font-bold text-gray-900 mb-1">Allow client comments</p>
-                                <p class="text-sm text-[#d4a373]">Clients can post comments on notes</p>
+
+                                <p class="text-sm font-bold text-gray-900 mb-1">
+                                    Allow client comments
+                                </p>
+
+                                <p class="text-sm text-[#d4a373]">
+                                    Clients can post comments on notes
+                                </p>
+
                             </div>
+
+
                             <label class="relative w-11 h-6 flex-shrink-0">
-                                <input type="checkbox" class="opacity-0 w-0 h-0 peer">
+
+                                <input
+                                    type="checkbox"
+                                    class="opacity-0 w-0 h-0 peer"
+                                >
+
                                 <span class="absolute inset-0 bg-gray-300 rounded-full cursor-pointer transition peer-checked:bg-[#4338ca] before:content-[''] before:absolute before:left-1 before:top-1 before:w-4 before:h-4 before:bg-white before:rounded-full before:shadow before:transition peer-checked:before:translate-x-5"></span>
+
                             </label>
+
                         </div>
 
                     </div>
 
+
                     <div class="flex flex-wrap gap-3 mt-6">
-                        <button type="submit" class="px-5 py-2.5 text-sm font-semibold text-white bg-[#d4a373] rounded-lg hover:bg-[#b8895e] transition">Save Portal Settings</button>
-                        <button type="button" class="px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition" onclick="settToast('Opening portal preview…')">Preview Portal</button>
+
+                        <button
+                            type="submit"
+                            class="px-5 py-2.5 text-sm font-semibold text-white bg-[#d4a373] rounded-lg hover:bg-[#b8895e] transition"
+                        >
+                            Save Portal Settings
+                        </button>
+
+                        <button
+                            type="button"
+                            class="px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                            onclick="settToast('Opening portal preview…')"
+                        >
+                            Preview Portal
+                        </button>
+
                     </div>
 
                 </form>
@@ -283,191 +936,525 @@
             </div>
 
 
-            <!-- ════════════ BILLING & PLAN ════════════ -->
-            <div id="panel-billing" class="bg-white rounded-xl p-8 border border-gray-200 shadow-sm" style="display:none;">
+            <!-- ══════════════════════════════════════════════ -->
+            <!-- BILLING & PLAN -->
+            <!-- ══════════════════════════════════════════════ -->
 
-                <h2 class="text-lg font-bold text-gray-900 mb-6">Billing &amp; Plan</h2>
+            <div
+                id="panel-billing"
+                class="bg-white rounded-xl p-8 border border-gray-200 shadow-sm"
+                style="display:none;"
+            >
 
-                <!-- Warning alert -->
+                <h2 class="text-lg font-bold text-gray-900 mb-6">
+                    Billing &amp; Plan
+                </h2>
+
+
+                <!-- Warning -->
+
                 <div class="flex items-center gap-3 p-4 bg-amber-50 border border-amber-300 rounded-lg mb-6">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-                         fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                         class="flex-shrink-0">
+
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="#d97706"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="flex-shrink-0"
+                    >
+
                         <circle cx="12" cy="12" r="10"/>
+
                         <line x1="12" y1="8" x2="12" y2="12"/>
+
                         <line x1="12" y1="16" x2="12.01" y2="16"/>
+
                     </svg>
-                    <p class="text-sm text-amber-900">You're using 5 clients on a Free plan (limit: 3). Upgrade to unlock unlimited clients.</p>
+
+
+                    <p class="text-sm text-amber-900">
+                        You're using 5 clients on a Free plan (limit: 3). Upgrade to unlock unlimited clients.
+                    </p>
+
                 </div>
 
-                <!-- Usage stats -->
+
+                <!-- Usage -->
+
                 <div class="border-t border-gray-100 mb-0">
+
                     <div class="flex items-center justify-between py-3.5 border-b border-gray-100">
-                        <span class="text-sm text-[#d4a373] font-medium">Current plan</span>
-                        <span class="text-sm font-bold text-gray-900">Free</span>
+
+                        <span class="text-sm text-[#d4a373] font-medium">
+                            Current plan
+                        </span>
+
+                        <span class="text-sm font-bold text-gray-900">
+                            Free
+                        </span>
+
                     </div>
+
+
                     <div class="flex items-center justify-between py-3.5 border-b border-gray-100">
-                        <span class="text-sm text-gray-600">Clients</span>
-                        <span class="text-sm font-bold text-red-600">5 / 3 &nbsp;<span class="font-medium">(over limit)</span></span>
+
+                        <span class="text-sm text-gray-600">
+                            Clients
+                        </span>
+
+                        <span class="text-sm font-bold text-red-600">
+                            5 / 3
+                            <span class="font-medium">
+                                (over limit)
+                            </span>
+                        </span>
+
                     </div>
+
+
                     <div class="flex items-center justify-between py-3.5 border-b border-gray-100">
-                        <span class="text-sm text-gray-600">Team members</span>
-                        <span class="text-sm font-bold text-gray-900">2 / 2</span>
+
+                        <span class="text-sm text-gray-600">
+                            Team members
+                        </span>
+
+                        <span class="text-sm font-bold text-gray-900">
+                            2 / 2
+                        </span>
+
                     </div>
+
+
                     <div class="flex items-center justify-between py-3.5 border-b border-gray-100">
-                        <span class="text-sm text-gray-600">Invoices sent this month</span>
-                        <span class="text-sm font-bold text-gray-900">3 / 5</span>
+
+                        <span class="text-sm text-gray-600">
+                            Invoices sent this month
+                        </span>
+
+                        <span class="text-sm font-bold text-gray-900">
+                            3 / 5
+                        </span>
+
                     </div>
+
                 </div>
 
-                <!-- CTA buttons -->
+
+                <!-- CTA -->
+
                 <div class="flex flex-wrap gap-3 mt-6">
-                    <button class="px-5 py-2.5 text-sm font-semibold text-white bg-[#d4a373] rounded-lg hover:bg-[#b8895e] transition" onclick="settToast('Redirecting to upgrade…')">Upgrade to Pro &mdash; NPR 999/mo</button>
-                    <button class="px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition" onclick="showAllPlans()">See all plans</button>
+
+                    <button
+                        class="px-5 py-2.5 text-sm font-semibold text-white bg-[#d4a373] rounded-lg hover:bg-[#b8895e] transition"
+                        onclick="settToast('Redirecting to upgrade…')"
+                    >
+                        Upgrade to Pro &mdash; NPR 999/mo
+                    </button>
+
+                    <button
+                        class="px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                        onclick="showAllPlans()"
+                    >
+                        See all plans
+                    </button>
+
                 </div>
 
-                <!-- All plans (expandable) -->
-                <div class="hidden mt-7 border border-gray-200 rounded-xl overflow-hidden" id="all-plans-modal">
+
+                <!-- All plans -->
+
+                <div
+                    class="hidden mt-7 border border-gray-200 rounded-xl overflow-hidden"
+                    id="all-plans-modal"
+                >
+
                     <div class="grid grid-cols-1 md:grid-cols-3">
 
+
                         <!-- Starter -->
+
                         <div class="p-5 border-r border-gray-200 relative">
-                            <p class="text-sm font-bold text-gray-700 mb-1.5">Starter</p>
-                            <p class="text-2xl font-extrabold text-gray-900 mb-1">Free</p>
-                            <p class="text-xs text-gray-400 mb-4">Forever free</p>
+
+                            <p class="text-sm font-bold text-gray-700 mb-1.5">
+                                Starter
+                            </p>
+
+                            <p class="text-2xl font-extrabold text-gray-900 mb-1">
+                                Free
+                            </p>
+
+                            <p class="text-xs text-gray-400 mb-4">
+                                Forever free
+                            </p>
+
                             <ul class="text-xs text-gray-600 flex flex-col gap-1.5 mb-4">
+
                                 <li>✓ &nbsp;3 clients</li>
+
                                 <li>✓ &nbsp;1 seat</li>
+
                                 <li>✓ &nbsp;5 invoices/mo</li>
-                                <li class="text-gray-300">✗ &nbsp;Custom branding</li>
-                                <li class="text-gray-300">✗ &nbsp;Priority support</li>
+
+                                <li class="text-gray-300">
+                                    ✗ &nbsp;Custom branding
+                                </li>
+
+                                <li class="text-gray-300">
+                                    ✗ &nbsp;Priority support
+                                </li>
+
                             </ul>
-                            <button class="w-full px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg opacity-60 cursor-default">Current plan</button>
+
+
+                            <button
+                                class="w-full px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg opacity-60 cursor-default"
+                            >
+                                Current plan
+                            </button>
+
                         </div>
+
 
                         <!-- Pro -->
+
                         <div class="p-5 border-r border-gray-200 bg-purple-50 relative">
-                            <span class="absolute top-3.5 right-3.5 bg-[#d4a373] text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">Popular</span>
-                            <p class="text-sm font-bold text-[#d4a373] mb-1.5">Pro</p>
-                            <p class="text-2xl font-extrabold text-gray-900 mb-1">NPR 999</p>
-                            <p class="text-xs text-gray-400 mb-4">per month</p>
+
+                            <span class="absolute top-3.5 right-3.5 bg-[#d4a373] text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
+                                Popular
+                            </span>
+
+                            <p class="text-sm font-bold text-[#d4a373] mb-1.5">
+                                Pro
+                            </p>
+
+                            <p class="text-2xl font-extrabold text-gray-900 mb-1">
+                                NPR 999
+                            </p>
+
+                            <p class="text-xs text-gray-400 mb-4">
+                                per month
+                            </p>
+
+
                             <ul class="text-xs text-gray-600 flex flex-col gap-1.5 mb-4">
+
                                 <li>✓ &nbsp;Unlimited clients</li>
+
                                 <li>✓ &nbsp;5 seats</li>
+
                                 <li>✓ &nbsp;Unlimited invoices</li>
+
                                 <li>✓ &nbsp;Custom branding</li>
+
                                 <li>✓ &nbsp;Priority support</li>
+
                             </ul>
-                            <button class="w-full px-5 py-2.5 text-sm font-semibold text-white bg-[#d4a373] rounded-lg hover:bg-[#b8895e] transition" onclick="settToast('Redirecting to checkout…')">Upgrade to Pro</button>
+
+
+                            <button
+                                class="w-full px-5 py-2.5 text-sm font-semibold text-white bg-[#d4a373] rounded-lg hover:bg-[#b8895e] transition"
+                                onclick="settToast('Redirecting to checkout…')"
+                            >
+                                Upgrade to Pro
+                            </button>
+
                         </div>
 
+
                         <!-- Business -->
+
                         <div class="p-5 relative">
-                            <p class="text-sm font-bold text-gray-700 mb-1.5">Business</p>
-                            <p class="text-2xl font-extrabold text-gray-900 mb-1">NPR 2,499</p>
-                            <p class="text-xs text-gray-400 mb-4">per month</p>
+
+                            <p class="text-sm font-bold text-gray-700 mb-1.5">
+                                Business
+                            </p>
+
+                            <p class="text-2xl font-extrabold text-gray-900 mb-1">
+                                NPR 2,499
+                            </p>
+
+                            <p class="text-xs text-gray-400 mb-4">
+                                per month
+                            </p>
+
+
                             <ul class="text-xs text-gray-600 flex flex-col gap-1.5 mb-4">
+
                                 <li>✓ &nbsp;Unlimited clients</li>
+
                                 <li>✓ &nbsp;20 seats</li>
+
                                 <li>✓ &nbsp;Unlimited invoices</li>
+
                                 <li>✓ &nbsp;White-label portal</li>
+
                                 <li>✓ &nbsp;Dedicated support</li>
+
                             </ul>
-                            <button class="w-full px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition" onclick="settToast('Contact sales for Business plan.')">Contact Sales</button>
+
+
+                            <button
+                                class="w-full px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                                onclick="settToast('Contact sales for Business plan.')"
+                            >
+                                Contact Sales
+                            </button>
+
                         </div>
 
                     </div>
+
                 </div>
 
             </div>
 
-            <!-- ════════════ NOTIFICATIONS ════════════ -->
-            <div id="panel-notification" class="bg-white rounded-xl p-8 border border-gray-200 shadow-sm" style="display:none;">
-                <h2 class="text-lg font-bold text-gray-900 mb-1">Email Notifications</h2>
+
+            <!-- ══════════════════════════════════════════════ -->
+            <!-- NOTIFICATIONS -->
+            <!-- ══════════════════════════════════════════════ -->
+
+            <div
+                id="panel-notification"
+                class="bg-white rounded-xl p-8 border border-gray-200 shadow-sm"
+                style="display:none;"
+            >
+
+                <h2 class="text-lg font-bold text-gray-900 mb-1">
+                    Email Notifications
+                </h2>
+
                 <p class="text-sm text-gray-600 mb-6"></p>
+
 
                 <div class="flex flex-col border-t border-gray-100">
 
-                    <div class="flex items-center justify-between py-4 border-b border-gray-100">
-                        <div>
-                            <p class="text-sm font-semibold text-gray-900 mb-1">Payment received</p>
-                            <p class="text-sm text-gray-600">When a client payment is recorded</p>
-                        </div>
-                        <label class="relative w-11 h-6 flex-shrink-0">
-                            <input type="checkbox" checked class="opacity-0 w-0 h-0 peer">
-                            <span class="absolute inset-0 bg-gray-300 rounded-full cursor-pointer transition peer-checked:bg-[#4338ca] before:content-[''] before:absolute before:left-1 before:top-1 before:w-4 before:h-4 before:bg-white before:rounded-full before:shadow before:transition peer-checked:before:translate-x-5"></span>
-                        </label>
-                    </div>
+
+                    <!-- Payment received -->
 
                     <div class="flex items-center justify-between py-4 border-b border-gray-100">
+
                         <div>
-                            <p class="text-sm font-semibold text-gray-900 mb-1">Deadline reminder</p>
-                            <p class="text-sm text-gray-600">2 days before a project is due</p>
+
+                            <p class="text-sm font-semibold text-gray-900 mb-1">
+                                Payment received
+                            </p>
+
+                            <p class="text-sm text-gray-600">
+                                When a client payment is recorded
+                            </p>
+
                         </div>
+
+
                         <label class="relative w-11 h-6 flex-shrink-0">
-                            <input type="checkbox" checked class="opacity-0 w-0 h-0 peer">
+
+                            <input
+                                type="checkbox"
+                                checked
+                                class="opacity-0 w-0 h-0 peer"
+                            >
+
                             <span class="absolute inset-0 bg-gray-300 rounded-full cursor-pointer transition peer-checked:bg-[#4338ca] before:content-[''] before:absolute before:left-1 before:top-1 before:w-4 before:h-4 before:bg-white before:rounded-full before:shadow before:transition peer-checked:before:translate-x-5"></span>
+
                         </label>
+
                     </div>
 
-                    <div class="flex items-center justify-between py-4 border-b border-gray-100">
-                        <div>
-                            <p class="text-sm font-semibold text-gray-900 mb-1">Overdue alert</p>
-                            <p class="text-sm text-gray-600">When a project passes its deadline</p>
-                        </div>
-                        <label class="relative w-11 h-6 flex-shrink-0">
-                            <input type="checkbox" checked class="opacity-0 w-0 h-0 peer">
-                            <span class="absolute inset-0 bg-gray-300 rounded-full cursor-pointer transition peer-checked:bg-[#4338ca] before:content-[''] before:absolute before:left-1 before:top-1 before:w-4 before:h-4 before:bg-white before:rounded-full before:shadow before:transition peer-checked:before:translate-x-5"></span>
-                        </label>
-                    </div>
+
+                    <!-- Deadline reminder -->
 
                     <div class="flex items-center justify-between py-4 border-b border-gray-100">
+
                         <div>
-                            <p class="text-sm font-semibold text-gray-900 mb-1">Client portal viewed</p>
-                            <p class="text-sm text-gray-600">When a client opens their portal</p>
+
+                            <p class="text-sm font-semibold text-gray-900 mb-1">
+                                Deadline reminder
+                            </p>
+
+                            <p class="text-sm text-gray-600">
+                                2 days before a project is due
+                            </p>
+
                         </div>
+
+
                         <label class="relative w-11 h-6 flex-shrink-0">
-                            <input type="checkbox" class="opacity-0 w-0 h-0 peer">
+
+                            <input
+                                type="checkbox"
+                                checked
+                                class="opacity-0 w-0 h-0 peer"
+                            >
+
                             <span class="absolute inset-0 bg-gray-300 rounded-full cursor-pointer transition peer-checked:bg-[#4338ca] before:content-[''] before:absolute before:left-1 before:top-1 before:w-4 before:h-4 before:bg-white before:rounded-full before:shadow before:transition peer-checked:before:translate-x-5"></span>
+
                         </label>
+
                     </div>
 
+
+                    <!-- Overdue alert -->
+
                     <div class="flex items-center justify-between py-4 border-b border-gray-100">
+
                         <div>
-                            <p class="text-sm font-semibold text-gray-900 mb-1">Team member joined</p>
-                            <p class="text-sm text-gray-600">When an invite is accepted</p>
+
+                            <p class="text-sm font-semibold text-gray-900 mb-1">
+                                Overdue alert
+                            </p>
+
+                            <p class="text-sm text-gray-600">
+                                When a project passes its deadline
+                            </p>
+
                         </div>
+
+
                         <label class="relative w-11 h-6 flex-shrink-0">
-                            <input type="checkbox" checked class="opacity-0 w-0 h-0 peer">
+
+                            <input
+                                type="checkbox"
+                                checked
+                                class="opacity-0 w-0 h-0 peer"
+                            >
+
                             <span class="absolute inset-0 bg-gray-300 rounded-full cursor-pointer transition peer-checked:bg-[#4338ca] before:content-[''] before:absolute before:left-1 before:top-1 before:w-4 before:h-4 before:bg-white before:rounded-full before:shadow before:transition peer-checked:before:translate-x-5"></span>
+
                         </label>
+
                     </div>
+
+
+                    <!-- Client portal viewed -->
+
+                    <div class="flex items-center justify-between py-4 border-b border-gray-100">
+
+                        <div>
+
+                            <p class="text-sm font-semibold text-gray-900 mb-1">
+                                Client portal viewed
+                            </p>
+
+                            <p class="text-sm text-gray-600">
+                                When a client opens their portal
+                            </p>
+
+                        </div>
+
+
+                        <label class="relative w-11 h-6 flex-shrink-0">
+
+                            <input
+                                type="checkbox"
+                                class="opacity-0 w-0 h-0 peer"
+                            >
+
+                            <span class="absolute inset-0 bg-gray-300 rounded-full cursor-pointer transition peer-checked:bg-[#4338ca] before:content-[''] before:absolute before:left-1 before:top-1 before:w-4 before:h-4 before:bg-white before:rounded-full before:shadow before:transition peer-checked:before:translate-x-5"></span>
+
+                        </label>
+
+                    </div>
+
+
+                    <!-- Team member joined -->
+
+                    <div class="flex items-center justify-between py-4 border-b border-gray-100">
+
+                        <div>
+
+                            <p class="text-sm font-semibold text-gray-900 mb-1">
+                                Team member joined
+                            </p>
+
+                            <p class="text-sm text-gray-600">
+                                When an invite is accepted
+                            </p>
+
+                        </div>
+
+
+                        <label class="relative w-11 h-6 flex-shrink-0">
+
+                            <input
+                                type="checkbox"
+                                checked
+                                class="opacity-0 w-0 h-0 peer"
+                            >
+
+                            <span class="absolute inset-0 bg-gray-300 rounded-full cursor-pointer transition peer-checked:bg-[#4338ca] before:content-[''] before:absolute before:left-1 before:top-1 before:w-4 before:h-4 before:bg-white before:rounded-full before:shadow before:transition peer-checked:before:translate-x-5"></span>
+
+                        </label>
+
+                    </div>
+
+
+                    <!-- Weekly summary -->
 
                     <div class="flex items-center justify-between py-4">
+
                         <div>
-                            <p class="text-sm font-semibold text-gray-900 mb-1">Weekly summary</p>
-                            <p class="text-sm text-gray-600">Monday morning recap of the week ahead</p>
+
+                            <p class="text-sm font-semibold text-gray-900 mb-1">
+                                Weekly summary
+                            </p>
+
+                            <p class="text-sm text-gray-600">
+                                Monday morning recap of the week ahead
+                            </p>
+
                         </div>
+
+
                         <label class="relative w-11 h-6 flex-shrink-0">
-                            <input type="checkbox" checked class="opacity-0 w-0 h-0 peer">
+
+                            <input
+                                type="checkbox"
+                                checked
+                                class="opacity-0 w-0 h-0 peer"
+                            >
+
                             <span class="absolute inset-0 bg-gray-300 rounded-full cursor-pointer transition peer-checked:bg-[#4338ca] before:content-[''] before:absolute before:left-1 before:top-1 before:w-4 before:h-4 before:bg-white before:rounded-full before:shadow before:transition peer-checked:before:translate-x-5"></span>
+
                         </label>
+
                     </div>
 
                 </div>
+
             </div>
 
         </div>
+
     </div>
+
 </div>
 
-<!-- Toast -->
-<div id="sett-toast" class="fixed bottom-6 right-6 bg-gray-900 text-white px-5 py-3 rounded-xl text-sm font-medium flex items-center gap-3 shadow-xl opacity-0 translate-y-3 pointer-events-none transition-all duration-300 z-50">
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- TOAST -->
+<!-- ══════════════════════════════════════════════ -->
+
+<div
+    id="sett-toast"
+    class="fixed bottom-6 right-6 bg-gray-900 text-white px-5 py-3 rounded-xl text-sm font-medium flex items-center gap-3 shadow-xl opacity-0 translate-y-3 pointer-events-none transition-all duration-300 z-50"
+>
+
     <i class="fas fa-check-circle text-green-400"></i>
-    <span id="sett-toast-msg">Saved!</span>
+
+    <span id="sett-toast-msg">
+        Saved!
+    </span>
+
 </div>
+
 
 <style>
+
 .sett-tab-btn.active {
     background: #ffffff !important;
     color: #111827 !important;
@@ -475,55 +1462,235 @@
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08) !important;
     border: 1px solid #e5e7eb !important;
 }
+
 #sett-toast.show {
     opacity: 1 !important;
     transform: translateY(0) !important;
     pointer-events: auto !important;
 }
+
 </style>
+
 
 {% endblock %}
 
+
 {% block extra_scripts %}
+
 <script>
-    // Tab switching
+
+    // ==================================================
+    // TAB SWITCHING
+    // ==================================================
+
     function settSwitch(tab) {
-        ['profile', 'workspace', 'portal', 'billing', 'notification'].forEach(t => {
-            document.getElementById('panel-' + t).style.display = 'none';
-            document.getElementById('tab-btn-' + t).classList.remove('active');
+
+        [
+            'profile',
+            'workspace',
+            'portal',
+            'billing',
+            'notification'
+        ].forEach(t => {
+
+            const panel = document.getElementById(
+                'panel-' + t
+            );
+
+            const button = document.getElementById(
+                'tab-btn-' + t
+            );
+
+
+            if (panel) {
+                panel.style.display = 'none';
+            }
+
+            if (button) {
+                button.classList.remove('active');
+            }
+
         });
-        document.getElementById('panel-' + tab).style.display = 'block';
-        document.getElementById('tab-btn-' + tab).classList.add('active');
+
+
+        const selectedPanel = document.getElementById(
+            'panel-' + tab
+        );
+
+        const selectedButton = document.getElementById(
+            'tab-btn-' + tab
+        );
+
+
+        if (selectedPanel) {
+            selectedPanel.style.display = 'block';
+        }
+
+        if (selectedButton) {
+            selectedButton.classList.add('active');
+        }
+
     }
 
-    // Photo preview
+
+    // ==================================================
+    // PHOTO PREVIEW
+    // ==================================================
+
     function settPreviewPhoto(event) {
+
         const file = event.target.files[0];
+
         if (!file) return;
+
+
         const reader = new FileReader();
+
+
         reader.onload = e => {
-            const av = document.getElementById('avatarPreview');
-            av.style.backgroundImage = `url(${e.target.result})`;
+
+            const av = document.getElementById(
+                'avatarPreview'
+            );
+
+            av.style.backgroundImage =
+                `url(${e.target.result})`;
+
             av.style.backgroundSize = 'cover';
+
             av.style.backgroundPosition = 'center';
+
             av.textContent = '';
+
         };
+
+
         reader.readAsDataURL(file);
+
     }
 
-    // Toast notification
+
+    // ==================================================
+    // TOAST
+    // ==================================================
+
     function settToast(msg) {
-        const toast = document.getElementById('sett-toast');
-        document.getElementById('sett-toast-msg').textContent = msg || 'Saved!';
+
+        const toast = document.getElementById(
+            'sett-toast'
+        );
+
+        document.getElementById(
+            'sett-toast-msg'
+        ).textContent = msg || 'Saved!';
+
+
         toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 3000);
+
+
+        setTimeout(() => {
+
+            toast.classList.remove('show');
+
+        }, 3000);
+
     }
 
-    // Toggle "See all plans" section
+
+    // ==================================================
+    // SEE ALL PLANS
+    // ==================================================
+
     function showAllPlans() {
-        const el = document.getElementById('all-plans-modal');
+
+        const el = document.getElementById(
+            'all-plans-modal'
+        );
+
         if (!el) return;
+
         el.classList.toggle('hidden');
+
     }
+
+
+    // ==================================================
+    // ENABLE ORGANIZATION EDITING
+    // ==================================================
+
+    function enableOrganizationEdit() {
+
+        const inputs = document.querySelectorAll(
+            '.organization-input'
+        );
+
+        const logoInput = document.getElementById(
+            'organization-logo'
+        );
+
+        const changeButton = document.getElementById(
+            'change-org-btn'
+        );
+
+        const actions = document.getElementById(
+            'organization-actions'
+        );
+
+
+        // Enable text fields
+
+        inputs.forEach(input => {
+
+            input.disabled = false;
+
+        });
+
+
+        // Enable logo upload
+
+        if (logoInput) {
+
+            logoInput.disabled = false;
+
+        }
+
+
+        // Hide Change Details button
+
+        if (changeButton) {
+
+            changeButton.classList.add('hidden');
+
+        }
+
+
+        // Show Save and Cancel buttons
+
+        if (actions) {
+
+            actions.classList.remove('hidden');
+
+        }
+
+    }
+
+
+    // ==================================================
+    // CANCEL ORGANIZATION EDITING
+    // ==================================================
+
+    function cancelOrganizationEdit() {
+
+        /*
+         * Reload the page so that any unsaved changes
+         * are discarded and the original database values
+         * are displayed again.
+         */
+
+        window.location.reload();
+
+    }
+
 </script>
+
 {% endblock %}

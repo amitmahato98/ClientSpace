@@ -24,7 +24,6 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-
         margin-bottom: 28px;
     }
 
@@ -427,11 +426,13 @@
 
     .history-active {
         background: #e8f4ec;
+
         color: #3f7653;
     }
 
     .history-completed {
         background: #f0f2f1;
+
         color: #697570;
     }
 
@@ -507,8 +508,11 @@
                 class="back-button"
                 title="Back to Staff"
             >
+
                 <i class="fas fa-arrow-left"></i>
+
             </a>
+
 
             <div>
 
@@ -525,7 +529,6 @@
         </div>
 
     </div>
-
 
 
     <!-- ==============================
@@ -559,35 +562,49 @@
                 </h2>
 
                 <div class="profile-email">
+
                     {{ staff.email }}
+
                 </div>
+
 
                 <div class="profile-badges">
 
                     <span class="badge role-badge">
+
                         {{ staff.role }}
+
                     </span>
 
 
                     {% if staff.status == "Working" %}
 
                         <span class="badge status-working">
+
                             <i class="fas fa-circle"></i>
+
                             Working
+
                         </span>
 
                     {% elif staff.status == "Available" %}
 
                         <span class="badge status-available">
+
                             <i class="fas fa-circle"></i>
+
                             Available
+
                         </span>
 
                     {% elif staff.status == "On Leave" %}
 
                         <span class="badge status-leave">
+
                             <i class="fas fa-circle"></i>
+
                             On Leave
+
                         </span>
 
                     {% endif %}
@@ -599,7 +616,6 @@
         </div>
 
     </div>
-
 
 
     <!-- ==============================
@@ -663,6 +679,46 @@
             </div>
 
 
+            <!-- ORGANIZATION -->
+
+            <div class="info-row">
+
+                <span class="info-label">
+                    Organization
+                </span>
+
+                <span class="info-value">
+                    {{ staff.organization.name }}
+                </span>
+
+            </div>
+
+
+            <!-- MANAGER -->
+
+            <div class="info-row">
+
+                <span class="info-label">
+                    Manager
+                </span>
+
+                <span class="info-value">
+
+                    {% if manager %}
+
+                        {{ manager.user.get_full_name }}
+
+                    {% else %}
+
+                        Not available
+
+                    {% endif %}
+
+                </span>
+
+            </div>
+
+
             <div class="info-row">
 
                 <span class="info-label">
@@ -672,9 +728,13 @@
                 <span class="info-value">
 
                     {% if staff.phone %}
+
                         {{ staff.phone }}
+
                     {% else %}
+
                         Not provided
+
                     {% endif %}
 
                 </span>
@@ -682,7 +742,6 @@
             </div>
 
         </div>
-
 
 
         <!-- ACCOUNT INFORMATION -->
@@ -709,9 +768,13 @@
                 <span class="info-value">
 
                     {% if staff.user %}
+
                         {{ staff.user.username }}
+
                     {% else %}
+
                         Not created
+
                     {% endif %}
 
                 </span>
@@ -728,9 +791,13 @@
                 <span class="info-value">
 
                     {% if staff.user %}
+
                         {{ staff.user.email }}
+
                     {% else %}
+
                         Not available
+
                     {% endif %}
 
                 </span>
@@ -747,9 +814,13 @@
                 <span class="info-value">
 
                     {% if staff.user %}
+
                         {{ staff.user.date_joined|date:"M d, Y" }}
+
                     {% else %}
+
                         -
+
                     {% endif %}
 
                 </span>
@@ -764,7 +835,9 @@
                 </span>
 
                 <span class="info-value">
+
                     {{ staff.created_at|date:"M d, Y" }}
+
                 </span>
 
             </div>
@@ -774,12 +847,14 @@
     </div>
 
 
-
     <!-- ==============================
          CURRENT PROJECTS
     ============================== -->
 
-    <div class="details-card" style="margin-bottom: 22px;">
+    <div
+        class="details-card"
+        style="margin-bottom: 22px;"
+    >
 
         <div class="card-title">
 
@@ -799,17 +874,25 @@
                 <div class="project-left">
 
                     <div class="project-icon">
+
                         <i class="fas fa-folder-open"></i>
+
                     </div>
+
 
                     <div>
 
                         <div class="project-name">
+
                             {{ assignment.project.name }}
+
                         </div>
 
+
                         <div class="project-work">
+
                             {{ assignment.work }}
+
                         </div>
 
                     </div>
@@ -818,7 +901,9 @@
 
 
                 <span class="active-label">
+
                     Active
+
                 </span>
 
             </div>
@@ -836,7 +921,6 @@
         {% endfor %}
 
     </div>
-
 
 
     <!-- ==============================
@@ -926,13 +1010,17 @@
                                 {% if assignment.is_active %}
 
                                     <span class="history-status history-active">
+
                                         Active
+
                                     </span>
 
                                 {% else %}
 
                                     <span class="history-status history-completed">
+
                                         Completed
+
                                     </span>
 
                                 {% endif %}
@@ -945,7 +1033,10 @@
 
                         <tr>
 
-                            <td colspan="5" style="text-align:center; padding:30px; color:#899590;">
+                            <td
+                                colspan="5"
+                                style="text-align:center; padding:30px; color:#899590;"
+                            >
 
                                 No assignment history available.
 
