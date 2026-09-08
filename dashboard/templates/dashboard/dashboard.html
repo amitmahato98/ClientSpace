@@ -26,8 +26,8 @@
     <div class="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg hover:-translate-y-1 transition relative overflow-hidden group">
         <div class="absolute left-0 top-0 bottom-0 w-1 bg-purple-600"></div>
         <span class="block text-[10px] text-gray-500 font-semibold mb-3 tracking-wide">ACTIVE PROJECTS</span>
-        <h2 class="text-3xl font-bold text-gray-900 group-hover:translate-x-1 transition">7</h2>
-        <p class="text-[11px] text-gray-400 mt-2">across 5 clients</p>
+        <h2 class="text-3xl font-bold text-gray-900 group-hover:translate-x-1 transition">{{active_project_count}}</h2>
+        <p class="text-[11px] text-gray-400 mt-2">across {{client_count}} clients</p>
     </div>
 
     <!-- Overdue -->
@@ -58,7 +58,7 @@
     <div class="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg hover:-translate-y-1 transition relative overflow-hidden group">
         <div class="absolute left-0 top-0 bottom-0 w-1 bg-green-500"></div>
         <span class="block text-[10px] text-gray-500 font-semibold mb-3 tracking-wide">EARNED THIS MONTH</span>
-        <h2 class="text-3xl font-bold text-gray-900 group-hover:translate-x-1 transition">₹1,28,000</h2>
+        <h2 class="text-3xl font-bold text-gray-900 group-hover:translate-x-1 transition">{{budget_sum}}</h2>
         <p class="text-[11px] text-gray-400 mt-2">↑ 18% vs July</p>
     </div>
 
