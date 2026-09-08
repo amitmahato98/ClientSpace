@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ form_title }} — {{ project.name }} — ClientSpace{% endblock %}
+{% block page_heading %}
+    <a href="{% url 'projects:project_list' %}" class="text-gray-400 hover:text-[#b8895e] transition font-normal">Projects</a>
+    <span class="mx-1.5 text-gray-300 text-sm font-light">/</span>
+    <a href="{% url 'projects:project_detail' project.pk %}" class="text-gray-400 hover:text-[#b8895e] transition font-normal">{{ project.name }}</a>
+    <span class="mx-1.5 text-gray-300 text-sm font-light">/</span>
+    {{ form_title }}
+{% endblock %}
+{% block page_subheading %}{{ project.name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+
+    <!-- Back link -->
+    <a href="{% url 'projects:project_detail' project.pk %}"
+       class="inline-flex items-center gap-2 text-xs font-medium text-gray-400 hover:text-[#b8895e] transition mb-5">
+        <i class="fas fa-arrow-left text-[10px]"></i>
+        Back to project
+    </a>
+
+    <!-- Card -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+
+        <h2 class="text-sm font-bold text-gray-900 mb-1">{{ form_title }}</h2>
+        <p class="text-xs text-gray-400 mb-5">
+            Project: <strong class="text-gray-700">{{ project.name }}</strong>
+            {% if not form.fields.assigned_to.queryset.exists %}
+            <span class="ml-2 text-[#b06000] bg-[#fef7e0] px-2 py-0.5 rounded-md text-[11px]">
+                <i class="fas fa-exclamation-triangle mr-1"></i>
+                No staff are assigned to this project yet. Assign staff first.
+            </span>
+            {% endif %}
+        </p>
+
+        <!-- Non-field errors -->
+        {% if form.non_field_errors %}
+        <div class="mb-4 px-4 py-3 rounded-lg bg-[#fce8e6] text-[#c5221f] border border-[#f5c2be] text-xs">
+            {% for error in form.non_field_errors %}
+            <p><i class="fas fa-exclamation-circle mr-1.5"></i>{{ error }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="space-y-4">
+
+                <!-- Title -->
+                <div>
+                    <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                        Task title <span class="text-[#c5221f]">*</span>
+                    </label>
+                    {{ form.title }}
+                    {% if form.title.errors %}
+                    <p class="mt-1 text-[11px] text-[#c5221f]">{{ form.title.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Description -->
+                <div>
+                    <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                        Description
+                    </label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                    <p class="mt-1 text-[11px] text-[#c5221f]">{{ form.description.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Assign to -->
+                <div>
+                    <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                        Assign to
+                    </label>
+                    {{ form.assigned_to }}
+                    <p class="mt-1 text-[11px] text-gray-400">Only staff assigned to this project are shown.</p>
+                    {% if form.assigned_to.errors %}
+                    <p class="mt-1 text-[11px] text-[#c5221f]">{{ form.assigned_to.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Priority + Status row -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                            Priority
+                        </label>
+                        {{ form.priority }}
+                        {% if form.priority.errors %}
+                        <p class="mt-1 text-[11px] text-[#c5221f]">{{ form.priority.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                            Status
+                        </label>
+                        {{ form.status }}
+                        {% if form.status.errors %}
+                        <p class="mt-1 text-[11px] text-[#c5221f]">{{ form.status.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Due date -->
+                <div>
+                    <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+                        Due date
+                    </label>
+                    {{ form.due_date }}
+                    {% if form.due_date.errors %}
+                    <p class="mt-1 text-[11px] text-[#c5221f]">{{ form.due_date.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+            </div>
+
+            <!-- Footer actions -->
+            <div class="flex items-center justify-end gap-3 mt-6 pt-5 border-t border-gray-100">
+                <a href="{% url 'projects:project_detail' project.pk %}"
+                   class="px-4 py-2 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition">
+                    Cancel
+                </a>
+                <button type="submit"
+                    class="px-5 py-2 text-xs font-medium text-white bg-[#d4a373] hover:bg-[#b8895e] rounded-lg shadow-sm transition">
+                    {{ submit_label }}
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+{% endblock %}

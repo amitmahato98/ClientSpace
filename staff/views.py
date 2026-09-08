@@ -560,15 +560,26 @@ def delete_staff(request, staff_id):
 @login_required
 def staff_view(request, staff_id):
 
+    # ==========================================
+    # GET CURRENT MANAGER'S ORGANIZATION
+    # ==========================================
+
     membership = OrganizationMembership.objects.filter(
         user=request.user,
         role=OrganizationMembership.Role.MANAGER
+    ).select_related(
+        "organization"
     ).first()
 
     if not membership:
         return redirect("dashboard")
 
     organization = membership.organization
+
+
+    # ==========================================
+    # GET STAFF MEMBER
+    # ==========================================
 
     staff_member = get_object_or_404(
         Staff,
@@ -577,12 +588,34 @@ def staff_view(request, staff_id):
         user__isnull=False
     )
 
+
+    # ==========================================
+    # GET ORGANIZATION MANAGER
+    # ==========================================
+
+    manager = OrganizationMembership.objects.filter(
+        organization=organization,
+        role=OrganizationMembership.Role.MANAGER
+    ).select_related(
+        "user"
+    ).first()
+
+
+    # ==========================================
+    # ACTIVE PROJECT ASSIGNMENTS
+    # ==========================================
+
     active_assignments = StaffAssignment.objects.filter(
         staff=staff_member,
         is_active=True
     ).select_related(
         "project"
     )
+
+
+    # ==========================================
+    # ASSIGNMENT HISTORY
+    # ==========================================
 
     assignment_history = StaffAssignment.objects.filter(
         staff=staff_member
@@ -592,6 +625,11 @@ def staff_view(request, staff_id):
         "-assigned_at"
     )
 
+
+    # ==========================================
+    # RENDER PAGE
+    # ==========================================
+
     return render(
         request,
         "staff/staff_view.html",
@@ -599,6 +637,7 @@ def staff_view(request, staff_id):
             "staff": staff_member,
             "active_assignments": active_assignments,
             "assignment_history": assignment_history,
+            "manager": manager,
         }
     )
 

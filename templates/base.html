@@ -67,13 +67,13 @@
             {% if user.is_authenticated and not user.is_client %}
               <!-- Dashboard — MANAGER and STAFF only -->
               <a href="{% url 'dashboard' %}" data-nav="dashboard"
-                class="sidebar-link sidebar-active flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#4a3520] font-medium text-sm transition">
+                class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#6b4f3a] hover:text-[#4a3520] text-sm transition">
                 <i class="fas fa-th-large w-5 text-center text-[#b8895e]"></i>
                 <span>Dashboard</span>
               </a>
 
               <a href="{% url 'staff' %}" data-nav="staff"
-                class="sidebar-link sidebar-active flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#4a3520] font-medium text-sm transition">
+                class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#6b4f3a] hover:text-[#4a3520] text-sm transition">
                 <i class="fas fa-user-tie w-5 text-center text-[#b8895e]"></i>
                 <span>Staffs</span>
               </a>
@@ -92,6 +92,15 @@
               <i class="fas fa-folder-open w-5 text-center text-[#b8895e]"></i>
               <span>Projects</span>
             </a>
+
+            {% if user.is_authenticated and user.is_staff_member %}
+              <!-- My Tasks — STAFF only -->
+              <a href="{% url 'projects:my_tasks' %}" data-nav="my_tasks"
+                class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#6b4f3a] hover:text-[#4a3520] text-sm transition">
+                <i class="fas fa-clipboard-list w-5 text-center text-[#b8895e]"></i>
+                <span>My Tasks</span>
+              </a>
+            {% endif %}
 
             {% if user.is_authenticated and not user.is_client %}
               <!-- Tasks — MANAGER and STAFF only -->
@@ -175,12 +184,20 @@
                        w-48 lg:w-56 transition">
             </div>
 
-            <!-- Bell -->
-            <button type="button" title="Notifications"
-              class="w-8 h-8 rounded-full border border-gray-200 bg-white/80 flex items-center justify-center
-                     text-gray-500 hover:bg-white hover:text-[#b8895e] text-xs transition">
-              <i class="far fa-bell"></i>
-            </button>
+            <!-- Notification Bell -->
+            <div class="relative" id="notifBellWrapper">
+              <button type="button" id="notifBellBtn"
+                title="Notifications"
+                class="relative w-8 h-8 rounded-full border border-gray-200 bg-white/80 flex items-center justify-center
+                       text-gray-500 hover:bg-white hover:text-[#b8895e] text-xs transition">
+                <i class="far fa-bell"></i>
+                {% if unread_count > 0 %}
+                <span class="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center leading-none">
+                  {{ unread_count|stringformat:"s"|truncatechars:3 }}
+                </span>
+                {% endif %}
+              </button>
+            </div>
 
             <!-- Help -->
             <button type="button" title="Help"
@@ -214,6 +231,53 @@
           {% endblock %}
         </header>
 
+        <!-- ===== DJANGO MESSAGES AS TOAST NOTIFICATIONS (Phase 5) ===== -->
+        {% if messages %}
+        <div id="toastContainer" class="fixed top-20 right-4 z-[60] space-y-2 pointer-events-none">
+          {% for message in messages %}
+          <div class="toast-message pointer-events-auto transform translate-x-0 transition-all duration-300 ease-out
+                      px-4 py-3 rounded-lg shadow-lg text-xs font-medium flex items-center gap-2.5 min-w-[280px] max-w-sm
+                      {% if message.tags == 'success' %}bg-[#e6f4ea] text-[#137333] border border-[#b7dfbe]
+                      {% elif message.tags == 'error' %}bg-[#fce8e6] text-[#c5221f] border border-[#f5c2be]
+                      {% elif message.tags == 'warning' %}bg-[#fef7e0] text-[#b06000] border border-[#f5e1a4]
+                      {% else %}bg-[#e8f0fe] text-[#1a73e8] border border-[#c5d8fb]{% endif %}"
+               data-toast-id="{{ forloop.counter }}">
+            <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %} shrink-0"></i>
+            <span class="flex-1">{{ message }}</span>
+            <button type="button" onclick="dismissToast(this)" class="shrink-0 hover:opacity-70 transition">
+              <i class="fas fa-times text-[10px]"></i>
+            </button>
+          </div>
+          {% endfor %}
+        </div>
+        <script>
+          // Auto-dismiss toasts after 4 seconds
+          function dismissToast(btn) {
+            const toast = btn.closest('.toast-message');
+            if (toast) {
+              toast.style.opacity = '0';
+              toast.style.transform = 'translateX(100%)';
+              setTimeout(() => toast.remove(), 300);
+            }
+          }
+
+          document.addEventListener('DOMContentLoaded', function() {
+            const toasts = document.querySelectorAll('.toast-message');
+            toasts.forEach((toast, index) => {
+              // Stagger the appearance
+              setTimeout(() => {
+                toast.style.opacity = '1';
+              }, index * 100);
+
+              // Auto-dismiss after 4 seconds
+              setTimeout(() => {
+                dismissToast(toast.querySelector('button'));
+              }, 4000 + (index * 100));
+            });
+          });
+        </script>
+        {% endif %}
+
         <!-- ===== PAGE CONTENT ===== -->
         <main class="flex-1 overflow-y-auto p-6">
           {% block content %}{% endblock %}
@@ -245,7 +309,7 @@
 
         {% if user.is_authenticated and not user.is_client %}
           <a href="{% url 'dashboard' %}" data-nav="dashboard"
-            class="sidebar-link sidebar-active flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition">
+            class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition">
             <i class="fas fa-th-large w-5 text-center text-[#b8895e]"></i>
             <span>Dashboard</span>
           </a>
@@ -261,6 +325,14 @@
           <i class="fas fa-folder-open w-5 text-center text-[#b8895e]"></i>
           <span>Projects</span>
         </a>
+
+        {% if user.is_authenticated and user.is_staff_member %}
+          <a href="{% url 'projects:my_tasks' %}" data-nav="my_tasks"
+            class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition">
+            <i class="fas fa-clipboard-list w-5 text-center text-[#b8895e]"></i>
+            <span>My Tasks</span>
+          </a>
+        {% endif %}
 
         {% if user.is_authenticated and not user.is_client %}
           <a href="#" data-nav="tasks"
@@ -307,6 +379,24 @@
     <!-- JAVASCRIPT: Active states & Mobile toggle                    -->
     <!-- ============================================================ -->
     <script>
+      // ── CSRF Token Helper ────────────────────────────────────────
+      function getCsrfToken() {
+        const name = 'csrftoken';
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+          const cookies = document.cookie.split(';');
+          for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      }
+
+      // ── Sidebar Functions ────────────────────────────────────────
       function openSidebar() {
         document.getElementById("mobileSidebar").classList.remove("-translate-x-full");
         document.getElementById("mobileSidebarOverlay").classList.remove("hidden");
@@ -349,12 +439,17 @@
           });
         }
 
+        // Determine which nav item matches the current path.
+        // If nothing matches (e.g. /notifications/), call setActiveNav(null)
+        // so every sidebar link is left in the inactive hover style.
+        var matchedNav = null;
         allLinks.forEach(function (link) {
           const href = link.getAttribute("href");
-          if (href && href !== "#" && currentPath.startsWith(href) && href !== "/") {
-            setActiveNav(link.getAttribute("data-nav"));
+          if (href && href !== "#" && href !== "/" && currentPath.startsWith(href)) {
+            matchedNav = link.getAttribute("data-nav");
           }
         });
+        setActiveNav(matchedNav); // null clears all highlights cleanly
 
         allLinks.forEach(function (link) {
           link.addEventListener("click", function (e) {
@@ -365,9 +460,225 @@
             if (window.innerWidth < 768) closeSidebar();
           });
         });
+
+        /* ── Notification bell dropdown ───────────────────────── */
+        const bellBtn       = document.getElementById("notifBellBtn");
+        const notifDropdown = document.getElementById("notifDropdown");
+
+        function positionDropdown() {
+          if (!bellBtn || !notifDropdown) return;
+          var rect   = bellBtn.getBoundingClientRect();
+          var dropW  = 320;
+          var gap    = 8;
+
+          // Place directly below the bell with a small gap
+          var top  = rect.bottom + gap;
+
+          // Align right edge of dropdown to right edge of bell button
+          var left = rect.right - dropW;
+
+          // Clamp so it never goes off-screen on either side
+          var margin = 8;
+          if (left < margin) left = margin;
+          if (left + dropW > window.innerWidth - margin) {
+            left = window.innerWidth - dropW - margin;
+          }
+
+          notifDropdown.style.top  = top  + "px";
+          notifDropdown.style.left = left + "px";
+        }
+
+        if (bellBtn && notifDropdown) {
+          bellBtn.addEventListener("click", function (e) {
+            e.stopPropagation();
+            if (notifDropdown.classList.contains("hidden")) {
+              positionDropdown();
+              notifDropdown.classList.remove("hidden");
+            } else {
+              notifDropdown.classList.add("hidden");
+            }
+          });
+
+          document.addEventListener("click", function (e) {
+            if (!notifDropdown.contains(e.target) && e.target !== bellBtn) {
+              notifDropdown.classList.add("hidden");
+            }
+          });
+
+          document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape") notifDropdown.classList.add("hidden");
+          });
+
+          window.addEventListener("resize", function () {
+            if (!notifDropdown.classList.contains("hidden")) positionDropdown();
+          });
+        }
+
+        /* ══════════════════════════════════════════════════════════
+           PHASE 5: AJAX NOTIFICATION INTERACTIONS
+           ══════════════════════════════════════════════════════════ */
+
+        // Helper: Update badge count in navbar
+        function updateBadgeCount(count) {
+          const bellBtn = document.getElementById("notifBellBtn");
+          if (!bellBtn) return;
+
+          let badge = bellBtn.querySelector("span");
+          if (count > 0) {
+            if (!badge) {
+              badge = document.createElement("span");
+              badge.className = "absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center leading-none";
+              bellBtn.appendChild(badge);
+            }
+            badge.textContent = count > 99 ? "99+" : count;
+          } else {
+            if (badge) badge.remove();
+          }
+        }
+
+        // "Mark all as read" button (AJAX)
+        const markAllReadBtn = document.getElementById("markAllReadAjaxBtn");
+        if (markAllReadBtn) {
+          markAllReadBtn.addEventListener("click", function (e) {
+            e.preventDefault();
+            
+            fetch("{% url 'notifications:ajax_mark_all_read' %}", {
+              method: "POST",
+              headers: {
+                "X-CSRFToken": getCsrfToken(),
+                "Content-Type": "application/json",
+              },
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                // Update badge
+                updateBadgeCount(data.unread_count);
+                
+                // Mark all notification items in dropdown as read (visual feedback)
+                const notifItems = document.querySelectorAll("#notifDropdown .bg-\\[\\#fdf6ec\\]");
+                notifItems.forEach(item => {
+                  item.classList.remove("bg-[#fdf6ec]");
+                  const dot = item.querySelector(".bg-\\[\\#d4a373\\]");
+                  if (dot) dot.remove();
+                  const text = item.querySelector(".font-semibold");
+                  if (text) {
+                    text.classList.remove("font-semibold", "text-gray-800");
+                    text.classList.add("text-gray-500");
+                  }
+                });
+                
+                // Hide the "Mark all read" button
+                markAllReadBtn.style.display = "none";
+              }
+            })
+            .catch(error => {
+              console.error("Error marking notifications as read:", error);
+            });
+          });
+        }
+
+        // Individual notification click (mark as read via AJAX, then navigate)
+        const notifLinks = document.querySelectorAll(".notif-item-link");
+        notifLinks.forEach(link => {
+          link.addEventListener("click", function (e) {
+            const isRead = this.dataset.isRead === "true";
+            if (isRead) return; // Already read, just navigate
+
+            e.preventDefault();
+            const notifId = this.dataset.notifId;
+            const targetUrl = this.href;
+
+            fetch(`/notifications/ajax/mark-single-read/${notifId}/`, {
+              method: "POST",
+              headers: {
+                "X-CSRFToken": getCsrfToken(),
+                "Content-Type": "application/json",
+              },
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                updateBadgeCount(data.unread_count);
+                window.location.href = targetUrl;
+              }
+            })
+            .catch(error => {
+              console.error("Error marking notification as read:", error);
+              // Navigate anyway
+              window.location.href = targetUrl;
+            });
+          });
+        });
+
       });
     </script>
 
     {% block extra_scripts %}{% endblock %}
+
+    <!-- ============================================================ -->
+    <!-- NOTIFICATION DROPDOWN                                        -->
+    <!-- Lives outside every overflow-hidden / stacking ancestor so  -->
+    <!-- it always renders on the very top layer on every page.      -->
+    <!-- Position is set by JS (positionDropdown) on each open.      -->
+    <!-- ============================================================ -->
+    <div id="notifDropdown"
+      class="hidden fixed bg-white rounded-xl border border-gray-100 overflow-hidden"
+      style="z-index: 99999; width: 320px; box-shadow: 0 8px 30px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);">
+
+      <!-- Header -->
+      <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+        <span class="text-xs font-bold text-gray-800">Notifications</span>
+        {% if unread_count > 0 %}
+        <button type="button" id="markAllReadAjaxBtn"
+                class="text-[11px] text-[#b8895e] hover:text-[#8b6f55] font-medium transition">
+          Mark all read
+        </button>
+        {% endif %}
+      </div>
+
+      <!-- Items -->
+      <div class="overflow-y-auto divide-y divide-gray-50" style="max-height: 288px;">
+        {% if notification_list %}
+          {% for notif in notification_list %}
+          <a href="{% url 'notifications:click' notif.pk %}"
+             data-notif-id="{{ notif.pk }}"
+             data-is-read="{% if notif.is_read %}true{% else %}false{% endif %}"
+             class="notif-item-link flex items-start gap-2.5 px-4 py-3 hover:bg-[#faf8f5] transition
+                    {% if not notif.is_read %}bg-[#fdf6ec]{% endif %}">
+            <div class="w-6 h-6 rounded-full shrink-0 flex items-center justify-center mt-0.5
+                        {% if not notif.is_read %}bg-[#f5e6d0] text-[#8b6f55]{% else %}bg-gray-100 text-gray-400{% endif %}">
+              <i class="fas fa-bell text-[9px]"></i>
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="text-[11px] leading-relaxed
+                        {% if not notif.is_read %}font-semibold text-gray-800{% else %}text-gray-500{% endif %}">
+                {{ notif.message|truncatechars:90 }}
+              </p>
+              <p class="text-[10px] text-gray-400 mt-0.5">{{ notif.created_at|timesince }} ago</p>
+            </div>
+            {% if not notif.is_read %}
+            <span class="w-1.5 h-1.5 rounded-full bg-[#d4a373] shrink-0 mt-1.5"></span>
+            {% endif %}
+          </a>
+          {% endfor %}
+        {% else %}
+          <div class="px-4 py-6 text-center">
+            <i class="far fa-bell text-gray-300 text-xl mb-2 block"></i>
+            <p class="text-xs text-gray-400">No notifications yet</p>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Footer -->
+      <div class="px-4 py-2.5 border-t border-gray-100 text-center">
+        <a href="{% url 'notifications:list' %}"
+           class="text-[11px] text-[#b8895e] hover:text-[#8b6f55] font-medium transition">
+          View all notifications
+        </a>
+      </div>
+
+    </div>
+
   </body>
 </html>

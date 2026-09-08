@@ -4,20 +4,21 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block page_heading %}Dashboard{% endblock %}
-{% block page_subheading %}Hello {{ user.first_name }} 🌞 · Wednesday, 20 August · 7 active projects{% endblock %}
+{% block page_subheading %}Hello {{ user.first_name }} 🌞 · {{ active_projects_count }} active project{{ active_projects_count|pluralize }}{% endblock %}
 
 {% block content %}
 
-<!-- ALERT -->
+<!-- ALERT (only show if there are overdue projects) -->
+{% if overdue_projects_count > 0 %}
 <div class="flex items-center gap-3 px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm hover:bg-red-100 hover:border-red-300 transition mb-5">
     <span class="text-base">⊙</span>
     <span>
-        <strong>2 projects are overdue</strong>
-        — E-commerce Store (6 days) and Marketing Site (3 days).
-        Review them below.
+        <strong>{{ overdue_projects_count }} project{{ overdue_projects_count|pluralize:" is, s are" }} overdue</strong>
+        — Review them in your projects list.
     </span>
-    <a href="#" class="ml-auto text-red-600 font-semibold hover:text-red-800 transition">View all →</a>
+    <a href="{% url 'projects:project_list' %}" class="ml-auto text-red-600 font-semibold hover:text-red-800 transition">View all →</a>
 </div>
+{% endif %}
 
 <!-- STATISTICS -->
 <section class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-5">
@@ -26,40 +27,40 @@
     <div class="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg hover:-translate-y-1 transition relative overflow-hidden group">
         <div class="absolute left-0 top-0 bottom-0 w-1 bg-purple-600"></div>
         <span class="block text-[10px] text-gray-500 font-semibold mb-3 tracking-wide">ACTIVE PROJECTS</span>
-        <h2 class="text-3xl font-bold text-gray-900 group-hover:translate-x-1 transition">{{active_project_count}}</h2>
-        <p class="text-[11px] text-gray-400 mt-2">across {{client_count}} clients</p>
+        <h2 class="text-3xl font-bold text-gray-900 group-hover:translate-x-1 transition">{{ active_projects_count }}</h2>
+        <p class="text-[11px] text-gray-400 mt-2">in progress</p>
     </div>
 
     <!-- Overdue -->
     <div class="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg hover:-translate-y-1 transition relative overflow-hidden group">
         <div class="absolute left-0 top-0 bottom-0 w-1 bg-red-500"></div>
         <span class="block text-[10px] text-gray-500 font-semibold mb-3 tracking-wide">OVERDUE</span>
-        <h2 class="text-3xl font-bold text-gray-900 group-hover:translate-x-1 transition">2</h2>
-        <p class="text-[11px] text-gray-400 mt-2">needs attention</p>
+        <h2 class="text-3xl font-bold text-gray-900 group-hover:translate-x-1 transition">{{ overdue_projects_count }}</h2>
+        <p class="text-[11px] text-gray-400 mt-2">{% if overdue_projects_count > 0 %}needs attention{% else %}looking good{% endif %}</p>
     </div>
 
     <!-- Due This Week -->
     <div class="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg hover:-translate-y-1 transition relative overflow-hidden group">
         <div class="absolute left-0 top-0 bottom-0 w-1 bg-orange-500"></div>
         <span class="block text-[10px] text-gray-500 font-semibold mb-3 tracking-wide">DUE THIS WEEK</span>
-        <h2 class="text-3xl font-bold text-gray-900 group-hover:translate-x-1 transition">3</h2>
-        <p class="text-[11px] text-gray-400 mt-2">next: Logo Design, Aug 22</p>
+        <h2 class="text-3xl font-bold text-gray-900 group-hover:translate-x-1 transition">{{ due_this_week_count }}</h2>
+        <p class="text-[11px] text-gray-400 mt-2">project{{ due_this_week_count|pluralize }}</p>
     </div>
 
-    <!-- Pending Payments -->
+    <!-- My Tasks -->
     <div class="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg hover:-translate-y-1 transition relative overflow-hidden group">
         <div class="absolute left-0 top-0 bottom-0 w-1 bg-blue-500"></div>
-        <span class="block text-[10px] text-gray-500 font-semibold mb-3 tracking-wide">PENDING PAYMENTS</span>
-        <h2 class="text-3xl font-bold text-gray-900 group-hover:translate-x-1 transition">₹64,500</h2>
-        <p class="text-[11px] text-gray-400 mt-2">4 invoices outstanding</p>
+        <span class="block text-[10px] text-gray-500 font-semibold mb-3 tracking-wide">{% if user.is_staff_member %}MY TASKS{% else %}TOTAL TASKS{% endif %}</span>
+        <h2 class="text-3xl font-bold text-gray-900 group-hover:translate-x-1 transition">{{ my_tasks_count }}</h2>
+        <p class="text-[11px] text-gray-400 mt-2">{{ tasks_due_soon_count }} due soon</p>
     </div>
 
-    <!-- Earned This Month -->
+    <!-- Team Size -->
     <div class="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg hover:-translate-y-1 transition relative overflow-hidden group">
         <div class="absolute left-0 top-0 bottom-0 w-1 bg-green-500"></div>
-        <span class="block text-[10px] text-gray-500 font-semibold mb-3 tracking-wide">EARNED THIS MONTH</span>
-        <h2 class="text-3xl font-bold text-gray-900 group-hover:translate-x-1 transition">{{budget_sum}}</h2>
-        <p class="text-[11px] text-gray-400 mt-2">↑ 18% vs July</p>
+        <span class="block text-[10px] text-gray-500 font-semibold mb-3 tracking-wide">TEAM SIZE</span>
+        <h2 class="text-3xl font-bold text-gray-900 group-hover:translate-x-1 transition">{{ staff_count }}</h2>
+        <p class="text-[11px] text-gray-400 mt-2">staff member{{ staff_count|pluralize }}</p>
     </div>
 
 </section>
@@ -75,171 +76,118 @@
             <a href="{% url 'projects:project_list' %}" class="text-xs text-[#b8895e] hover:text-[#8b6844] transition">All projects →</a>
         </div>
 
-        <!-- Project 1 -->
+        {% if recent_projects %}
+        {% for item in recent_projects %}
+        {% with project=item.project %}
         <div class="grid grid-cols-[42px_1.5fr_110px_125px_65px] gap-4 items-center border-t border-gray-100 py-2 px-2 rounded hover:bg-[#fafaff] hover:translate-x-1 transition">
-            <div class="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center text-white text-[11px] font-bold group-hover:scale-110 transition">RS</div>
-            <div>
-                <h3 class="text-sm font-semibold text-gray-900">Website Redesign</h3>
-                <p class="text-[10px] text-gray-400 mt-1">Rahul Sharma · 8/12 tasks</p>
+            <div class="w-10 h-10 rounded-full flex items-center justify-center text-white text-[11px] font-bold group-hover:scale-110 transition
+                {% if project.status == 'IN_PROGRESS' %}bg-purple-600
+                {% elif project.status == 'COMPLETED' %}bg-green-500
+                {% elif project.status == 'AT_RISK' %}bg-orange-500
+                {% elif project.status == 'BLOCKED' %}bg-red-500
+                {% else %}bg-blue-500{% endif %}">
+                {{ project.client.first_name|first|default:"P"|upper }}{{ project.client.last_name|first|default:"R"|upper }}
             </div>
-            <span class="px-2.5 py-1.5 rounded-xl bg-purple-50 text-purple-700 text-[10px] font-semibold w-fit hover:bg-purple-100 transition">● In Progress</span>
+            <div>
+                <h3 class="text-sm font-semibold text-gray-900">
+                    <a href="{% url 'projects:project_detail' project.pk %}" class="hover:text-[#b8895e] transition">
+                        {{ project.name|truncatechars:30 }}
+                    </a>
+                </h3>
+                <p class="text-[10px] text-gray-400 mt-1">{{ project.client_display_name }} · {{ item.completed_tasks }}/{{ item.total_tasks }} tasks</p>
+            </div>
+            <span class="px-2.5 py-1.5 rounded-xl text-[10px] font-semibold w-fit hover:brightness-95 transition {{ project.status_css_class }}">● {{ project.get_status_display }}</span>
             <div class="flex items-center gap-2">
                 <div class="w-[70px] h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                    <div class="h-full bg-purple-600 rounded-full" style="width: 67%;"></div>
+                    <div class="h-full bg-purple-600 rounded-full" style="width: {{ item.progress }}%;"></div>
                 </div>
-                <small class="text-[10px] text-gray-400">67%</small>
+                <small class="text-[10px] text-gray-400">{{ item.progress }}%</small>
             </div>
             <div class="text-right">
                 <small class="block text-[8px] text-gray-400">DUE</small>
-                <strong class="block text-[11px] text-gray-900 mt-1">Sep 2</strong>
+                <strong class="block text-[11px] {% if project.deadline and project.deadline < today %}text-red-600{% else %}text-gray-900{% endif %} mt-1">
+                    {% if project.deadline %}{{ project.deadline|date:"M j" }}{% else %}—{% endif %}
+                </strong>
             </div>
         </div>
-
-        <!-- Project 2 -->
-        <div class="grid grid-cols-[42px_1.5fr_110px_125px_65px] gap-4 items-center border-t border-gray-100 py-2 px-2 rounded hover:bg-[#fafaff] hover:translate-x-1 transition">
-            <div class="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center text-white text-[11px] font-bold group-hover:scale-110 transition">MK</div>
-            <div>
-                <h3 class="text-sm font-semibold text-gray-900">Logo Design</h3>
-                <p class="text-[10px] text-gray-400 mt-1">Meera Kapoor · 4/5 tasks</p>
-            </div>
-            <span class="px-2.5 py-1.5 rounded-xl bg-purple-50 text-purple-700 text-[10px] font-semibold w-fit hover:bg-purple-100 transition">● In Progress</span>
-            <div class="flex items-center gap-2">
-                <div class="w-[70px] h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                    <div class="h-full bg-purple-600 rounded-full" style="width: 80%;"></div>
-                </div>
-                <small class="text-[10px] text-gray-400">80%</small>
-            </div>
-            <div class="text-right">
-                <small class="block text-[8px] text-gray-400">DUE</small>
-                <strong class="block text-[11px] text-orange-500 mt-1">Aug 22</strong>
-            </div>
+        {% endwith %}
+        {% endfor %}
+        {% else %}
+        <div class="py-10 text-center border-t border-gray-100">
+            <i class="fas fa-folder-open text-gray-300 text-2xl mb-3"></i>
+            <p class="text-xs text-gray-500">No active projects yet</p>
+            <p class="text-[11px] text-gray-400 mt-1">Create your first project to get started</p>
         </div>
-
-        <!-- Project 3 -->
-        <div class="grid grid-cols-[42px_1.5fr_110px_125px_65px] gap-4 items-center border-t border-gray-100 py-2 px-2 rounded hover:bg-[#fafafff] hover:translate-x-1 transition">
-            <div class="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center text-white text-[11px] font-bold group-hover:scale-110 transition">PN</div>
-            <div>
-                <h3 class="text-sm font-semibold text-gray-900">E-commerce Store</h3>
-                <p class="text-[10px] text-gray-400 mt-1">Priya Nair · 6/20 tasks</p>
-            </div>
-            <span class="px-2.5 py-1.5 rounded-xl bg-red-50 text-red-600 text-[10px] font-semibold w-fit hover:bg-red-100 transition">● Overdue</span>
-            <div class="flex items-center gap-2">
-                <div class="w-[70px] h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                    <div class="h-full bg-red-500 rounded-full" style="width: 30%;"></div>
-                </div>
-                <small class="text-[10px] text-gray-400">30%</small>
-            </div>
-            <div class="text-right">
-                <small class="block text-[8px] text-gray-400">DUE</small>
-                <strong class="block text-[11px] text-red-600 mt-1">Aug 14</strong>
-            </div>
-        </div>
-
-        <!-- Project 4 -->
-        <div class="grid grid-cols-[42px_1.5fr_110px_125px_65px] gap-4 items-center border-t border-gray-100 py-2 px-2 rounded hover:bg-[#fafafff] hover:translate-x-1 transition">
-            <div class="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white text-[11px] font-bold group-hover:scale-110 transition">DO</div>
-            <div>
-                <h3 class="text-sm font-semibold text-gray-900">Brand Identity</h3>
-                <p class="text-[10px] text-gray-400 mt-1">Bright Path Nonprofit · 9/9 tasks</p>
-            </div>
-            <span class="px-2.5 py-1.5 rounded-xl bg-green-50 text-green-700 text-[10px] font-semibold w-fit hover:bg-green-100 transition">● Completed</span>
-            <div class="flex items-center gap-2">
-                <div class="w-[70px] h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                    <div class="h-full bg-purple-600 rounded-full" style="width: 100%;"></div>
-                </div>
-                <small class="text-[10px] text-gray-400">100%</small>
-            </div>
-            <div class="text-right">
-                <small class="block text-[8px] text-gray-400">DUE</small>
-                <strong class="block text-[11px] text-gray-900 mt-1">Aug 10</strong>
-            </div>
-        </div>
+        {% endif %}
 
     </div>
 
-    <!-- ACTIVITY FEED & EARNINGS (right column) -->
+    <!-- ACTIVITY FEED & STATS (right column) -->
     <div class="space-y-4">
 
         <!-- ACTIVITY FEED -->
         <div class="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg transition">
             
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-base font-semibold text-gray-900">Activity Feed</h2>
+                <h2 class="text-base font-semibold text-gray-900">Recent Activity</h2>
             </div>
 
+            {% if recent_activity %}
+            {% for activity in recent_activity %}
             <div class="flex gap-3 py-3 px-2 border-t border-gray-100 rounded hover:bg-[#fafafff] hover:pl-3 transition">
-                <span class="w-2 h-2 rounded-full bg-green-500 mt-1.5 flex-shrink-0"></span>
+                {% with icon_data=activity.icon_css %}
+                <span class="w-2 h-2 rounded-full mt-1.5 flex-shrink-0 {{ icon_data.bg|slice:":2" }}-500"></span>
                 <div>
-                    <h3 class="text-[11px] font-medium text-gray-900">Marked Brand Identity as Completed</h3>
-                    <p class="text-[10px] text-gray-400 mt-1">Today, 9:12 AM</p>
+                    <h3 class="text-[11px] font-medium text-gray-900">{{ activity.description|truncatechars:60 }}</h3>
+                    <p class="text-[10px] text-gray-400 mt-1">{{ activity.created_at|timesince }} ago</p>
                 </div>
+                {% endwith %}
             </div>
-
-            <div class="flex gap-3 py-3 px-2 border-t border-gray-100 rounded hover:bg-[#fafafff] hover:pl-3 transition">
-                <span class="w-2 h-2 rounded-full bg-blue-600 mt-1.5 flex-shrink-0"></span>
-                <div>
-                    <h3 class="text-[11px] font-medium text-gray-900">Payment ₹40,000 from Rahul Sharma</h3>
-                    <p class="text-[10px] text-gray-400 mt-1">Today, 8:40 AM</p>
-                </div>
+            {% endfor %}
+            {% else %}
+            <div class="py-6 text-center border-t border-gray-100">
+                <i class="far fa-clock text-gray-300 text-xl mb-2"></i>
+                <p class="text-xs text-gray-400">No recent activity</p>
             </div>
-
-            <div class="flex gap-3 py-3 px-2 border-t border-gray-100 rounded hover:bg-[#fafafff] hover:pl-3 transition">
-                <span class="w-2 h-2 rounded-full bg-purple-600 mt-1.5 flex-shrink-0"></span>
-                <div>
-                    <h3 class="text-[11px] font-medium text-gray-900">New task added in Logo Design</h3>
-                    <p class="text-[10px] text-gray-400 mt-1">Yesterday, 5:02 PM</p>
-                </div>
-            </div>
-
-            <div class="flex gap-3 py-3 px-2 border-t border-gray-100 rounded hover:bg-[#fafafff] hover:pl-3 transition">
-                <span class="w-2 h-2 rounded-full bg-red-500 mt-1.5 flex-shrink-0"></span>
-                <div>
-                    <h3 class="text-[11px] font-medium text-gray-900">E-commerce Store deadline passed</h3>
-                    <p class="text-[10px] text-gray-400 mt-1">Aug 14, 12:00 AM</p>
-                </div>
-            </div>
-
-            <div class="flex gap-3 py-3 px-2 border-t border-gray-100 rounded hover:bg-[#fafafff] hover:pl-3 transition">
-                <span class="w-2 h-2 rounded-full bg-blue-600 mt-1.5 flex-shrink-0"></span>
-                <div>
-                    <h3 class="text-[11px] font-medium text-gray-900">Invited Sana Iqbal to the team</h3>
-                    <p class="text-[10px] text-gray-400 mt-1">Aug 13, 3:20 PM</p>
-                </div>
-            </div>
-
-            <div class="flex gap-3 py-3 px-2 border-t border-gray-100 rounded hover:bg-[#fafafff] hover:pl-3 transition">
-                <span class="w-2 h-2 rounded-full bg-purple-600 mt-1.5 flex-shrink-0"></span>
-                <div>
-                    <h3 class="text-[11px] font-medium text-gray-900">Invoice INV-009 sent to Meera Kapoor</h3>
-                    <p class="text-[10px] text-gray-400 mt-1">Aug 5, 10:00 AM</p>
-                </div>
-            </div>
+            {% endif %}
 
         </div>
 
-        <!-- EARNINGS -->
+        <!-- QUICK ACTIONS -->
         <div class="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg transition">
             
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-base font-semibold text-gray-900">Earnings — Last 6 Months</h2>
+                <h2 class="text-base font-semibold text-gray-900">Quick Actions</h2>
             </div>
 
-            <div class="h-40 relative mt-5 border-b border-gray-200">
-                <!-- Horizontal grid lines -->
-                <div class="absolute left-0 right-0 top-11 border-t border-dashed border-gray-200"></div>
-                <div class="absolute left-0 right-0 top-24 border-t border-dashed border-gray-200"></div>
+            <div class="space-y-2">
+                {% if user.is_manager %}
+                <a href="{% url 'projects:project_create' %}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#f8f4ef] hover:bg-[#f5e6d0] text-[#5a3e2b] text-xs font-medium transition group">
+                    <div class="w-7 h-7 rounded-full bg-[#d4a373] text-white flex items-center justify-center group-hover:scale-110 transition">
+                        <i class="fas fa-plus text-[10px]"></i>
+                    </div>
+                    <span>Create New Project</span>
+                </a>
+                {% endif %}
                 
-                <!-- Trend line -->
-                <div class="absolute w-[70%] h-0.5 bg-purple-600 right-[8%] top-16 -rotate-2 rounded-full shadow-sm"></div>
-            </div>
-
-            <div class="flex justify-around mt-6">
-                <span class="text-[10px] text-gray-400">Mar</span>
-                <span class="text-[10px] text-gray-400">Apr</span>
-                <span class="text-[10px] text-gray-400">May</span>
-                <span class="text-[10px] text-gray-400">Jun</span>
-                <span class="text-[10px] text-gray-400">Jul</span>
-                <span class="text-[10px] text-gray-400">Aug</span>
+                {% if user.is_staff_member %}
+                <a href="{% url 'projects:my_tasks' %}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#e8f0fe] hover:bg-[#c5d8fb] text-[#1a73e8] text-xs font-medium transition group">
+                    <div class="w-7 h-7 rounded-full bg-[#1a73e8] text-white flex items-center justify-center group-hover:scale-110 transition">
+                        <i class="fas fa-tasks text-[10px]"></i>
+                    </div>
+                    <span>View My Tasks</span>
+                </a>
+                {% endif %}
+                
+                <a href="{% url 'projects:project_list' %}"
+                   class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#f3f4f6] hover:bg-[#e5e7eb] text-gray-700 text-xs font-medium transition group">
+                    <div class="w-7 h-7 rounded-full bg-gray-400 text-white flex items-center justify-center group-hover:scale-110 transition">
+                        <i class="fas fa-folder-open text-[10px]"></i>
+                    </div>
+                    <span>Browse All Projects</span>
+                </a>
             </div>
 
         </div>

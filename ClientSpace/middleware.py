@@ -41,6 +41,14 @@ CLIENT_BLOCKED_PATTERNS = [
     r"^/clients/",
     r"^/settings/",
     r"^/projects/create/",
+    r"^/projects/\d+/assign-staff/",
+    r"^/projects/\d+/remove-staff/",
+    # Phase 2 — task management endpoints
+    r"^/projects/\d+/tasks/create/",
+    r"^/projects/\d+/tasks/\d+/edit/",
+    r"^/projects/\d+/tasks/\d+/delete/",
+    r"^/projects/tasks/my/",
+    r"^/projects/tasks/\d+/status/",
 ]
 
 _PUBLIC_RE = re.compile(

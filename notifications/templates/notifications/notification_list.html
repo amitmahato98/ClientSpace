@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Notifications — ClientSpace{% endblock %}
+{% block page_heading %}Notifications{% endblock %}
+{% block page_subheading %}Your recent activity and updates{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto space-y-4">
+
+    <!-- =========================================================
+         DJANGO MESSAGES
+         ========================================================= -->
+    {% if messages %}
+    <div class="space-y-2">
+        {% for message in messages %}
+        <div class="flex items-center gap-2.5 px-4 py-3 rounded-lg text-xs font-medium
+            {% if message.tags == 'success' %}bg-[#e6f4ea] text-[#137333] border border-[#b7dfbe]
+            {% elif message.tags == 'error' %}bg-[#fce8e6] text-[#c5221f] border border-[#f5c2be]
+            {% else %}bg-[#e8f0fe] text-[#1a73e8] border border-[#c5d8fb]{% endif %}">
+            <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %}"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Header row -->
+    <div class="flex items-center justify-between">
+        <div>
+            <p class="text-xs text-gray-500">
+                {% if unread_count > 0 %}
+                    <span class="font-semibold text-gray-800">{{ unread_count }}</span> unread
+                {% else %}
+                    All caught up
+                {% endif %}
+            </p>
+        </div>
+        {% if unread_count > 0 %}
+        <form method="POST" action="{% url 'notifications:mark_all_read' %}">
+            {% csrf_token %}
+            <button type="submit"
+                class="text-xs text-[#b8895e] hover:text-[#8b6f55] font-medium transition">
+                Mark all as read
+            </button>
+        </form>
+        {% endif %}
+    </div>
+
+    {% if notifications %}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 divide-y divide-gray-50">
+        {% for notif in notifications %}
+        <a href="{% url 'notifications:click' notif.pk %}"
+           class="flex items-start gap-3 px-5 py-4 hover:bg-[#faf8f5] transition
+                  {% if not notif.is_read %}bg-[#fdf6ec]{% endif %}">
+
+            <!-- Icon / avatar -->
+            <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5
+                        {% if not notif.is_read %}bg-[#f5e6d0] text-[#8b6f55]{% else %}bg-gray-100 text-gray-400{% endif %}">
+                <i class="fas fa-bell text-[11px]"></i>
+            </div>
+
+            <div class="min-w-0 flex-1">
+                <p class="text-xs {% if not notif.is_read %}font-semibold text-gray-800{% else %}text-gray-600{% endif %} leading-relaxed">
+                    {{ notif.message }}
+                </p>
+                <div class="flex items-center gap-3 mt-1">
+                    <span class="text-[11px] text-gray-400">{{ notif.created_at|timesince }} ago</span>
+                    {% if not notif.is_read %}
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#d4a373]"></span>
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
+        <i class="far fa-bell text-[#c9a87a] text-3xl mb-3"></i>
+        <p class="text-sm font-semibold text-gray-700">No notifications yet</p>
+        <p class="text-xs text-gray-400 mt-1">You'll see notifications here when something happens.</p>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

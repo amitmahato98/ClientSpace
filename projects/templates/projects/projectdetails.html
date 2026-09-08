@@ -99,6 +99,13 @@
 
             <!-- Action buttons -->
             <div class="flex flex-wrap items-center gap-2 shrink-0">
+                {% if user.is_manager %}
+                <button type="button" id="assignStaffButton"
+                    class="px-4 py-2 bg-white hover:bg-[#f8f4ef] text-[#5a3e2b] text-xs font-medium rounded-lg shadow-sm border border-[#d4a373] transition flex items-center gap-1.5">
+                    <i class="fas fa-user-plus text-[#b8895e] text-[10px]"></i>
+                    Assign Staff <span class="ml-0.5 text-[#b8895e]">+</span>
+                </button>
+                {% endif %}
                 <button type="button" id="sharePortalButton"
                     class="px-4 py-2 bg-[#d4a373] hover:bg-[#b8895e] text-white text-xs font-medium rounded-lg shadow-sm transition flex items-center gap-1.5">
                     <i class="fas fa-link text-[10px]"></i>
@@ -180,6 +187,11 @@
             <button type="button" data-tab="overview"
                 class="project-tab active px-4 py-3 text-xs font-semibold text-[#8b6f55] border-b-2 border-[#d4a373] whitespace-nowrap transition">
                 <i class="far fa-file-alt mr-1.5"></i> Overview
+            </button>
+            <button type="button" data-tab="tasks"
+                class="project-tab px-4 py-3 text-xs font-medium text-gray-400 hover:text-gray-700 border-b-2 border-transparent whitespace-nowrap transition">
+                <i class="fas fa-tasks mr-1.5"></i> Tasks
+                {% if tasks %}<span class="ml-1 px-1.5 py-0.5 rounded-full bg-[#f5e6d0] text-[#8b6f55] text-[10px] font-semibold">{{ tasks|length }}</span>{% endif %}
             </button>
             <button type="button" data-tab="activity"
                 class="project-tab px-4 py-3 text-xs font-medium text-gray-400 hover:text-gray-700 border-b-2 border-transparent whitespace-nowrap transition">
@@ -283,50 +295,326 @@
                 {% endif %}
             </div>
 
-        </div>
-    </div>
+            <!-- =====================================================
+                 ASSIGNED STAFF CARD
+                 ===================================================== -->
+            <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 lg:col-span-2">
+
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-sm font-bold text-gray-900">Assigned Staff</h3>
+                    {% if user.is_manager %}
+                    <button type="button" id="assignStaffButton"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-[#f8f4ef] text-[#5a3e2b] text-xs font-medium rounded-lg border border-[#d4a373] transition">
+                        <i class="fas fa-user-plus text-[#b8895e] text-[10px]"></i>
+                        Assign Staff <span class="text-[#b8895e] ml-0.5">+</span>
+                    </button>
+                    {% endif %}
+                </div>
+
+                {% if assigned_staff %}
+                <div class="space-y-2">
+                    {% for assignment in assigned_staff %}
+                    <div class="flex items-center justify-between gap-3 px-4 py-3 rounded-lg bg-[#faf8f5] border border-[#ede8e0] hover:border-[#d4a373] transition group">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <!-- Avatar initials -->
+                            <div class="w-8 h-8 rounded-full bg-[#f5e6d0] text-[#8b6f55] flex items-center justify-center shrink-0 text-xs font-semibold">
+                                {% with name=assignment.staff.first_name|add:" "|add:assignment.staff.last_name %}
+                                    {% with parts=name.split %}
+                                        {% if parts|length >= 2 %}{{ parts.0|first|upper }}{{ parts.1|first|upper }}{% else %}{{ name|first|upper }}{% endif %}
+                                    {% endwith %}
+                                {% endwith %}
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-xs font-semibold text-gray-800 truncate">
+                                    {{ assignment.staff.first_name }} {{ assignment.staff.last_name }}
+                                </p>
+                                <p class="text-[11px] text-gray-400 truncate">
+                                    {{ assignment.staff.role }}
+                                    {% if assignment.staff.user %}
+                                    &bull; {{ assignment.staff.user.email }}
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Assigned date + Remove button (manager only) -->
+                        <div class="flex items-center gap-3 shrink-0">
+                            <span class="hidden sm:block text-[11px] text-gray-400">
+                                Since {{ assignment.assigned_at|date:"M j, Y" }}
+                            </span>
+                            {% if user.is_manager %}
+                            <form method="POST"
+                                  action="{% url 'projects:remove_staff' project.pk assignment.pk %}"
+                                  onsubmit="return confirm('Remove {{ assignment.staff.first_name }} {{ assignment.staff.last_name }} from this project?');">
+                                {% csrf_token %}
+                                <button type="submit"
+                                    class="px-2.5 py-1 text-[11px] font-medium text-[#c5221f] bg-[#fce8e6] hover:bg-[#f5c2be] rounded-md transition">
+                                    Remove
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                {% else %}
+                <!-- Empty state -->
+                <div class="p-5 rounded-lg bg-[#f8f4ef] border border-[#eadcca] text-center">
+                    <i class="fas fa-users text-[#c9a87a] text-xl mb-2"></i>
+                    <p class="text-xs text-[#6b4f3a]">No staff assigned to this project yet.</p>
+                    {% if user.is_manager %}
+                    <p class="text-[11px] text-[#9b7d62] mt-1">Click <strong>Assign Staff +</strong> above to get started.</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+            </div><!-- /assigned staff card -->
+
+        </div><!-- /overview grid -->
+    </div><!-- /tab-overview -->
 
 
     <!-- =====================================================
-         ACTIVITY TAB
+         TASKS TAB
          ===================================================== -->
-    <div id="tab-activity" class="project-tab-content hidden">
-        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-            <h3 class="text-sm font-bold text-gray-900">Recent activity</h3>
-            <p class="text-xs text-gray-400 mt-1">Recent changes made to this project.</p>
-            <div class="mt-5 space-y-4">
-                <div class="flex gap-3">
-                    <div class="w-7 h-7 rounded-full bg-[#f8eee4] text-[#8b6f55] flex items-center justify-center shrink-0">
-                        <i class="fas fa-plus text-[10px]"></i>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-700">
-                            Project created by
-                            <strong>{{ project.created_by.get_full_name|default:project.created_by.username }}</strong>.
-                        </p>
-                        <p class="text-[10px] text-gray-400 mt-0.5">{{ project.created_at|date:"M j, Y \a\t g:i A" }}</p>
-                    </div>
+    <div id="tab-tasks" class="project-tab-content hidden">
+
+        <!-- Header row: title + Create Task button (manager only) -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+            <div>
+                <h3 class="text-sm font-bold text-gray-900">Tasks</h3>
+                <p class="text-[11px] text-gray-400 mt-0.5">All tasks for this project</p>
+            </div>
+            {% if user.is_manager %}
+            <a href="{% url 'projects:task_create' project.pk %}"
+               class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#d4a373] hover:bg-[#b8895e] text-white text-xs font-medium rounded-lg shadow-sm transition shrink-0">
+                <i class="fas fa-plus text-[10px]"></i>
+                Create Task
+            </a>
+            {% endif %}
+        </div>
+
+        <!-- Phase 5: Filter Bar -->
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 mb-4">
+            <form method="GET" id="taskFilterForm" class="flex flex-wrap items-end gap-3">
+                <!-- Status filter -->
+                <div class="flex-1 min-w-[140px]">
+                    <label for="filterStatus" class="block text-[11px] font-medium text-gray-500 mb-1.5 uppercase tracking-wide">Status</label>
+                    <select name="status" id="filterStatus"
+                            class="w-full text-xs px-3 py-2 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#d4a373]/30 focus:border-[#d4a373] transition">
+                        <option value="">All Statuses</option>
+                        <option value="PENDING" {% if filter_status == "PENDING" %}selected{% endif %}>Pending</option>
+                        <option value="IN_PROGRESS" {% if filter_status == "IN_PROGRESS" %}selected{% endif %}>In Progress</option>
+                        <option value="COMPLETED" {% if filter_status == "COMPLETED" %}selected{% endif %}>Completed</option>
+                    </select>
                 </div>
-                {% if project.updated_at != project.created_at %}
-                <div class="flex gap-3">
-                    <div class="w-7 h-7 rounded-full bg-[#f8eee4] text-[#8b6f55] flex items-center justify-center shrink-0">
-                        <i class="fas fa-pencil-alt text-[10px]"></i>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-700">Project was last updated.</p>
-                        <p class="text-[10px] text-gray-400 mt-0.5">{{ project.updated_at|date:"M j, Y \a\t g:i A" }}</p>
-                    </div>
+
+                <!-- Priority filter -->
+                <div class="flex-1 min-w-[140px]">
+                    <label for="filterPriority" class="block text-[11px] font-medium text-gray-500 mb-1.5 uppercase tracking-wide">Priority</label>
+                    <select name="priority" id="filterPriority"
+                            class="w-full text-xs px-3 py-2 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#d4a373]/30 focus:border-[#d4a373] transition">
+                        <option value="">All Priorities</option>
+                        <option value="LOW" {% if filter_priority == "LOW" %}selected{% endif %}>Low</option>
+                        <option value="MEDIUM" {% if filter_priority == "MEDIUM" %}selected{% endif %}>Medium</option>
+                        <option value="HIGH" {% if filter_priority == "HIGH" %}selected{% endif %}>High</option>
+                    </select>
+                </div>
+
+                <!-- Assigned staff filter (Manager only) -->
+                {% if user.is_manager and assigned_staff %}
+                <div class="flex-1 min-w-[140px]">
+                    <label for="filterAssigned" class="block text-[11px] font-medium text-gray-500 mb-1.5 uppercase tracking-wide">Assigned To</label>
+                    <select name="assigned_to" id="filterAssigned"
+                            class="w-full text-xs px-3 py-2 rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#d4a373]/30 focus:border-[#d4a373] transition">
+                        <option value="">All Staff</option>
+                        {% for assignment in assigned_staff %}
+                        <option value="{{ assignment.staff.user.id }}" {% if filter_assigned|stringformat:"s" == assignment.staff.user.id|stringformat:"s" %}selected{% endif %}>
+                            {{ assignment.staff.first_name }} {{ assignment.staff.last_name }}
+                        </option>
+                        {% endfor %}
+                    </select>
                 </div>
                 {% endif %}
-            </div>
+
+                <!-- Filter buttons -->
+                <div class="flex items-center gap-2">
+                    <button type="submit"
+                            class="px-4 py-2 text-xs font-medium text-white bg-[#d4a373] hover:bg-[#b8895e] rounded-lg transition whitespace-nowrap">
+                        <i class="fas fa-filter mr-1.5 text-[10px]"></i>
+                        Apply
+                    </button>
+                    <a href="{% url 'projects:project_detail' project.pk %}?#tasks"
+                       class="px-4 py-2 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition whitespace-nowrap">
+                        Clear
+                    </a>
+                </div>
+            </form>
         </div>
+
+        {% if tasks %}
+        <div class="space-y-2">
+            {% for task in tasks %}
+            <div class="bg-white rounded-xl border border-gray-100 shadow-sm hover:border-[#d4a373] transition">
+                <div class="flex items-start justify-between gap-4 px-5 py-4">
+
+                    <!-- Left: title + meta -->
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="text-xs font-semibold text-gray-800 truncate">{{ task.title }}</span>
+                            <!-- Status badge -->
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium {{ task.status_css_class }}">
+                                {{ task.get_status_display }}
+                            </span>
+                            <!-- Priority badge -->
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium {{ task.priority_css_class }}">
+                                {{ task.get_priority_display }}
+                            </span>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5">
+                            <!-- Assigned to -->
+                            <span class="text-[11px] text-gray-400">
+                                <i class="fas fa-user mr-1"></i>
+                                {{ task.assigned_display_name }}
+                            </span>
+                            <!-- Due date -->
+                            {% if task.due_date %}
+                            <span class="text-[11px] text-gray-400">
+                                <i class="far fa-calendar mr-1"></i>
+                                Due {{ task.due_date|date:"M j, Y" }}
+                            </span>
+                            {% endif %}
+                            <!-- Description preview -->
+                            {% if task.description %}
+                            <span class="text-[11px] text-gray-400 truncate max-w-xs">{{ task.description|truncatechars:60 }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Right: Manager actions only -->
+                    {% if user.is_manager %}
+                    <div class="flex items-center gap-2 shrink-0">
+                        <a href="{% url 'projects:task_edit' project.pk task.pk %}"
+                           class="px-2.5 py-1 text-[11px] font-medium text-[#1a73e8] bg-[#e8f0fe] hover:bg-[#c5d8fb] rounded-md transition">
+                            Edit
+                        </a>
+                        <form method="POST" action="{% url 'projects:task_delete' project.pk task.pk %}"
+                              onsubmit="return confirm('Delete task \'{{ task.title }}\'? This cannot be undone.');">
+                            {% csrf_token %}
+                            <button type="submit"
+                                class="px-2.5 py-1 text-[11px] font-medium text-[#c5221f] bg-[#fce8e6] hover:bg-[#f5c2be] rounded-md transition">
+                                Delete
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% else %}
+        <!-- Empty state -->
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-8 text-center">
+            <i class="fas fa-tasks text-[#c9a87a] text-2xl mb-3"></i>
+            <p class="text-sm font-medium text-gray-700">No tasks yet</p>
+            <p class="text-xs text-gray-400 mt-1">
+                {% if user.is_manager %}
+                    Create the first task for this project.
+                {% else %}
+                    No tasks have been created for this project yet.
+                {% endif %}
+            </p>
+            {% if user.is_manager %}
+            <a href="{% url 'projects:task_create' project.pk %}"
+               class="inline-flex items-center gap-1.5 mt-4 px-4 py-2 bg-[#d4a373] hover:bg-[#b8895e] text-white text-xs font-medium rounded-lg shadow-sm transition">
+                <i class="fas fa-plus text-[10px]"></i>
+                Create Task
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+    </div><!-- /tab-tasks -->
+
+
+    <!-- =====================================================
+         ACTIVITY TAB  (MANAGER + STAFF only — hidden from CLIENT)
+         ===================================================== -->
+    <div id="tab-activity" class="project-tab-content hidden">
+      {% if user.is_manager or user.is_staff_member %}
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+
+          <div class="flex items-center justify-between mb-5">
+            <div>
+              <h3 class="text-sm font-bold text-gray-900">Activity</h3>
+              <p class="text-[11px] text-gray-400 mt-0.5">Full audit trail for this project</p>
+            </div>
+            {% if activities %}
+            <span class="text-[11px] text-gray-400">{{ activities|length }} event{{ activities|length|pluralize }}</span>
+            {% endif %}
+          </div>
+
+          {% if activities %}
+          <!-- Timeline -->
+          <div class="relative">
+            <!-- Vertical line -->
+            <div class="absolute left-[13px] top-2 bottom-2 w-px bg-gray-100"></div>
+
+            <div class="space-y-5">
+              {% for activity in activities %}
+              <div class="flex gap-3 relative">
+
+                <!-- Icon dot -->
+                {% with icon_data=activity.icon_css %}
+                <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0 z-10 {{ icon_data.bg }}">
+                  <i class="fas {{ icon_data.icon }} text-[10px]"></i>
+                </div>
+                {% endwith %}
+
+                <!-- Content -->
+                <div class="min-w-0 flex-1 pt-0.5">
+                  <p class="text-xs text-gray-700 leading-relaxed">{{ activity.description }}</p>
+                  <p class="text-[10px] text-gray-400 mt-0.5">
+                    {{ activity.created_at|date:"M j, Y" }}
+                    <span class="mx-1">&middot;</span>
+                    {{ activity.created_at|date:"g:i A" }}
+                  </p>
+                </div>
+
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          {% else %}
+          <div class="py-10 text-center">
+            <i class="far fa-clock text-gray-300 text-2xl mb-3"></i>
+            <p class="text-xs text-gray-500">No activity recorded yet.</p>
+            <p class="text-[11px] text-gray-400 mt-1">Actions like assigning staff and creating tasks will appear here.</p>
+          </div>
+          {% endif %}
+
+        </div>
+
+      {% else %}
+        <!-- CLIENT: activity log is hidden entirely -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 text-center">
+          <i class="far fa-eye-slash text-gray-300 text-xl mb-3"></i>
+          <p class="text-xs text-gray-500">Activity details are not available for your role.</p>
+        </div>
+      {% endif %}
     </div>
 
 </div>
 
 
 <!-- =========================================================
-     MODAL (share portal)
+     MODAL — Share portal
      ========================================================= -->
 <div id="projectModal"
     class="fixed inset-0 z-50 hidden items-center justify-center bg-black/30 backdrop-blur-[2px] px-4">
@@ -349,6 +637,84 @@
 </div>
 
 
+<!-- =========================================================
+     MODAL — Assign Staff  (MANAGER ONLY)
+     ========================================================= -->
+{% if user.is_manager and assign_form %}
+<div id="assignStaffModal"
+    class="fixed inset-0 z-50 hidden items-center justify-center bg-black/30 backdrop-blur-[2px] px-4">
+    <div class="bg-white rounded-xl shadow-xl border border-gray-100 w-full max-w-lg">
+
+        <!-- Modal header -->
+        <div class="flex items-center justify-between px-5 pt-5 pb-4 border-b border-gray-100">
+            <div>
+                <h3 class="text-sm font-bold text-gray-900">Assign Staff</h3>
+                <p class="text-[11px] text-gray-400 mt-0.5">Select staff members from your organisation to assign to this project.</p>
+            </div>
+            <button type="button" id="closeAssignModal"
+                class="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-500 flex items-center justify-center transition shrink-0 ml-4">
+                <i class="fas fa-times text-xs"></i>
+            </button>
+        </div>
+
+        <!-- Modal body -->
+        <form method="POST" action="{% url 'projects:assign_staff' project.pk %}" id="assignStaffForm">
+            {% csrf_token %}
+            <div class="px-5 py-4 max-h-80 overflow-y-auto space-y-1">
+
+                {% if assign_form.staff_ids.field.queryset.exists %}
+                    <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-3">Available staff</p>
+                    {% for staff_member in assign_form.staff_ids.field.queryset %}
+                    <label class="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer hover:bg-[#f8f4ef] border border-transparent hover:border-[#eadcca] transition group">
+                        <input type="checkbox"
+                               name="staff_ids"
+                               value="{{ staff_member.pk }}"
+                               class="w-4 h-4 rounded border-gray-300 text-[#d4a373] focus:ring-[#d4a373]/30 accent-[#d4a373] cursor-pointer">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <!-- Initials avatar -->
+                            <div class="w-7 h-7 rounded-full bg-[#f5e6d0] text-[#8b6f55] flex items-center justify-center shrink-0 text-[11px] font-semibold">
+                                {{ staff_member.first_name|first|upper }}{{ staff_member.last_name|first|upper }}
+                            </div>
+                            <div class="min-w-0">
+                                <span class="text-xs font-medium text-gray-800 group-hover:text-[#4a3520]">
+                                    {{ staff_member.first_name }} {{ staff_member.last_name }}
+                                </span>
+                                <span class="block text-[11px] text-gray-400">{{ staff_member.role }}</span>
+                            </div>
+                        </div>
+                    </label>
+                    {% endfor %}
+
+                {% else %}
+                    <div class="py-6 text-center">
+                        <i class="fas fa-user-check text-[#c9a87a] text-2xl mb-2"></i>
+                        <p class="text-xs text-gray-500">All staff members in your organisation are already assigned to this project.</p>
+                    </div>
+                {% endif %}
+
+            </div>
+
+            <!-- Modal footer -->
+            <div class="flex items-center justify-end gap-2 px-5 py-4 border-t border-gray-100">
+                <button type="button" id="cancelAssignModal"
+                    class="px-4 py-2 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition">
+                    Cancel
+                </button>
+                {% if assign_form.staff_ids.field.queryset.exists %}
+                <button type="submit"
+                    class="px-4 py-2 text-xs font-medium text-white bg-[#d4a373] hover:bg-[#b8895e] rounded-lg shadow-sm transition">
+                    <i class="fas fa-user-plus mr-1.5 text-[10px]"></i>
+                    Assign Staff
+                </button>
+                {% endif %}
+            </div>
+        </form>
+
+    </div>
+</div>
+{% endif %}
+
+
 <script>
 document.addEventListener("DOMContentLoaded", function () {
 
@@ -356,29 +722,43 @@ document.addEventListener("DOMContentLoaded", function () {
     const tabs        = document.querySelectorAll(".project-tab");
     const tabContents = document.querySelectorAll(".project-tab-content");
 
+    function switchTab(targetTab) {
+        tabs.forEach(function (t) {
+            t.classList.remove("active", "text-[#8b6f55]", "border-[#d4a373]");
+            t.classList.add("text-gray-400", "border-transparent");
+        });
+        tabContents.forEach(function (c) { c.classList.add("hidden"); });
+
+        const activeTab = document.querySelector(`[data-tab="${targetTab}"]`);
+        if (activeTab) {
+            activeTab.classList.add("active", "text-[#8b6f55]", "border-[#d4a373]");
+            activeTab.classList.remove("text-gray-400", "border-transparent");
+            if (typeof activeTab.scrollIntoView === "function") {
+                activeTab.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+            }
+        }
+
+        const selected = document.getElementById("tab-" + targetTab);
+        if (selected) selected.classList.remove("hidden");
+    }
+
     tabs.forEach(function (tab) {
         tab.addEventListener("click", function () {
             const target = tab.dataset.tab;
-
-            tabs.forEach(function (t) {
-                t.classList.remove("active", "text-[#8b6f55]", "border-[#d4a373]");
-                t.classList.add("text-gray-400", "border-transparent");
-            });
-            tabContents.forEach(function (c) { c.classList.add("hidden"); });
-
-            tab.classList.add("active", "text-[#8b6f55]", "border-[#d4a373]");
-            tab.classList.remove("text-gray-400", "border-transparent");
-
-            const selected = document.getElementById("tab-" + target);
-            if (selected) selected.classList.remove("hidden");
-
-            if (typeof tab.scrollIntoView === "function") {
-                tab.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
-            }
+            switchTab(target);
+            window.location.hash = target;
         });
     });
 
-    /* ── Modal ────────────────────────────────────────────────── */
+    // Phase 5: Check URL hash on page load to restore tab state
+    if (window.location.hash) {
+        const hash = window.location.hash.substring(1); // remove #
+        if (hash) {
+            switchTab(hash);
+        }
+    }
+
+    /* ── Share-portal modal ───────────────────────────────────── */
     const modal        = document.getElementById("projectModal");
     const modalTitle   = document.getElementById("modalTitle");
     const modalMessage = document.getElementById("modalMessage");
@@ -422,6 +802,71 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     }
+
+    /* ── Assign Staff modal ───────────────────────────────────── */
+    const assignModal        = document.getElementById("assignStaffModal");
+    const closeAssignModal   = document.getElementById("closeAssignModal");
+    const cancelAssignModal  = document.getElementById("cancelAssignModal");
+
+    function openAssignModal() {
+        if (!assignModal) return;
+        assignModal.classList.remove("hidden");
+        assignModal.classList.add("flex");
+    }
+
+    function hideAssignModal() {
+        if (!assignModal) return;
+        assignModal.classList.add("hidden");
+        assignModal.classList.remove("flex");
+    }
+
+    // Both "Assign Staff +" buttons (header + card) wire to the same modal
+    document.querySelectorAll("#assignStaffButton").forEach(function (btn) {
+        btn.addEventListener("click", openAssignModal);
+    });
+
+    if (closeAssignModal)  closeAssignModal.addEventListener("click", hideAssignModal);
+    if (cancelAssignModal) cancelAssignModal.addEventListener("click", hideAssignModal);
+
+    if (assignModal) {
+        assignModal.addEventListener("click", function (e) {
+            if (e.target === assignModal) hideAssignModal();
+        });
+
+        document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape" && !assignModal.classList.contains("hidden")) hideAssignModal();
+        });
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       PHASE 5: TASK FILTER AUTO-SUBMIT
+       ══════════════════════════════════════════════════════════ */
+    const filterStatus = document.getElementById("filterStatus");
+    const filterPriority = document.getElementById("filterPriority");
+    const filterAssigned = document.getElementById("filterAssigned");
+    const taskFilterForm = document.getElementById("taskFilterForm");
+
+    function submitFiltersAndSwitchToTasks() {
+        if (!taskFilterForm) return;
+        
+        // Build query string
+        const params = new URLSearchParams();
+        if (filterStatus && filterStatus.value) params.set("status", filterStatus.value);
+        if (filterPriority && filterPriority.value) params.set("priority", filterPriority.value);
+        if (filterAssigned && filterAssigned.value) params.set("assigned_to", filterAssigned.value);
+        
+        // Navigate with hash to preserve tasks tab
+        const queryString = params.toString();
+        const url = queryString ? `?${queryString}#tasks` : "#tasks";
+        window.location.href = url;
+    }
+
+    // Auto-submit on select change
+    [filterStatus, filterPriority, filterAssigned].forEach(select => {
+        if (select) {
+            select.addEventListener("change", submitFiltersAndSwitchToTasks);
+        }
+    });
 
 });
 </script>
