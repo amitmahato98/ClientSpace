@@ -765,6 +765,38 @@ def task_delete(request, pk, task_id):
     return redirect("projects:project_detail", pk=pk)
 
 
+@login_required
+@manager_required
+def task_overview(request):
+    manager_org = get_user_organization(request.user)
+    if manager_org is None:
+        messages.error(request, "You must belong to an organisation to view tasks.")
+        return redirect("projects:project_list")
+
+    tasks = (
+        Task.objects
+        .filter(project__organization=manager_org)
+        .select_related("project", "assigned_to")
+        .order_by("assigned_to__username", "due_date", "-priority")
+    )
+
+    STATUS_PROGRESS_MAP = {
+        Task.Status.PENDING: 0,
+        Task.Status.IN_PROGRESS: 50,
+        Task.Status.COMPLETED: 100,
+    }
+    for task in tasks:
+        task.progress_percent = STATUS_PROGRESS_MAP.get(task.status, 0)
+
+    tasks_by_staff = {}
+    for task in tasks:
+        tasks_by_staff.setdefault(task.assigned_to, []).append(task)
+
+    return render(request, "projects/task_overview.html", {
+        "tasks": tasks,
+        "tasks_by_staff": tasks_by_staff,
+    })
+
 # ──────────────────────────────────────────────────────────────────────────────
 # MY TASKS  — STAFF ONLY
 # ──────────────────────────────────────────────────────────────────────────────

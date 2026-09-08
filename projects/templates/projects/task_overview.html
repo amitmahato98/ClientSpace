@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Tasks — ClientSpace{% endblock %}
+{% block page_heading %}Tasks{% endblock %}
+{% block content %}
+
+<div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
+  <div>
+    <h2 class="text-lg font-semibold text-[#4a3520]">Tasks</h2>
+    <p class="text-sm text-[#8b6f55]">{{ tasks.count }} task{{ tasks.count|pluralize }} across {{ tasks_by_staff|length }} staff member{{ tasks_by_staff|length|pluralize }}</p>
+  </div>
+</div>
+
+{% if not tasks %}
+  <div class="bg-white rounded-xl border border-[#e8dccc] p-6 text-sm text-[#8b6f55]">
+    No tasks yet. Assign one from a project's detail page using "Add Task."
+  </div>
+{% endif %}
+
+{% for staff_user, staff_tasks in tasks_by_staff.items %}
+<div class="bg-white rounded-xl border border-[#e8dccc] mb-6">
+  <div class="px-5 py-4 border-b border-[#e8dccc] flex items-center gap-3">
+    <div class="w-8 h-8 shrink-0 rounded-full bg-[#d4a373] text-white flex items-center justify-center text-xs font-medium">
+      {% if staff_user %}{{ staff_user.username|slice:":2"|upper }}{% else %}?{% endif %}
+    </div>
+    <div>
+      <div class="text-sm font-semibold text-[#4a3520]">
+        {% if staff_user %}{{ staff_user.get_full_name|default:staff_user.username }}{% else %}Unassigned{% endif %}
+      </div>
+      <div class="text-xs text-[#8b6f55]">{{ staff_tasks|length }} task{{ staff_tasks|length|pluralize }}</div>
+    </div>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm min-w-125">
+      <tr class="text-left text-[#8b6f55] border-b border-[#e8dccc]">
+        <th class="pb-2 px-5 pt-3">Task</th>
+        <th class="pb-2 px-2 pt-3">Project</th>
+        <th class="pb-2 px-2 pt-3">Status</th>
+        <th class="pb-2 px-2 pt-3">Completion</th>
+        <th class="pb-2 px-5 pt-3">Due</th>
+      </tr>
+      {% for task in staff_tasks %}
+      <tr class="border-b border-[#f2ede4]">
+        <td class="py-2 px-5 text-[#4a3520]">{{ task.title }}</td>
+        <td class="py-2 px-2 text-[#8b6f55]">
+          <a href="{% url 'projects:project_detail' task.project.pk %}" class="hover:text-[#b8895e] transition">
+            {{ task.project.name }}
+          </a>
+        </td>
+        <td class="py-2 px-2">
+          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ task.status_css_class }}">
+            {{ task.get_status_display }}
+          </span>
+        </td>
+        <td class="py-2 px-2">
+          <div class="flex items-center gap-2 w-28">
+            <div class="flex-1 h-1.5 rounded-full bg-[#f2ede4] overflow-hidden">
+             <div class="h-full bg-[#d4a373]" style="width: {{ task.progress_percent }}%"></div>
+            </div>
+            <span class="text-xs text-[#8b6f55] shrink-0">{{ task.progress_percent }}%</span>
+          </div>
+        </td>
+        <td class="py-2 px-5 text-[#8b6f55] text-xs">
+          {% if task.due_date %}{{ task.due_date|date:"M j, Y" }}{% else %}—{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+{% endfor %}
+
+{% endblock %}
