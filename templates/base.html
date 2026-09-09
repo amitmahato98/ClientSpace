@@ -191,7 +191,7 @@
               <button type="button" id="notifBellBtn"
                 title="Notifications"
                 class="relative w-8 h-8 rounded-full border border-gray-200 bg-white/80 flex items-center justify-center
-                       text-gray-500 hover:bg-white hover:text-[#b8895e] text-xs transition">
+                       text-gray-500 hover:bg-white hover:text-[#b8895e] text-xs transition cursor-pointer">
                 <i class="far fa-bell"></i>
                 {% if unread_count > 0 %}
                 <span class="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center leading-none">
@@ -204,26 +204,30 @@
             <!-- Help -->
             <a href="{% url 'helpcenter:home' %}" title="Help"
               class="w-8 h-8 rounded-full border border-gray-200 bg-white/80 hidden sm:flex items-center justify-center
-                     text-gray-500 hover:bg-white hover:text-[#b8895e] text-xs transition">
+                     text-gray-500 hover:bg-white hover:text-[#b8895e] text-xs transition cursor-pointer">
               <i class="far fa-question-circle"></i>
             </a>
 
             {% if user.is_authenticated %}
-              <!-- User avatar / initials -->
-              {% if user.profile_picture %}
-                <img src="{{ user.profile_picture.url }}" class="w-8 h-8 rounded-full object-cover" title="{{ user.display_name|default:user.get_full_name }}">
-              {% else %}
-                <div class="w-8 h-8 rounded-full bg-[#d4a373] flex items-center justify-center text-white text-sm font-medium" title="{{ user.display_name|default:user.get_full_name }}">
-                  {{ user.initials }}
-                </div>
-              {% endif %}
+              <!-- User avatar / initials — click to open Profile settings -->
+              <a href="{% url 'sett:settings' %}?tab=profile"
+                 title="Profile settings"
+                 class="shrink-0 rounded-full ring-2 ring-transparent hover:ring-[#b8895e] transition cursor-pointer">
+                {% if user.profile_picture %}
+                  <img src="{{ user.profile_picture.url }}" class="w-8 h-8 rounded-full object-cover" title="{{ user.display_name|default:user.get_full_name }}">
+                {% else %}
+                  <div class="w-8 h-8 rounded-full bg-[#d4a373] flex items-center justify-center text-white text-sm font-medium" title="{{ user.display_name|default:user.get_full_name }}">
+                    {{ user.initials }}
+                  </div>
+                {% endif %}
+              </a>
 
               <!-- Logout -->
               <form method="POST" action="{% url 'accounts:logout' %}" style="margin:0">
                 {% csrf_token %}
                 <button type="submit" title="Sign out"
                   class="w-8 h-8 rounded-full border border-gray-200 bg-white/80 flex items-center justify-center
-                         text-gray-500 hover:bg-red-50 hover:text-red-500 hover:border-red-200 text-xs transition">
+                         text-gray-500 hover:bg-red-50 hover:text-red-500 hover:border-red-200 text-xs transition cursor-pointer">
                   <i class="fas fa-sign-out-alt"></i>
                 </button>
               </form>

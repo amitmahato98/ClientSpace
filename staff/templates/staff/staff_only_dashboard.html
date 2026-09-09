@@ -1,0 +1,1363 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Staff Dashboard{% endblock %}
+
+{% block page_heading %}
+    Staff
+{% endblock %}
+
+{% block page_subheading %}
+    Your profile, tasks and team
+{% endblock %}
+
+
+{% block content %}
+
+<div class="staff-dashboard">
+
+
+    <!-- =====================================================
+         PROFILE HEADER
+    ====================================================== -->
+
+    <section class="profile-header">
+
+        <div class="profile-main">
+
+            <div class="profile-avatar">
+                {{ staff.first_name|first|upper }}{{ staff.last_name|first|upper }}
+            </div>
+
+            <div class="profile-info">
+
+                <h1>
+                    {{ staff.first_name }}
+                    {{ staff.last_name }}
+                </h1>
+
+                <p class="position">
+                    {{ staff.role }}
+                </p>
+
+                <p class="organization">
+                    <i class="fas fa-building"></i>
+                    {{ staff.organization }}
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- STATUS -->
+
+        <div class="current-status">
+
+            <span class="status-title">
+                Current Status
+            </span>
+
+            <span class="status-badge
+                {% if staff.status == 'Available' %}
+                    available
+                {% elif staff.status == 'Working' %}
+                    working
+                {% elif staff.status == 'On Leave' %}
+                    on-leave
+                {% endif %}
+            ">
+
+                <span class="status-dot"></span>
+
+                {{ staff.status }}
+
+            </span>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         STATISTICS
+    ====================================================== -->
+
+    <section class="statistics">
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                <i class="fas fa-tasks"></i>
+            </div>
+
+            <div>
+                <span class="stat-number">
+                    {{ active_task_count }}
+                </span>
+
+                <span class="stat-label">
+                    Active Tasks
+                </span>
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+
+            <div>
+                <span class="stat-number">
+                    {{ completed_task_count }}
+                </span>
+
+                <span class="stat-label">
+                    Completed Tasks
+                </span>
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                <i class="fas fa-users"></i>
+            </div>
+
+            <div>
+                <span class="stat-number">
+                    {{ fellow_staff_count }}
+                </span>
+
+                <span class="stat-label">
+                    Fellow Staff
+                </span>
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         MAIN GRID
+    ====================================================== -->
+
+    <div class="main-grid">
+
+
+        <!-- =================================================
+             MY PROFILE
+        ================================================== -->
+
+        <section class="dashboard-card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <h2>My Profile</h2>
+
+                    <p>
+                        Your staff information
+                    </p>
+
+                </div>
+
+                <i class="fas fa-user card-header-icon"></i>
+
+            </div>
+
+
+            <div class="profile-details">
+
+
+                <div class="detail-row">
+
+                    <span>
+                        Full Name
+                    </span>
+
+                    <strong>
+                        {{ staff.first_name }}
+                        {{ staff.last_name }}
+                    </strong>
+
+                </div>
+
+
+                <div class="detail-row">
+
+                    <span>
+                        Email
+                    </span>
+
+                    <strong>
+                        {{ staff.email|default:"Not provided" }}
+                    </strong>
+
+                </div>
+
+
+                <div class="detail-row">
+
+                    <span>
+                        Phone
+                    </span>
+
+                    <strong>
+                        {{ staff.phone|default:"Not provided" }}
+                    </strong>
+
+                </div>
+
+
+                <div class="detail-row">
+
+                    <span>
+                        Position
+                    </span>
+
+                    <strong>
+                        {{ staff.role }}
+                    </strong>
+
+                </div>
+
+                 <div class="detail-row">
+
+                <span>
+                    Manager
+                </span>
+
+                <strong>
+                    {% if manager %}
+                        {{ manager.user.get_full_name }}
+                    {% else %}
+                        Not available
+                    {% endif %}
+                </strong>
+
+                </div>
+
+
+                <div class="detail-row">
+
+                    <span>
+                        Joined
+                    </span>
+
+                    <strong>
+                        {{ staff.created_at|date:"M d, Y" }}
+                    </strong>
+
+                </div>
+
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             MY CURRENT TASKS
+        ================================================== -->
+
+        <section class="dashboard-card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <h2>My Tasks</h2>
+
+                    <p>
+                        Your current assignments
+                    </p>
+
+                </div>
+
+                <i class="fas fa-tasks card-header-icon"></i>
+
+            </div>
+
+
+            {% if assignments %}
+
+                <div class="task-list">
+
+                    {% for assignment in assignments %}
+
+                        <div class="task-item">
+
+                            <div class="task-content">
+
+                                <h3>
+                                    {{ assignment.work }}
+                                </h3>
+
+                                <div class="task-meta">
+
+                                    <span>
+                                        <i class="fas fa-project-diagram"></i>
+
+                                        {{ assignment.project }}
+                                    </span>
+
+                                    <span>
+                                        <i class="fas fa-calendar"></i>
+
+                                        {{ assignment.assigned_at|date:"M d, Y" }}
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+                            <span class="task-badge">
+                                Active
+                            </span>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <div class="empty-state">
+
+                    <i class="fas fa-clipboard-check"></i>
+
+                    <h3>No active tasks</h3>
+
+                    <p>
+                        You currently don't have any active assignments.
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+        </section>
+
+
+
+        <!-- =================================================
+             FELLOW STAFF
+        ================================================== -->
+
+        <section class="dashboard-card full-width">
+
+            <div class="card-header">
+
+                <div>
+
+                    <h2>Fellow Staff</h2>
+
+                    <p>
+                        Staff members in your organization
+                    </p>
+
+                </div>
+
+                <i class="fas fa-users card-header-icon"></i>
+
+            </div>
+
+
+            {% if fellow_staff %}
+
+                <div class="staff-list">
+
+                    {% for member in fellow_staff %}
+
+                        <div class="staff-member">
+
+                            <div class="staff-avatar">
+
+                                {{ member.first_name|first|upper }}{{ member.last_name|first|upper }}
+
+                            </div>
+
+
+                            <div class="staff-member-info">
+
+                                <h3>
+
+                                    {{ member.first_name }}
+                                    {{ member.last_name }}
+
+                                </h3>
+
+                                <p>
+                                    {{ member.role }}
+                                </p>
+
+                            </div>
+
+
+                            <div class="staff-member-status">
+
+                                <span class="member-status
+                                    {% if member.status == 'Available' %}
+                                        available
+                                    {% elif member.status == 'Working' %}
+                                        working
+                                    {% elif member.status == 'On Leave' %}
+                                        on-leave
+                                    {% endif %}
+                                ">
+
+                                    {{ member.status }}
+
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <div class="empty-state">
+
+                    <i class="fas fa-users"></i>
+
+                    <h3>No other staff members</h3>
+
+                    <p>
+                        There are no other staff members in your organization.
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+        </section>
+
+
+
+        <!-- =================================================
+             PREVIOUS TASKS
+        ================================================== -->
+
+        <section class="dashboard-card full-width">
+
+            <div class="card-header">
+
+                <div>
+
+                    <h2>Completed Tasks</h2>
+
+                    <p>
+                        Your previous assignments
+                    </p>
+
+                </div>
+
+                <i class="fas fa-history card-header-icon"></i>
+
+            </div>
+
+
+            {% if completed_assignments %}
+
+                <div class="completed-list">
+
+                    {% for assignment in completed_assignments %}
+
+                        <div class="completed-item">
+
+                            <div>
+
+                                <h3>
+                                    {{ assignment.work }}
+                                </h3>
+
+                                <p>
+
+                                    <i class="fas fa-project-diagram"></i>
+
+                                    {{ assignment.project }}
+
+                                </p>
+
+                            </div>
+
+
+                            <div class="completed-date">
+
+                                {% if assignment.completed_at %}
+
+                                    Completed
+                                    {{ assignment.completed_at|date:"M d, Y" }}
+
+                                {% else %}
+
+                                    Completed
+
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <div class="empty-state">
+
+                    <i class="fas fa-history"></i>
+
+                    <h3>No completed tasks</h3>
+
+                    <p>
+                        Your completed assignments will appear here.
+                    </p>
+
+                </div>
+
+            {% endif %}
+
+        </section>
+
+
+
+        <!-- =================================================
+             APPLICATIONS
+        ================================================== -->
+
+        <section class="dashboard-card full-width">
+
+            <div class="card-header">
+
+                <div>
+
+                    <h2>Applications</h2>
+
+                    <p>
+                        Submit and manage your requests
+                    </p>
+
+                </div>
+
+                <i class="fas fa-file-signature card-header-icon"></i>
+
+            </div>
+
+
+            <div class="application-grid">
+
+
+                <a href="#" class="application-card">
+
+                    <div class="application-icon">
+                        <i class="fas fa-calendar-minus"></i>
+                    </div>
+
+                    <div>
+
+                        <h3>
+                            Apply for Leave
+                        </h3>
+
+                        <p>
+                            Submit a request for leave
+                        </p>
+
+                    </div>
+
+                    <i class="fas fa-arrow-right application-arrow"></i>
+
+                </a>
+
+
+                <a href="#" class="application-card">
+
+                    <div class="application-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+
+                    <div>
+
+                        <h3>
+                            New Application
+                        </h3>
+
+                        <p>
+                            Submit a new request
+                        </p>
+
+                    </div>
+
+                    <i class="fas fa-arrow-right application-arrow"></i>
+
+                </a>
+
+
+                <a href="#" class="application-card">
+
+                    <div class="application-icon">
+                        <i class="fas fa-history"></i>
+                    </div>
+
+                    <div>
+
+                        <h3>
+                            My Applications
+                        </h3>
+
+                        <p>
+                            View your submitted requests
+                        </p>
+
+                    </div>
+
+                    <i class="fas fa-arrow-right application-arrow"></i>
+
+                </a>
+
+
+            </div>
+
+        </section>
+
+
+    </div>
+
+</div>
+
+
+
+<style>
+
+/* ================================================
+   STAFF DASHBOARD
+================================================ */
+
+.staff-dashboard {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+
+/* ================================================
+   PROFILE HEADER
+================================================ */
+
+.profile-header {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
+    padding: 28px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 22px;
+}
+
+.profile-main {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.profile-avatar {
+    width: 70px;
+    height: 70px;
+
+    border-radius: 50%;
+
+    background: #f3f4f6;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 21px;
+    font-weight: 700;
+
+    color: #374151;
+}
+
+.profile-info h1 {
+    margin: 0;
+
+    font-size: 26px;
+    font-weight: 700;
+
+    color: #111827;
+}
+
+.position {
+    margin: 5px 0;
+
+    font-size: 14px;
+
+    color: #6b7280;
+}
+
+.organization {
+    margin: 0;
+
+    font-size: 12px;
+
+    color: #9ca3af;
+}
+
+.organization i {
+    margin-right: 5px;
+}
+
+
+/* ================================================
+   STATUS
+================================================ */
+
+.current-status {
+    text-align: right;
+}
+
+.status-title {
+    display: block;
+
+    font-size: 11px;
+
+    color: #9ca3af;
+
+    margin-bottom: 7px;
+}
+
+.status-badge {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    padding: 7px 13px;
+
+    border-radius: 20px;
+
+    font-size: 12px;
+
+    font-weight: 600;
+}
+
+.status-dot {
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: currentColor;
+}
+
+.status-badge.available {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.status-badge.working {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.status-badge.on-leave {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+
+/* ================================================
+   STATISTICS
+================================================ */
+
+.statistics {
+    display: grid;
+
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 18px;
+
+    margin-bottom: 22px;
+}
+
+.stat-card {
+    background: white;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 15px;
+
+    padding: 20px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+}
+
+.stat-icon {
+    width: 45px;
+    height: 45px;
+
+    border-radius: 10px;
+
+    background: #f3f4f6;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    color: #374151;
+}
+
+.stat-number {
+    display: block;
+
+    font-size: 23px;
+
+    font-weight: 700;
+
+    color: #111827;
+}
+
+.stat-label {
+    display: block;
+
+    font-size: 12px;
+
+    color: #6b7280;
+}
+
+
+/* ================================================
+   MAIN GRID
+================================================ */
+
+.main-grid {
+    display: grid;
+
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 22px;
+}
+
+.full-width {
+    grid-column: 1 / -1;
+}
+
+
+/* ================================================
+   CARD
+================================================ */
+
+.dashboard-card {
+    background: white;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 16px;
+
+    padding: 23px;
+}
+
+.card-header {
+    display: flex;
+
+    align-items: flex-start;
+
+    justify-content: space-between;
+
+    margin-bottom: 20px;
+}
+
+.card-header h2 {
+    margin: 0;
+
+    font-size: 18px;
+
+    color: #111827;
+}
+
+.card-header p {
+    margin: 5px 0 0;
+
+    font-size: 12px;
+
+    color: #6b7280;
+}
+
+.card-header-icon {
+    font-size: 19px;
+
+    color: #9ca3af;
+}
+
+
+/* ================================================
+   PROFILE DETAILS
+================================================ */
+
+.detail-row {
+    display: flex;
+
+    justify-content: space-between;
+
+    gap: 20px;
+
+    padding: 12px 0;
+
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.detail-row span {
+    font-size: 12px;
+
+    color: #6b7280;
+}
+
+.detail-row strong {
+    font-size: 12px;
+
+    color: #111827;
+
+    text-align: right;
+}
+
+
+/* ================================================
+   TASKS
+================================================ */
+
+.task-item {
+    display: flex;
+
+    justify-content: space-between;
+
+    gap: 15px;
+
+    padding: 15px 0;
+
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.task-content {
+    min-width: 0;
+}
+
+.task-content h3 {
+    margin: 0;
+
+    font-size: 13px;
+
+    color: #111827;
+
+    line-height: 1.5;
+}
+
+.task-meta {
+    display: flex;
+
+    gap: 15px;
+
+    margin-top: 7px;
+
+    color: #9ca3af;
+
+    font-size: 11px;
+}
+
+.task-meta i {
+    margin-right: 4px;
+}
+
+.task-badge {
+    flex-shrink: 0;
+
+    height: fit-content;
+
+    padding: 5px 10px;
+
+    border-radius: 20px;
+
+    background: #dbeafe;
+
+    color: #1d4ed8;
+
+    font-size: 10px;
+
+    font-weight: 600;
+}
+
+
+/* ================================================
+   FELLOW STAFF
+================================================ */
+
+.staff-list {
+    display: grid;
+
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 14px;
+}
+
+.staff-member {
+    border: 1px solid #f0f0f0;
+
+    border-radius: 12px;
+
+    padding: 15px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+}
+
+.staff-avatar {
+    width: 43px;
+    height: 43px;
+
+    flex-shrink: 0;
+
+    border-radius: 50%;
+
+    background: #f3f4f6;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    color: #374151;
+}
+
+.staff-member-info {
+    min-width: 0;
+}
+
+.staff-member-info h3 {
+    margin: 0;
+
+    font-size: 13px;
+
+    color: #111827;
+}
+
+.staff-member-info p {
+    margin: 4px 0 0;
+
+    font-size: 11px;
+
+    color: #6b7280;
+}
+
+.staff-member-status {
+    margin-left: auto;
+}
+
+.member-status {
+    display: inline-block;
+
+    padding: 5px 8px;
+
+    border-radius: 20px;
+
+    font-size: 9px;
+
+    font-weight: 600;
+}
+
+.member-status.available {
+    background: #dcfce7;
+
+    color: #166534;
+}
+
+.member-status.working {
+    background: #dbeafe;
+
+    color: #1d4ed8;
+}
+
+.member-status.on-leave {
+    background: #fef3c7;
+
+    color: #92400e;
+}
+
+
+/* ================================================
+   COMPLETED TASKS
+================================================ */
+
+.completed-item {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 20px;
+
+    padding: 15px 0;
+
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.completed-item h3 {
+    margin: 0;
+
+    font-size: 13px;
+
+    color: #111827;
+}
+
+.completed-item p {
+    margin: 6px 0 0;
+
+    color: #6b7280;
+
+    font-size: 11px;
+}
+
+.completed-item p i {
+    margin-right: 5px;
+}
+
+.completed-date {
+    color: #6b7280;
+
+    font-size: 11px;
+
+    white-space: nowrap;
+}
+
+
+/* ================================================
+   APPLICATIONS
+================================================ */
+
+.application-grid {
+    display: grid;
+
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 15px;
+}
+
+.application-card {
+    display: flex;
+
+    align-items: center;
+
+    gap: 13px;
+
+    padding: 17px;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 12px;
+
+    text-decoration: none;
+
+    color: inherit;
+
+    transition: 0.2s;
+}
+
+.application-card:hover {
+    background: #f9fafb;
+
+    transform: translateY(-2px);
+}
+
+.application-icon {
+    width: 40px;
+    height: 40px;
+
+    flex-shrink: 0;
+
+    border-radius: 9px;
+
+    background: #f3f4f6;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    color: #374151;
+}
+
+.application-card h3 {
+    margin: 0;
+
+    font-size: 13px;
+
+    color: #111827;
+}
+
+.application-card p {
+    margin: 4px 0 0;
+
+    font-size: 11px;
+
+    color: #6b7280;
+}
+
+.application-arrow {
+    margin-left: auto;
+
+    color: #9ca3af;
+
+    font-size: 11px;
+}
+
+
+/* ================================================
+   EMPTY STATE
+================================================ */
+
+.empty-state {
+    text-align: center;
+
+    padding: 30px 10px;
+
+    color: #9ca3af;
+}
+
+.empty-state i {
+    font-size: 25px;
+
+    margin-bottom: 10px;
+}
+
+.empty-state h3 {
+    margin: 0;
+
+    font-size: 14px;
+
+    color: #6b7280;
+}
+
+.empty-state p {
+    margin-top: 5px;
+
+    font-size: 11px;
+}
+
+
+/* ================================================
+   RESPONSIVE
+================================================ */
+
+@media (max-width: 1000px) {
+
+    .staff-list {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .application-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+
+@media (max-width: 800px) {
+
+    .profile-header {
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        gap: 20px;
+    }
+
+    .current-status {
+        text-align: left;
+    }
+
+    .statistics {
+        grid-template-columns: 1fr;
+    }
+
+    .main-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+
+@media (max-width: 600px) {
+
+    .staff-dashboard {
+        padding: 10px;
+    }
+
+    .profile-main {
+        align-items: flex-start;
+    }
+
+    .profile-avatar {
+        width: 55px;
+        height: 55px;
+
+        font-size: 16px;
+    }
+
+    .profile-info h1 {
+        font-size: 21px;
+    }
+
+    .staff-list {
+        grid-template-columns: 1fr;
+    }
+
+    .task-item {
+        flex-direction: column;
+    }
+
+    .completed-item {
+        flex-direction: column;
+
+        align-items: flex-start;
+    }
+
+}
+
+</style>
+
+{% endblock %}

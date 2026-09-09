@@ -17,7 +17,7 @@ from .forms import Add_staffForm, StaffSetupForm, StaffAssignmentForm
 from .models import Staff,StaffAssignment
 from projects.models import Project
 
-from accounts.models import OrganizationMembership
+from accounts.models import OrganizationMembership,Organization
 
 
 User = get_user_model()
@@ -27,6 +27,93 @@ signer = TimestampSigner()
 
 @login_required
 def staff(request):
+
+    # =====================================================
+    # STAFF USER
+    # =====================================================
+
+    if request.user.role == request.user.Role.STAFF:
+
+        staff_member = request.user.staff_profile
+
+        # ---------------------------------------------
+        # MY ACTIVE ASSIGNMENTS
+        # ---------------------------------------------
+
+        active_assignments = StaffAssignment.objects.filter(
+            staff=staff_member,
+            is_active=True
+        ).select_related(
+            "project",
+            "assigned_by"
+        ).order_by(
+            "-assigned_at"
+        )
+
+        # ---------------------------------------------
+        # MY COMPLETED / PREVIOUS ASSIGNMENTS
+        # ---------------------------------------------
+
+        completed_assignments = StaffAssignment.objects.filter(
+            staff=staff_member,
+            is_active=False
+        ).select_related(
+            "project",
+            "assigned_by"
+        ).order_by(
+            "-completed_at"
+        )
+
+        # ---------------------------------------------
+        # OTHER STAFF IN SAME ORGANIZATION
+        # ---------------------------------------------
+
+        fellow_staff = Staff.objects.filter(
+            organization=staff_member.organization,
+            user__isnull=False
+        ).exclude(
+            id=staff_member.id
+        ).select_related(
+            "user"
+        ).order_by(
+            "first_name",
+            "last_name"
+        )
+        manager = OrganizationMembership.objects.filter(
+        organization=staff_member.organization,
+        role=OrganizationMembership.Role.MANAGER
+    ).select_related("user").first()
+
+        # ---------------------------------------------
+        # COUNTS
+        # ---------------------------------------------
+
+        active_task_count = active_assignments.count()
+
+        completed_task_count = completed_assignments.count()
+
+        fellow_staff_count = fellow_staff.count()
+
+        return render(
+            request,
+            "staff/staff_only_dashboard.html",
+            {
+                "staff": staff_member,
+                "manager": manager,
+                "assignments": active_assignments,
+                "completed_assignments": completed_assignments,
+                "fellow_staff": fellow_staff,
+
+                "active_task_count": active_task_count,
+                "completed_task_count": completed_task_count,
+                "fellow_staff_count": fellow_staff_count,
+            }
+        )
+
+
+    # =====================================================
+    # MANAGER USER
+    # =====================================================
 
     membership = OrganizationMembership.objects.filter(
         user=request.user,
@@ -81,6 +168,8 @@ def staff(request):
             "active_tasks": active_tasks,
         }
     )
+
+
 
 
 @login_required
@@ -476,15 +565,26 @@ def delete_staff(request, staff_id):
 @login_required
 def staff_view(request, staff_id):
 
+    # ==========================================
+    # GET CURRENT MANAGER'S ORGANIZATION
+    # ==========================================
+
     membership = OrganizationMembership.objects.filter(
         user=request.user,
         role=OrganizationMembership.Role.MANAGER
+    ).select_related(
+        "organization"
     ).first()
 
     if not membership:
         return redirect("dashboard")
 
     organization = membership.organization
+
+
+    # ==========================================
+    # GET STAFF MEMBER
+    # ==========================================
 
     staff_member = get_object_or_404(
         Staff,
@@ -493,12 +593,34 @@ def staff_view(request, staff_id):
         user__isnull=False
     )
 
+
+    # ==========================================
+    # GET ORGANIZATION MANAGER
+    # ==========================================
+
+    manager = OrganizationMembership.objects.filter(
+        organization=organization,
+        role=OrganizationMembership.Role.MANAGER
+    ).select_related(
+        "user"
+    ).first()
+
+
+    # ==========================================
+    # ACTIVE PROJECT ASSIGNMENTS
+    # ==========================================
+
     active_assignments = StaffAssignment.objects.filter(
         staff=staff_member,
         is_active=True
     ).select_related(
         "project"
     )
+
+
+    # ==========================================
+    # ASSIGNMENT HISTORY
+    # ==========================================
 
     assignment_history = StaffAssignment.objects.filter(
         staff=staff_member
@@ -508,6 +630,11 @@ def staff_view(request, staff_id):
         "-assigned_at"
     )
 
+
+    # ==========================================
+    # RENDER PAGE
+    # ==========================================
+
     return render(
         request,
         "staff/staff_view.html",
@@ -515,5 +642,9 @@ def staff_view(request, staff_id):
             "staff": staff_member,
             "active_assignments": active_assignments,
             "assignment_history": assignment_history,
+            "manager": manager,
         }
     )
+
+
+
