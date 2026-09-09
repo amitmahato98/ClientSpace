@@ -7,4 +7,6 @@ app_name = "helpcenter"
 
 urlpatterns = [
     path("", views.help_home, name="home"),
+    path("contact/", views.contact_submit, name="contact"),
+
 ]
