@@ -1691,6 +1691,30 @@
 
     }
 
+
+    // ==================================================
+    // AUTO-SWITCH TAB FROM URL QUERY PARAM (?tab=...)
+    // ==================================================
+
+    (function () {
+
+        const params = new URLSearchParams(window.location.search);
+        const tab    = params.get('tab');
+
+        const validTabs = [
+            'profile',
+            'workspace',
+            'notification',
+            'portal',
+            'billing'
+        ];
+
+        if (tab && validTabs.includes(tab)) {
+            settSwitch(tab);
+        }
+
+    })();
+
 </script>
 
 {% endblock %}
