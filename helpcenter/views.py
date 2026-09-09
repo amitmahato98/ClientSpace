@@ -1,5 +1,31 @@
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
+from django.contrib import messages
+from django.shortcuts import redirect, render
+
+from .models import ContactMessage
+
+
+def contact_submit(request):
+    if request.method != "POST":
+        return redirect("helpcenter:home")
+
+    name = request.POST.get("name", "").strip()
+    email = request.POST.get("email", "").strip()
+    subject = request.POST.get("subject", "").strip()
+    message = request.POST.get("message", "").strip()
+
+    if not all((name, email, subject, message)):
+        messages.error(request, "Please complete all fields before sending your message.")
+        return redirect("helpcenter:home")
+
+    ContactMessage.objects.create(
+        name=name,
+        email=email,
+        subject=subject,
+        message=message,
+    )
+    messages.success(request, "Thanks — we got your message and will follow up by email.")
+    return redirect("helpcenter:home")
 
 
 HELP_CATEGORIES = [
