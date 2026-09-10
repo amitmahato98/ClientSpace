@@ -590,6 +590,63 @@
 
 
         /* ==========================================================
+           CONTACT FORM — PREVENT DUPLICATE SUBMISSIONS
+           Fires on the form's submit event (covers button clicks,
+           Enter key, and any other browser submission path).
+           Because this is a standard Django POST (no fetch/AJAX),
+           the page navigates away on success — the button stays
+           disabled for the lifetime of the outgoing request, which
+           is exactly what we want.
+           ========================================================== */
+
+        const contactForm = document.querySelector(
+            "form[action*='contact']"
+        );
+
+        if (contactForm) {
+
+            contactForm.addEventListener("submit", function handleContactSubmit(event) {
+
+                const submitBtn = contactForm.querySelector("[type='submit']");
+
+                if (!submitBtn) {
+                    return;
+                }
+
+                // Guard: if already submitted, block every subsequent attempt.
+                if (submitBtn.disabled) {
+                    event.preventDefault();
+                    return;
+                }
+
+                // Disable immediately — covers rapid clicks AND Enter key repeats.
+                submitBtn.disabled = true;
+
+                // Update label; preserve the icon so the design stays intact.
+                const labelSpan = submitBtn.querySelector("span");
+                if (labelSpan) {
+                    labelSpan.textContent = "Sending\u2026";
+                }
+
+                // Replace the paper-plane icon with a subtle spinner.
+                const iconEl = submitBtn.querySelector("i");
+                if (iconEl) {
+                    iconEl.className = "far fa-circle-notch fa-spin";
+                }
+
+                // Visual: slightly dim the button to reinforce the disabled state
+                // without altering its shape, colour, or size.
+                submitBtn.style.opacity = "0.65";
+                submitBtn.style.cursor  = "not-allowed";
+
+                // Allow the native POST to proceed — do NOT call preventDefault().
+
+            }, { once: false }); // once:false so the guard branch can still fire
+
+        }
+
+
+        /* ==========================================================
            CONTACT SUPPORT — SMOOTH REVEAL
            ========================================================== */
 
@@ -639,6 +696,32 @@
         updateClearButton();
 
         applyFilters();
+
+
+        /* ==========================================================
+           AUTO-OPEN CONTACT PANEL
+           After a form submission Django redirects back here with a
+           flash message. When messages are present the panel should
+           open automatically so the user sees the feedback without
+           having to click "Contact support" again.
+           ========================================================== */
+
+        {% if messages %}
+        if (contactToggle && contactPanel) {
+
+            contactPanel.classList.remove("grid-rows-[0fr]", "opacity-0");
+            contactPanel.classList.add("grid-rows-[1fr]", "opacity-100");
+            contactToggle.setAttribute("aria-expanded", "true");
+
+            window.setTimeout(function () {
+                document.getElementById("contactUs").scrollIntoView({
+                    behavior: "smooth",
+                    block: "start"
+                });
+            }, 100);
+
+        }
+        {% endif %}
 
     });
 </script>

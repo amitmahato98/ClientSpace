@@ -1,30 +1,89 @@
-from django.contrib.auth.decorators import login_required
+import logging
+
+from django.conf import settings as django_settings
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.core.mail import EmailMessage
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
 from django.shortcuts import redirect, render
 
 from .models import ContactMessage
+
+logger = logging.getLogger(__name__)
 
 
 def contact_submit(request):
     if request.method != "POST":
         return redirect("helpcenter:home")
 
-    name = request.POST.get("name", "").strip()
-    email = request.POST.get("email", "").strip()
+    name    = request.POST.get("name", "").strip()
+    email   = request.POST.get("email", "").strip()
     subject = request.POST.get("subject", "").strip()
     message = request.POST.get("message", "").strip()
 
+    # ── Field-presence validation ─────────────────────────────────────────────
     if not all((name, email, subject, message)):
         messages.error(request, "Please complete all fields before sending your message.")
         return redirect("helpcenter:home")
 
+    # ── Email format validation ───────────────────────────────────────────────
+    try:
+        validate_email(email)
+    except ValidationError:
+        messages.error(request, "Please enter a valid email address.")
+        return redirect("helpcenter:home")
+
+    # ── Persist to database ───────────────────────────────────────────────────
     ContactMessage.objects.create(
         name=name,
         email=email,
         subject=subject,
         message=message,
     )
-    messages.success(request, "Thanks — we got your message and will follow up by email.")
+
+    # ── Send support email ────────────────────────────────────────────────────
+    # From  → the configured SMTP account (DEFAULT_FROM_EMAIL / EMAIL_HOST_USER)
+    # To    → that same support/admin address
+    # Reply-To → the visitor's submitted address so replies go straight to them
+    from_addr = django_settings.DEFAULT_FROM_EMAIL or django_settings.EMAIL_HOST_USER
+
+    body = (
+        f"New support message via the Help Center\n"
+        f"{'─' * 46}\n\n"
+        f"Name:    {name}\n"
+        f"Email:   {email}\n"
+        f"Subject: {subject}\n\n"
+        f"Message:\n{message}\n"
+    )
+
+    try:
+        mail = EmailMessage(
+            subject=f"[ClientSpace] Support request — {subject}",
+            body=body,
+            from_email=from_addr,
+            to=[from_addr],            # delivered to the support inbox
+            reply_to=[email],          # "Reply" in mail client goes to the visitor
+        )
+        mail.send(fail_silently=False)
+    except Exception:
+        # Log the full traceback for debugging; never expose it to the user.
+        logger.exception(
+            "Failed to send contact-support email from %s (subject: %s)",
+            email,
+            subject,
+        )
+        messages.error(
+            request,
+            "Your message was saved but could not be delivered by email right now. "
+            "Please try again later or contact your workspace manager directly.",
+        )
+        return redirect("helpcenter:home")
+
+    messages.success(
+        request,
+        "Your message has been sent successfully. We'll get back to you soon.",
+    )
     return redirect("helpcenter:home")
 
 
