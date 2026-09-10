@@ -6,21 +6,230 @@
 
 {% block extra_head %}
 <style>
-/* ── Avatar ── */
+/* ══════════════════════════════════════════════
+   VARIABLES
+   ══════════════════════════════════════════════ */
+:root {
+    --brand-50:  #fdf8f3;
+    --brand-100: #f9ede0;
+    --brand-200: #f0d9bd;
+    --brand-300: #e4bd94;
+    --brand-400: #d4a373;
+    --brand-500: #c08c58;
+    --brand-600: #b8895e;
+    --brand-700: #9a6f4a;
+    --brand-800: #7d5a3c;
+    --brand-900: #644832;
+}
+
+::selection { background: var(--brand-200); color: var(--brand-900); }
+
+
+/* ══════════════════════════════════════════════
+   SETTINGS LAYOUT — FIXED SIDEBAR + SCROLLABLE RIGHT
+   ══════════════════════════════════════════════ */
+
+.sett-layout {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: 28px;
+    align-items: start;
+    height: calc(100vh - 140px);
+    min-height: 500px;
+}
+
+.sett-sidebar {
+    position: sticky;
+    top: 0;
+    height: 100%;
+    overflow-y: auto;
+    padding-right: 4px;
+    padding-bottom: 20px;
+}
+
+.sett-sidebar::-webkit-scrollbar { width: 4px; }
+.sett-sidebar::-webkit-scrollbar-track { background: transparent; }
+.sett-sidebar::-webkit-scrollbar-thumb {
+    background: #e5e7eb;
+    border-radius: 4px;
+}
+
+.sett-content {
+    height: 100%;
+    overflow-y: auto;
+    padding-right: 8px;
+    padding-bottom: 40px;
+}
+
+.sett-content::-webkit-scrollbar { width: 6px; }
+.sett-content::-webkit-scrollbar-track { background: transparent; }
+.sett-content::-webkit-scrollbar-thumb {
+    background: #e5e7eb;
+    border-radius: 6px;
+}
+.sett-content::-webkit-scrollbar-thumb:hover { background: #d1d5db; }
+
+
+@media (max-width: 900px) {
+    .sett-layout {
+        grid-template-columns: 1fr;
+        height: auto;
+    }
+    .sett-sidebar {
+        position: static;
+        height: auto;
+        overflow: visible;
+    }
+    .sett-content {
+        height: auto;
+        overflow: visible;
+    }
+}
+
+
+/* ══════════════════════════════════════════════
+   SIDEBAR STYLING
+   ══════════════════════════════════════════════ */
+
+.sett-nav-group-label {
+    font-size: 10px;
+    font-weight: 800;
+    color: #9ca3af;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0 14px;
+    margin: 4px 0 8px;
+}
+
+.sett-nav-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #e5e7eb 40%, #e5e7eb 60%, transparent);
+    margin: 12px 8px;
+}
+
+.sett-tab-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    text-align: left;
+    padding: 11px 14px;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #6b7280;
+    background: transparent;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    margin-bottom: 3px;
+}
+
+.sett-tab-btn .tab-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    background: #f3f4f6;
+    font-size: 0.8125rem;
+    color: #9ca3af;
+    flex-shrink: 0;
+    transition: all 0.22s ease;
+}
+
+.sett-tab-btn .tab-label {
+    flex: 1;
+    transition: color 0.2s;
+}
+
+.sett-tab-btn .tab-arrow {
+    font-size: 0.625rem;
+    color: transparent;
+    transition: all 0.22s ease;
+    transform: translateX(-4px);
+}
+
+.sett-tab-btn:hover {
+    background: #fafbfc;
+    color: #374151;
+    transform: translateX(2px);
+}
+
+.sett-tab-btn:hover .tab-icon {
+    background: var(--brand-50);
+    color: var(--brand-500);
+}
+
+.sett-tab-btn.active {
+    background: linear-gradient(135deg, #ffffff 0%, var(--brand-50) 100%);
+    color: #111827;
+    font-weight: 600;
+    border-color: var(--brand-200);
+    box-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.04),
+        0 6px 16px -8px rgba(184, 137, 94, 0.4);
+}
+
+.sett-tab-btn.active .tab-icon {
+    background: linear-gradient(135deg, var(--brand-400), var(--brand-600));
+    color: #fff;
+    box-shadow: 0 4px 10px -3px rgba(184, 137, 94, 0.6);
+}
+
+.sett-tab-btn.active .tab-arrow {
+    color: var(--brand-500);
+    transform: translateX(0);
+}
+
+.sett-tab-btn.active::before {
+    content: '';
+    position: absolute;
+    left: -1px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 22px;
+    background: linear-gradient(180deg, var(--brand-400), var(--brand-600));
+    border-radius: 0 3px 3px 0;
+}
+
+
+/* ══════════════════════════════════════════════
+   AVATAR
+   ══════════════════════════════════════════════ */
+
 .sett-avatar {
     display: flex;
     align-items: center;
-    gap: 20px;
-    margin-bottom: 24px;
+    gap: 22px;
+    margin-bottom: 30px;
+    padding: 22px 24px;
+    background: linear-gradient(135deg, var(--brand-50) 0%, #fff 60%);
+    border: 1px solid var(--brand-100);
+    border-radius: 18px;
+    position: relative;
+    overflow: hidden;
+}
+
+.sett-avatar::after {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 140px; height: 140px;
+    background: radial-gradient(circle, rgba(212, 163, 115, 0.12), transparent 70%);
+    pointer-events: none;
 }
 
 #avatarPreview {
-    width: 72px;
-    height: 72px;
+    width: 84px;
+    height: 84px;
     border-radius: 50%;
-    background-color: #d4a373;
+    background: linear-gradient(135deg, var(--brand-400), var(--brand-600));
     color: #fff;
-    font-size: 1.4rem;
+    font-size: 1.5rem;
     font-weight: 700;
     display: flex;
     align-items: center;
@@ -30,61 +239,172 @@
     background-size: cover;
     background-position: center;
     letter-spacing: 0.05em;
+    box-shadow:
+        0 0 0 4px #fff,
+        0 0 0 6px var(--brand-200),
+        0 10px 24px -6px rgba(184, 137, 94, 0.4);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    z-index: 1;
 }
 
-/* ── Form elements ── */
+#avatarPreview:hover {
+    transform: scale(1.05);
+    box-shadow:
+        0 0 0 4px #fff,
+        0 0 0 6px var(--brand-300),
+        0 14px 32px -6px rgba(184, 137, 94, 0.55);
+}
+
+
+/* ══════════════════════════════════════════════
+   FORM ELEMENTS
+   ══════════════════════════════════════════════ */
+
 .sett-label {
     display: block;
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
     font-weight: 600;
-    color: #374151;
-    margin-bottom: 6px;
+    color: #4b5563;
+    margin-bottom: 7px;
+    letter-spacing: 0.01em;
 }
 
 .sett-input {
     width: 100%;
-    padding: 10px 14px;
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
+    padding: 11px 15px;
+    background: #fafafa;
+    border: 1.5px solid #e8e8e8;
+    border-radius: 10px;
     font-size: 0.875rem;
     color: #111827;
     outline: none;
-    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.sett-input::placeholder { color: #b0b0b0; }
+
+.sett-input:hover:not(:disabled) {
+    border-color: #d0d0d0;
+    background: #fff;
 }
 
 .sett-input:focus {
     background: #fff;
-    border-color: #b8895e;
-    box-shadow: 0 0 0 3px rgba(184,137,94,0.15);
+    border-color: var(--brand-400);
+    box-shadow: 0 0 0 4px rgba(212, 163, 115, 0.12);
 }
 
-.sett-field {
-    margin-bottom: 16px;
+.sett-field { margin-bottom: 18px; }
+
+.sett-icon-wrap { position: relative; }
+
+.sett-icon-wrap > i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #b0b0b0;
+    font-size: 0.8125rem;
+    pointer-events: none;
+    transition: color 0.2s;
 }
 
-/* ── Outline button ── */
+.sett-icon-wrap:focus-within > i { color: var(--brand-500); }
+
+.sett-icon-wrap > .sett-input { padding-left: 40px; }
+
+
+/* ══════════════════════════════════════════════
+   BUTTONS
+   ══════════════════════════════════════════════ */
+
 .btn-outline {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 8px 16px;
+    gap: 7px;
+    padding: 9px 18px;
     font-size: 0.8125rem;
     font-weight: 600;
-    color: #374151;
+    color: #4b5563;
     background: #fff;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 10px;
     cursor: pointer;
-    transition: background 0.15s, border-color 0.15s;
+    transition: all 0.2s ease;
 }
 
 .btn-outline:hover {
-    background: #f3f4f6;
-    border-color: #9ca3af;
+    background: var(--brand-50);
+    border-color: var(--brand-300);
+    color: var(--brand-700);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px -3px rgba(184, 137, 94, 0.25);
 }
 
-/* ── Disabled organization inputs ── */
+.btn-outline:active { transform: translateY(0); }
+
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 24px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #fff;
+    background: linear-gradient(135deg, var(--brand-400) 0%, var(--brand-600) 100%);
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 14px -3px rgba(184, 137, 94, 0.5);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--brand-500) 0%, var(--brand-700) 100%);
+    opacity: 0;
+    transition: opacity 0.25s;
+}
+
+.btn-primary:hover::before { opacity: 1; }
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px -4px rgba(184, 137, 94, 0.6);
+}
+.btn-primary:active { transform: translateY(0); }
+.btn-primary > * { position: relative; z-index: 1; }
+
+.btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 18px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #4b5563;
+    background: #fff;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.btn-ghost:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+    transform: translateY(-1px);
+}
+
+
+/* ══════════════════════════════════════════════
+   DISABLED ORGANIZATION INPUTS
+   ══════════════════════════════════════════════ */
+
 .organization-input:disabled {
     cursor: default;
     background-color: #f9fafb;
@@ -92,10 +412,412 @@
     opacity: 1;
 }
 
-/* ── File input disabled ── */
 #organization-logo:disabled {
     cursor: default;
     opacity: 0.7;
+}
+
+
+/* ══════════════════════════════════════════════
+   READ-ONLY / EDIT BADGES
+   ══════════════════════════════════════════════ */
+
+.readonly-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 14px;
+    background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+    border: 1px solid #e5e7eb;
+    border-radius: 100px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    color: #6b7280;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+.readonly-badge i { font-size: 0.625rem; color: #9ca3af; }
+
+.edit-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 14px;
+    background: linear-gradient(135deg, var(--brand-50), var(--brand-100));
+    border: 1px solid var(--brand-200);
+    border-radius: 100px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    color: var(--brand-700);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+.edit-badge i { font-size: 0.625rem; color: var(--brand-500); }
+
+
+/* ══════════════════════════════════════════════
+   ORG CARD (SHARED BY MANAGER + STAFF)
+   ══════════════════════════════════════════════ */
+
+.org-card {
+    position: relative;
+    background: #fff;
+    border: 1px solid #eef0f2;
+    border-radius: 20px;
+    padding: 32px;
+    box-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.03),
+        0 12px 32px -12px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    transition: box-shadow 0.3s ease;
+}
+
+.org-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--brand-300), var(--brand-500), var(--brand-300));
+    background-size: 200% 100%;
+    animation: shimmer 6s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+.org-card:hover {
+    box-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.04),
+        0 20px 48px -12px rgba(0, 0, 0, 0.12);
+}
+
+
+/* ── Org header with circular logo ── */
+
+.org-header {
+    display: flex;
+    align-items: center;
+    gap: 26px;
+    padding-bottom: 26px;
+    margin-bottom: 26px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+/* THE CIRCULAR ORG LOGO */
+.org-logo-circle {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--brand-50), var(--brand-100));
+    color: var(--brand-600);
+    font-size: 2.25rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    box-shadow:
+        0 0 0 4px #fff,
+        0 0 0 7px var(--brand-100),
+        0 10px 28px -8px rgba(184, 137, 94, 0.45);
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
+    position: relative;
+}
+
+.org-logo-circle::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(255,255,255,0.35), transparent 50%);
+    pointer-events: none;
+}
+
+.org-logo-circle:hover {
+    transform: scale(1.06) rotate(-3deg);
+    box-shadow:
+        0 0 0 4px #fff,
+        0 0 0 7px var(--brand-200),
+        0 14px 36px -8px rgba(184, 137, 94, 0.6);
+}
+
+.org-logo-circle img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 50%;
+}
+
+.org-header-info h3 {
+    margin: 0 0 5px;
+    font-size: 1.375rem;
+    font-weight: 700;
+    color: #111827;
+    letter-spacing: -0.015em;
+    line-height: 1.2;
+}
+
+.org-header-info p {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: #9ca3af;
+    font-weight: 500;
+}
+
+.org-header-info p a {
+    color: var(--brand-600);
+    text-decoration: none;
+    border-bottom: 1px dashed transparent;
+    transition: all 0.15s;
+}
+
+.org-header-info p a:hover {
+    color: var(--brand-800);
+    border-bottom-color: var(--brand-300);
+}
+
+
+/* ── Org grid (read-only display) ── */
+
+.org-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 22px 28px;
+}
+
+@media (max-width: 640px) {
+    .org-grid { grid-template-columns: 1fr; }
+    .org-header { flex-direction: column; text-align: center; gap: 18px; }
+    .org-header-info h3 { font-size: 1.25rem; }
+    .org-logo-circle { width: 84px; height: 84px; font-size: 1.875rem; }
+}
+
+.org-item-label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    margin-bottom: 8px;
+}
+
+.org-item-label i {
+    font-size: 0.75rem;
+    color: var(--brand-400);
+    width: 14px;
+    text-align: center;
+}
+
+.org-item-value {
+    font-size: 0.9375rem;
+    color: #1f2937;
+    font-weight: 500;
+    line-height: 1.55;
+    word-break: break-word;
+}
+
+.org-item-value a {
+    color: var(--brand-600);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.15s;
+    border-bottom: 1px dashed transparent;
+}
+
+.org-item-value a:hover {
+    color: var(--brand-800);
+    border-bottom-color: var(--brand-300);
+}
+
+.org-item-full { grid-column: 1 / -1; }
+
+
+/* ── Org form grid (editable, manager) ── */
+/* Uses same visual language as .org-grid but with inputs */
+
+.org-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px 24px;
+}
+
+@media (max-width: 640px) {
+    .org-form-grid { grid-template-columns: 1fr; }
+}
+
+.org-form-full { grid-column: 1 / -1; }
+
+/* Inputs inside the org card */
+.org-card .sett-input {
+    background: #fafafa;
+    border: 1.5px solid #ececec;
+}
+
+.org-card .sett-input:disabled {
+    background: #f9fafb;
+    border-color: #f0f0f0;
+    color: #4b5563;
+}
+
+.org-card .sett-input:not(:disabled):hover {
+    border-color: #d0d0d0;
+    background: #fff;
+}
+
+.org-card .sett-input:not(:disabled):focus {
+    background: #fff;
+    border-color: var(--brand-400);
+    box-shadow: 0 0 0 4px rgba(212, 163, 115, 0.12);
+}
+
+.org-card .sett-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.org-card .sett-label i {
+    font-size: 0.75rem;
+    color: var(--brand-400);
+    width: 14px;
+    text-align: center;
+}
+
+
+/* ══════════════════════════════════════════════
+   PANEL CARD
+   ══════════════════════════════════════════════ */
+
+.sett-panel {
+    background: #fff;
+    border-radius: 20px;
+    padding: 36px;
+    border: 1px solid #eef0f2;
+    box-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.03),
+        0 12px 32px -12px rgba(0, 0, 0, 0.08);
+    animation: panelIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes panelIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.sett-panel-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 26px;
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+}
+
+.sett-panel-title::before {
+    content: '';
+    width: 4px;
+    height: 22px;
+    background: linear-gradient(180deg, var(--brand-400), var(--brand-600));
+    border-radius: 2px;
+    box-shadow: 0 0 12px rgba(212, 163, 115, 0.5);
+}
+
+
+/* ══════════════════════════════════════════════
+   TOAST
+   ══════════════════════════════════════════════ */
+
+#sett-toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: #1f2937;
+    color: #fff;
+    padding: 14px 20px;
+    border-radius: 14px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow:
+        0 10px 40px -8px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+    opacity: 0;
+    transform: translateY(12px);
+    pointer-events: none;
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 50;
+}
+
+#sett-toast.show {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+    pointer-events: auto !important;
+}
+
+
+/* ══════════════════════════════════════════════
+   TOGGLE SWITCH
+   ══════════════════════════════════════════════ */
+
+.sett-toggle {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+    display: inline-block;
+}
+.sett-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+}
+.sett-toggle span {
+    position: absolute;
+    inset: 0;
+    background: #d1d5db;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: background 0.25s ease;
+}
+.sett-toggle span::before {
+    content: '';
+    position: absolute;
+    left: 3px;
+    top: 3px;
+    width: 18px;
+    height: 18px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.sett-toggle input:checked + span {
+    background: linear-gradient(135deg, var(--brand-400), var(--brand-600));
+}
+.sett-toggle input:checked + span::before {
+    transform: translateX(20px);
+}
+.sett-toggle input:focus-visible + span {
+    box-shadow: 0 0 0 3px rgba(212, 163, 115, 0.3);
 }
 </style>
 {% endblock %}
@@ -103,97 +825,91 @@
 
 {% block content %}
 
-<div class="max-w-5xl mx-auto">
+<div class="max-w-6xl mx-auto">
 
-    <div class="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-5 items-start">
+    <div class="sett-layout">
 
         <!-- ══════════════════════════════════════════════ -->
-        <!-- SIDEBAR NAVIGATION -->
+        <!-- SIDEBAR — FIXED / STICKY -->
         <!-- ══════════════════════════════════════════════ -->
 
-        <nav class="flex flex-col gap-1">
+        <aside class="sett-sidebar">
 
-            <button
-                class="sett-tab-btn active w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-transparent border-none cursor-pointer transition hover:bg-gray-100 hover:text-gray-900"
-                id="tab-btn-profile"
-                onclick="settSwitch('profile')"
-            >
-                Profile
+            <div class="sett-nav-group-label">Account</div>
+
+            <button class="sett-tab-btn active" id="tab-btn-profile" onclick="settSwitch('profile')">
+                <span class="tab-icon"><i class="fas fa-user"></i></span>
+                <span class="tab-label">Profile</span>
+                <i class="fas fa-chevron-right tab-arrow"></i>
             </button>
 
-            <button
-                class="sett-tab-btn w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-transparent border-none cursor-pointer transition hover:bg-gray-100 hover:text-gray-900"
-                id="tab-btn-workspace"
-                onclick="settSwitch('workspace')"
-            >
-                Workspace
+            <button class="sett-tab-btn" id="tab-btn-workspace" onclick="settSwitch('workspace')">
+                <span class="tab-icon"><i class="fas fa-briefcase"></i></span>
+                <span class="tab-label">Workspace</span>
+                <i class="fas fa-chevron-right tab-arrow"></i>
             </button>
 
-            <button
-                class="sett-tab-btn w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-transparent border-none cursor-pointer transition hover:bg-gray-100 hover:text-gray-900"
-                id="tab-btn-notification"
-                onclick="settSwitch('notification')"
-            >
-                Notifications
+            <button class="sett-tab-btn" id="tab-btn-notification" onclick="settSwitch('notification')">
+                <span class="tab-icon"><i class="fas fa-bell"></i></span>
+                <span class="tab-label">Notifications</span>
+                <i class="fas fa-chevron-right tab-arrow"></i>
             </button>
 
-            <button
-                class="sett-tab-btn w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-transparent border-none cursor-pointer transition hover:bg-gray-100 hover:text-gray-900"
-                id="tab-btn-portal"
-                onclick="settSwitch('portal')"
-            >
-                Client Portal
+            <div class="sett-nav-divider"></div>
+
+            <div class="sett-nav-group-label">Business</div>
+
+            <button class="sett-tab-btn" id="tab-btn-portal" onclick="settSwitch('portal')">
+                <span class="tab-icon"><i class="fas fa-globe"></i></span>
+                <span class="tab-label">Client Portal</span>
+                <i class="fas fa-chevron-right tab-arrow"></i>
             </button>
 
-            <button
-                class="sett-tab-btn w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium text-gray-600 bg-transparent border-none cursor-pointer transition hover:bg-gray-100 hover:text-gray-900"
-                id="tab-btn-billing"
-                onclick="settSwitch('billing')"
-            >
-                Billing &amp; Plan
+            <button class="sett-tab-btn" id="tab-btn-billing" onclick="settSwitch('billing')">
+                <span class="tab-icon"><i class="fas fa-credit-card"></i></span>
+                <span class="tab-label">Billing &amp; Plan</span>
+                <i class="fas fa-chevron-right tab-arrow"></i>
             </button>
 
-        </nav>
+        </aside>
 
 
-        <div>
+        <!-- ══════════════════════════════════════════════ -->
+        <!-- CONTENT — SCROLLABLE RIGHT -->
+        <!-- ══════════════════════════════════════════════ -->
 
-            <!-- ══════════════════════════════════════════════ -->
+        <div class="sett-content">
+
             <!-- DJANGO MESSAGES -->
-            <!-- ══════════════════════════════════════════════ -->
-
             {% if messages %}
-
                 <div style="margin-bottom: 20px;">
-
                     {% for message in messages %}
-
                         <div
                             style="
-                                padding: 12px 16px;
-                                border-radius: 8px;
-                                margin-bottom: 8px;
+                                padding: 14px 18px;
+                                border-radius: 12px;
+                                margin-bottom: 10px;
                                 font-size: 14px;
                                 font-weight: 500;
-
+                                display: flex;
+                                align-items: center;
+                                gap: 10px;
                                 {% if message.tags == 'error' %}
-                                    background-color: #fef2f2;
+                                    background: linear-gradient(135deg, #fef2f2, #fee2e2);
                                     color: #dc2626;
                                     border: 1px solid #fecaca;
                                 {% else %}
-                                    background-color: #f0fdf4;
+                                    background: linear-gradient(135deg, #f0fdf4, #dcfce7);
                                     color: #16a34a;
                                     border: 1px solid #bbf7d0;
                                 {% endif %}
                             "
                         >
+                            <i class="fas {% if message.tags == 'error' %}fa-exclamation-circle{% else %}fa-check-circle{% endif %}"></i>
                             {{ message }}
                         </div>
-
                     {% endfor %}
-
                 </div>
-
             {% endif %}
 
 
@@ -201,449 +917,454 @@
             <!-- PROFILE -->
             <!-- ══════════════════════════════════════════════ -->
 
-            <div
-                id="panel-profile"
-                class="bg-white rounded-xl p-8 border border-gray-200 shadow-sm"
-            >
+            <div id="panel-profile" class="sett-panel">
 
-                <h2 class="text-lg font-bold text-gray-900 mb-6">
-                    Profile
-                </h2>
+                <h2 class="sett-panel-title">Profile</h2>
 
-
-                <!-- ══════════════════════════════════════ -->
-                <!-- PROFILE FORM -->
-                <!-- ══════════════════════════════════════ -->
-
-                <form
-                    method="POST"
-                    action="{% url 'sett:settings' %}"
-                    enctype="multipart/form-data"
-                >
+                <form method="POST" action="{% url 'sett:settings' %}" enctype="multipart/form-data">
 
                     {% csrf_token %}
-
-                    <input
-                        type="hidden"
-                        name="action"
-                        value="profile"
-                    >
-
+                    <input type="hidden" name="action" value="profile">
 
                     <!-- Avatar -->
-
                     <div class="sett-avatar">
-
                         <div
                             id="avatarPreview"
-
                             {% if user.profile_picture %}
-                                style="
-                                    background-image:url('{{ user.profile_picture.url }}');
-                                    background-size:cover;
-                                    background-position:center;
-                                "
+                                style="background-image:url('{{ user.profile_picture.url }}');background-size:cover;background-position:center;"
                             {% endif %}
                         >
-
-                            {% if not user.profile_picture %}
-                                {{ user.initials }}
-                            {% endif %}
-
+                            {% if not user.profile_picture %}{{ user.initials }}{% endif %}
                         </div>
 
-
                         <div>
-
-                            <input
-                                type="file"
-                                id="photoInput"
-                                name="profile_picture"
-                                class="hidden"
-                                accept="image/*"
-                                onchange="settPreviewPhoto(event)"
-                            >
-
-                            <button
-                                type="button"
-                                class="btn-outline"
-                                onclick="document.getElementById('photoInput').click()"
-                            >
+                            <input type="file" id="photoInput" name="profile_picture" class="hidden" accept="image/*" onchange="settPreviewPhoto(event)">
+                            <button type="button" class="btn-outline" onclick="document.getElementById('photoInput').click()">
                                 <i class="fas fa-camera"></i>
                                 Change photo
                             </button>
-
-                            <p class="text-xs text-gray-400 mt-1">
+                            <p class="text-xs text-gray-400 mt-2 flex items-center gap-1.5">
+                                <i class="fas fa-info-circle text-[10px]"></i>
                                 PNG, JPG up to 2MB
                             </p>
-
                         </div>
-
                     </div>
-
 
                     <!-- Full name & Display name -->
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-
-                        <div>
-
-                            <label class="sett-label">
-                                Full name
-                            </label>
-
-                            <input
-                                class="sett-input"
-                                type="text"
-                                name="full_name"
-                                value="{{ user.get_full_name }}"
-                                placeholder="Enter your Full Name"
-                            >
-
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="sett-field">
+                            <label class="sett-label">Full name</label>
+                            <div class="sett-icon-wrap">
+                                <i class="fas fa-user"></i>
+                                <input class="sett-input" type="text" name="full_name" value="{{ user.get_full_name }}" placeholder="Enter your Full Name">
+                            </div>
                         </div>
 
-
-                        <div>
-
-                            <label class="sett-label">
-                                Display name
-                            </label>
-
-                            <input
-                                class="sett-input"
-                                type="text"
-                                name="display_name"
-                                value="{{ user.display_name }}"
-                                placeholder="Enter your Display name"
-                            >
-
+                        <div class="sett-field">
+                            <label class="sett-label">Display name</label>
+                            <div class="sett-icon-wrap">
+                                <i class="fas fa-at"></i>
+                                <input class="sett-input" type="text" name="display_name" value="{{ user.display_name }}" placeholder="Enter your Display name">
+                            </div>
                         </div>
-
                     </div>
-
 
                     <!-- Email -->
-
                     <div class="sett-field">
-
-                        <label class="sett-label">
-                            Email
-                        </label>
-
-                        <input
-                            class="sett-input"
-                            type="email"
-                            name="email"
-                            value="{{ user.email }}"
-                            placeholder="abcd@gmail.com"
-                            required
-                        >
-
+                        <label class="sett-label">Email</label>
+                        <div class="sett-icon-wrap">
+                            <i class="fas fa-envelope"></i>
+                            <input class="sett-input" type="email" name="email" value="{{ user.email }}" placeholder="abcd@gmail.com" required>
+                        </div>
                     </div>
-
 
                     <!-- New password -->
-
-                    <div class="mb-4">
-
-                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">
-                            New password
-                        </label>
-
-                        <input
-                            class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 outline-none transition focus:bg-white focus:border-[#b8895e] focus:ring-2 focus:ring-[#b8895e] focus:ring-opacity-20"
-                            type="password"
-                            name="new_password"
-                            placeholder="Enter your new password"
-                        >
-
+                    <div class="sett-field">
+                        <label class="sett-label">New password</label>
+                        <div class="sett-icon-wrap">
+                            <i class="fas fa-lock"></i>
+                            <input class="sett-input" type="password" name="new_password" placeholder="Enter your new password">
+                        </div>
                     </div>
-
 
                     <!-- Confirm password -->
-
-                    <div class="mb-6">
-
-                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">
-                            Confirm new password
-                        </label>
-
-                        <input
-                            class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 outline-none transition focus:bg-white focus:border-[#b8895e] focus:ring-2 focus:ring-[#b8895e] focus:ring-opacity-20"
-                            type="password"
-                            name="confirm_password"
-                            placeholder="Enter confirm password"
-                        >
-
+                    <div class="sett-field" style="margin-bottom: 28px;">
+                        <label class="sett-label">Confirm new password</label>
+                        <div class="sett-icon-wrap">
+                            <i class="fas fa-lock"></i>
+                            <input class="sett-input" type="password" name="confirm_password" placeholder="Enter confirm password">
+                        </div>
                     </div>
 
-
-                    <!-- Save Profile -->
-
-                    <button
-                        type="submit"
-                        class="px-5 py-2.5 text-sm font-semibold text-white bg-[#d4a373] rounded-lg hover:bg-[#b8895e] transition"
-                    >
-                        Save Profile
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-check"></i>
+                        <span>Save Profile</span>
                     </button>
 
                 </form>
 
 
                 <!-- ══════════════════════════════════════════════ -->
-                <!-- ORGANIZATION DETAILS - MANAGER ONLY -->
+                <!-- ORGANIZATION DETAILS - MANAGER (EDITABLE) -->
+                <!-- Same visual style as staff read-only card -->
                 <!-- ══════════════════════════════════════════════ -->
 
                 {% if user.role == user.Role.MANAGER and organization %}
 
-                <div class="mt-8 pt-8 border-t border-gray-200">
+                <div class="mt-10 pt-10 border-t border-gray-100">
 
-
-                    <!-- Organization heading -->
-
-                    <div class="flex items-center justify-between mb-6">
-
+                    <!-- Heading -->
+                    <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
                         <div>
-
-                            <h2 class="text-lg font-bold text-gray-900">
+                            <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2.5">
+                                <i class="fas fa-building text-[#d4a373]"></i>
                                 Organization Details
                             </h2>
-
-                            <p class="text-sm text-gray-500 mt-1">
+                            <p class="text-sm text-gray-500 mt-1 ml-7">
                                 Manage the details of your organization.
                             </p>
-
                         </div>
 
-
-                        <!-- Change Details -->
-
-                        <button
-                            type="button"
-                            id="change-org-btn"
-                            onclick="enableOrganizationEdit()"
-                            class="px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition"
-                        >
-                            <i class="fas fa-pen mr-1"></i>
-                            Change Details
-                        </button>
-
-                    </div>
-
-
-                    <!-- ══════════════════════════════════════ -->
-                    <!-- ORGANIZATION FORM -->
-                    <!-- ══════════════════════════════════════ -->
-
-                    <form
-                        method="POST"
-                        action="{% url 'sett:settings' %}"
-                        enctype="multipart/form-data"
-                        id="organization-form"
-                    >
-
-                        {% csrf_token %}
-
-                        <input
-                            type="hidden"
-                            name="action"
-                            value="organization"
-                        >
-
-
-                        <!-- Organization Name -->
-
-                        <div class="sett-field">
-
-                            <label class="sett-label">
-                                Organization Name
-                            </label>
-
-                            <input
-                                class="sett-input organization-input"
-                                type="text"
-                                name="name"
-                                value="{{ organization.name }}"
-                                placeholder="Enter organization name"
-                                disabled
-                                required
-                            >
-
-                        </div>
-
-
-                        <!-- Description -->
-
-                        <div class="sett-field">
-
-                            <label class="sett-label">
-                                Description
-                            </label>
-
-                            <textarea
-                                class="sett-input organization-input"
-                                name="description"
-                                rows="4"
-                                placeholder="Enter organization description"
-                                disabled
-                            >{{ organization.description }}</textarea>
-
-                        </div>
-
-
-                        <!-- Organization Email -->
-
-                        <div class="sett-field">
-
-                            <label class="sett-label">
-                                Organization Email
-                            </label>
-
-                            <input
-                                class="sett-input organization-input"
-                                type="email"
-                                name="organization_email"
-                                value="{{ organization.email }}"
-                                placeholder="organization@example.com"
-                                disabled
-                            >
-
-                        </div>
-
-
-                        <!-- Phone -->
-
-                        <div class="sett-field">
-
-                            <label class="sett-label">
-                                Phone
-                            </label>
-
-                            <input
-                                class="sett-input organization-input"
-                                type="text"
-                                name="phone"
-                                value="{{ organization.phone }}"
-                                placeholder="Enter organization phone"
-                                disabled
-                            >
-
-                        </div>
-
-
-                        <!-- Address -->
-
-                        <div class="sett-field">
-
-                            <label class="sett-label">
-                                Address
-                            </label>
-
-                            <textarea
-                                class="sett-input organization-input"
-                                name="address"
-                                rows="3"
-                                placeholder="Enter organization address"
-                                disabled
-                            >{{ organization.address }}</textarea>
-
-                        </div>
-
-
-                        <!-- Website -->
-
-                        <div class="sett-field">
-
-                            <label class="sett-label">
-                                Website
-                            </label>
-
-                            <input
-                                class="sett-input organization-input"
-                                type="url"
-                                name="website"
-                                value="{{ organization.website }}"
-                                placeholder="https://example.com"
-                                disabled
-                            >
-
-                        </div>
-
-
-                        <!-- Organization Logo -->
-
-                        <div class="sett-field">
-
-                            <label class="sett-label">
-                                Organization Logo
-                            </label>
-
-
-                            {% if organization.logo %}
-
-                                <div
-                                    id="current-org-logo"
-                                    class="mb-3"
-                                >
-
-                                    <img
-                                        src="{{ organization.logo.url }}"
-                                        alt="Organization Logo"
-                                        class="w-20 h-20 object-cover rounded-lg border border-gray-200"
-                                    >
-
-                                </div>
-
-                            {% endif %}
-
-
-                            <input
-                                type="file"
-                                name="logo"
-                                id="organization-logo"
-                                accept="image/*"
-                                disabled
-                                class="block w-full text-sm text-gray-600
-                                       file:mr-4 file:py-2 file:px-4
-                                       file:rounded-lg file:border-0
-                                       file:text-sm file:font-semibold
-                                       file:bg-gray-100 file:text-gray-700
-                                       hover:file:bg-gray-200"
-                            >
-
-                            <p class="text-xs text-gray-400 mt-1">
-                                PNG, JPG up to 2MB
-                            </p>
-
-                        </div>
-
-
-                        <!-- Save / Cancel -->
-
-                        <div
-                            id="organization-actions"
-                            class="hidden flex flex-wrap gap-3"
-                        >
-
-                            <button
-                                type="submit"
-                                class="px-5 py-2.5 text-sm font-semibold text-white bg-[#d4a373] rounded-lg hover:bg-[#b8895e] transition"
-                            >
-                                Save Organization Details
-                            </button>
-
+                        <div class="flex items-center gap-3">
+                            <span class="edit-badge" id="org-edit-badge">
+                                <i class="fas fa-pen"></i>
+                                Editable
+                            </span>
 
                             <button
                                 type="button"
-                                onclick="cancelOrganizationEdit()"
-                                class="px-4 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                                id="change-org-btn"
+                                onclick="enableOrganizationEdit()"
+                                class="btn-outline"
                             >
-                                Cancel
+                                <i class="fas fa-pen"></i>
+                                Change Details
                             </button>
+                        </div>
+                    </div>
+
+
+                    <!-- ORG CARD (matches staff style) -->
+                    <div class="org-card">
+
+                        <form
+                            method="POST"
+                            action="{% url 'sett:settings' %}"
+                            enctype="multipart/form-data"
+                            id="organization-form"
+                        >
+
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="organization">
+
+
+                            <!-- Header with CIRCULAR logo -->
+                            <div class="org-header">
+
+                                <div class="org-logo-circle" id="org-logo-preview">
+                                    {% if organization.logo %}
+                                        <img
+                                            src="{{ organization.logo.url }}"
+                                            alt="{{ organization.name }} logo"
+                                            id="org-logo-img"
+                                        >
+                                    {% else %}
+                                        <span id="org-logo-initial">
+                                            {{ organization.name|slice:":1"|upper }}
+                                        </span>
+                                    {% endif %}
+                                </div>
+
+                                <div class="org-header-info">
+                                    <h3>{{ organization.name|default:"Organization" }}</h3>
+                                    {% if organization.website %}
+                                        <p>
+                                            <a href="{{ organization.website }}"
+                                               target="_blank"
+                                               rel="noopener noreferrer">
+                                                {{ organization.website }}
+                                            </a>
+                                        </p>
+                                    {% else %}
+                                        <p>Organization workspace</p>
+                                    {% endif %}
+                                </div>
+
+                            </div>
+
+
+                            <!-- FORM GRID (same layout as read-only grid) -->
+                            <div class="org-form-grid">
+
+                                <!-- Organization Name -->
+                                <div class="org-form-full">
+                                    <label class="sett-label">
+                                        <i class="fas fa-building"></i>
+                                        Organization Name
+                                    </label>
+                                    <input
+                                        class="sett-input organization-input"
+                                        type="text"
+                                        name="name"
+                                        value="{{ organization.name }}"
+                                        placeholder="Enter organization name"
+                                        disabled
+                                        required
+                                    >
+                                </div>
+
+
+                                <!-- Description -->
+                                <div class="org-form-full">
+                                    <label class="sett-label">
+                                        <i class="fas fa-align-left"></i>
+                                        Description
+                                    </label>
+                                    <textarea
+                                        class="sett-input organization-input"
+                                        name="description"
+                                        rows="4"
+                                        placeholder="Enter organization description"
+                                        disabled
+                                    >{{ organization.description }}</textarea>
+                                </div>
+
+
+                                <!-- Email -->
+                                <div>
+                                    <label class="sett-label">
+                                        <i class="fas fa-envelope"></i>
+                                        Organization Email
+                                    </label>
+                                    <input
+                                        class="sett-input organization-input"
+                                        type="email"
+                                        name="organization_email"
+                                        value="{{ organization.email }}"
+                                        placeholder="organization@example.com"
+                                        disabled
+                                    >
+                                </div>
+
+
+                                <!-- Phone -->
+                                <div>
+                                    <label class="sett-label">
+                                        <i class="fas fa-phone"></i>
+                                        Phone
+                                    </label>
+                                    <input
+                                        class="sett-input organization-input"
+                                        type="text"
+                                        name="phone"
+                                        value="{{ organization.phone }}"
+                                        placeholder="Enter organization phone"
+                                        disabled
+                                    >
+                                </div>
+
+
+                                <!-- Address (full) -->
+                                <div class="org-form-full">
+                                    <label class="sett-label">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        Address
+                                    </label>
+                                    <textarea
+                                        class="sett-input organization-input"
+                                        name="address"
+                                        rows="3"
+                                        placeholder="Enter organization address"
+                                        disabled
+                                    >{{ organization.address }}</textarea>
+                                </div>
+
+
+                                <!-- Website -->
+                                <div>
+                                    <label class="sett-label">
+                                        <i class="fas fa-globe"></i>
+                                        Website
+                                    </label>
+                                    <input
+                                        class="sett-input organization-input"
+                                        type="url"
+                                        name="website"
+                                        value="{{ organization.website }}"
+                                        placeholder="https://example.com"
+                                        disabled
+                                    >
+                                </div>
+
+
+                                <!-- Logo upload -->
+                                <div>
+                                    <label class="sett-label">
+                                        <i class="fas fa-image"></i>
+                                        Organization Logo
+                                    </label>
+
+                                    <input
+                                        type="file"
+                                        name="logo"
+                                        id="organization-logo"
+                                        accept="image/*"
+                                        disabled
+                                        class="block w-full text-sm text-gray-600
+                                               file:mr-4 file:py-2 file:px-4
+                                               file:rounded-lg file:border-0
+                                               file:text-sm file:font-semibold
+                                               file:bg-[#fdf8f3] file:text-[#b8895e]
+                                               hover:file:bg-[#f9ede0]
+                                               file:transition file:cursor-pointer"
+                                    >
+
+                                    <p class="text-xs text-gray-400 mt-2 flex items-center gap-1.5">
+                                        <i class="fas fa-info-circle text-[10px]"></i>
+                                        PNG, JPG up to 2MB — circle preview
+                                    </p>
+                                </div>
+
+                            </div>
+
+
+                            <!-- Save / Cancel actions -->
+                            <div
+                                id="organization-actions"
+                                class="hidden flex flex-wrap gap-3 mt-7 pt-7 border-t border-gray-100"
+                            >
+                                <button type="submit" class="btn-primary">
+                                    <i class="fas fa-check"></i>
+                                    <span>Save Organization Details</span>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onclick="cancelOrganizationEdit()"
+                                    class="btn-ghost"
+                                >
+                                    <i class="fas fa-times"></i>
+                                    Cancel
+                                </button>
+                            </div>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+                {% endif %}
+
+
+                <!-- ══════════════════════════════════════════════ -->
+                <!-- ORGANIZATION DETAILS - STAFF (READ ONLY) -->
+                <!-- ══════════════════════════════════════════════ -->
+
+                {% if user.role == user.Role.STAFF and organization %}
+
+                <div class="mt-10 pt-10 border-t border-gray-100">
+
+                    <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+                        <div>
+                            <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2.5">
+                                <i class="fas fa-building text-[#d4a373]"></i>
+                                Organization Details
+                            </h2>
+                            <p class="text-sm text-gray-500 mt-1 ml-7">
+                                Organization information — view only.
+                            </p>
+                        </div>
+
+                        <span class="readonly-badge">
+                            <i class="fas fa-lock"></i>
+                            Read only
+                        </span>
+                    </div>
+
+
+                    <div class="org-card">
+
+                        <!-- Header with CIRCULAR logo -->
+                        <div class="org-header">
+
+                            <div class="org-logo-circle">
+                                {% if organization.logo %}
+                                    <img src="{{ organization.logo.url }}" alt="{{ organization.name }} logo">
+                                {% else %}
+                                    {{ organization.name|slice:":1"|upper }}
+                                {% endif %}
+                            </div>
+
+                            <div class="org-header-info">
+                                <h3>{{ organization.name|default:"Organization" }}</h3>
+                                {% if organization.website %}
+                                    <p>
+                                        <a href="{{ organization.website }}" target="_blank" rel="noopener noreferrer">
+                                            {{ organization.website }}
+                                        </a>
+                                    </p>
+                                {% else %}
+                                    <p>Organization workspace</p>
+                                {% endif %}
+                            </div>
 
                         </div>
 
-                    </form>
+
+                        <div class="org-grid">
+
+                            {% if organization.description %}
+                            <div class="org-item-full">
+                                <div class="org-item-label">
+                                    <i class="fas fa-align-left"></i>
+                                    Description
+                                </div>
+                                <div class="org-item-value" style="white-space: pre-line;">
+                                    {{ organization.description }}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% if organization.email %}
+                            <div>
+                                <div class="org-item-label">
+                                    <i class="fas fa-envelope"></i>
+                                    Email
+                                </div>
+                                <div class="org-item-value">
+                                    <a href="mailto:{{ organization.email }}">{{ organization.email }}</a>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% if organization.phone %}
+                            <div>
+                                <div class="org-item-label">
+                                    <i class="fas fa-phone"></i>
+                                    Phone
+                                </div>
+                                <div class="org-item-value">
+                                    <a href="tel:{{ organization.phone }}">{{ organization.phone }}</a>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% if organization.address %}
+                            <div class="org-item-full">
+                                <div class="org-item-label">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    Address
+                                </div>
+                                <div class="org-item-value" style="white-space: pre-line;">
+                                    {{ organization.address }}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                        </div>
+
+                    </div>
 
                 </div>
 
@@ -656,97 +1377,44 @@
             <!-- WORKSPACE -->
             <!-- ══════════════════════════════════════════════ -->
 
-            <div
-                id="panel-workspace"
-                class="bg-white rounded-xl p-8 border border-gray-200 shadow-sm"
-                style="display:none;"
-            >
+            <div id="panel-workspace" class="sett-panel" style="display:none;">
 
-                <h2 class="text-lg font-bold text-gray-900 mb-6">
-                    Workspace
-                </h2>
-
+                <h2 class="sett-panel-title">Workspace</h2>
 
                 <form onsubmit="event.preventDefault(); settToast('Workspace saved successfully!');">
 
-                    <!-- Workspace Name -->
-
-                    <div class="mb-4">
-
-                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">
-                            Studio / Workspace name
-                        </label>
-
-                        <input
-                            class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 outline-none transition focus:bg-white focus:border-[#b8895e] focus:ring-2 focus:ring-[#b8895e] focus:ring-opacity-20"
-                            type="text"
-                            name="workspace_name"
-                            placeholder="Enter your workspace name "
-                            required
-                        >
-
+                    <div class="sett-field">
+                        <label class="sett-label">Studio / Workspace name</label>
+                        <div class="sett-icon-wrap">
+                            <i class="fas fa-briefcase"></i>
+                            <input class="sett-input" type="text" name="workspace_name" placeholder="Enter your workspace name" required>
+                        </div>
                     </div>
 
-
-                    <!-- Role -->
-
-                    <div class="mb-4">
-
-                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">
-                            Your role
-                        </label>
-
-                        <input
-                            class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 outline-none transition focus:bg-white focus:border-[#b8895e] focus:ring-2 focus:ring-[#b8895e] focus:ring-opacity-20"
-                            type="text"
-                            name="role"
-                            placeholder="Enter your role"
-                            required
-                        >
-
+                    <div class="sett-field">
+                        <label class="sett-label">Your role</label>
+                        <div class="sett-icon-wrap">
+                            <i class="fas fa-user-tag"></i>
+                            <input class="sett-input" type="text" name="role" placeholder="Enter your role" required>
+                        </div>
                     </div>
 
-
-                    <!-- Currency -->
-
-                    <div class="mb-6">
-
-                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">
-                            Currency
-                        </label>
-
-                        <select
-                            class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 outline-none transition focus:bg-white focus:border-[#b8895e] focus:ring-2 focus:ring-[#b8895e] focus:ring-opacity-20"
-                            name="currency"
-                            required
-                        >
-
-                            <option value="NPR" selected>
-                                NPR - Nepalese Rupee
-                            </option>
-
-                            <option value="USD">
-                                $ USD
-                            </option>
-
-                            <option value="EUR">
-                                € EUR
-                            </option>
-
-                            <option value="INR">
-                                ₹ INR — Indian Rupee
-                            </option>
-
-                        </select>
-
+                    <div class="sett-field" style="margin-bottom: 28px;">
+                        <label class="sett-label">Currency</label>
+                        <div class="sett-icon-wrap">
+                            <i class="fas fa-coins"></i>
+                            <select class="sett-input" name="currency" required style="padding-left: 40px;">
+                                <option value="NPR" selected>NPR - Nepalese Rupee</option>
+                                <option value="USD">$ USD</option>
+                                <option value="EUR">€ EUR</option>
+                                <option value="INR">₹ INR — Indian Rupee</option>
+                            </select>
+                        </div>
                     </div>
 
-
-                    <button
-                        type="submit"
-                        class="px-5 py-2.5 text-sm font-semibold text-white bg-[#d4a373] rounded-lg hover:bg-[#b8895e] transition"
-                    >
-                        Save Workspace
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-check"></i>
+                        <span>Save Workspace</span>
                     </button>
 
                 </form>
@@ -758,177 +1426,67 @@
             <!-- CLIENT PORTAL -->
             <!-- ══════════════════════════════════════════════ -->
 
-            <div
-                id="panel-portal"
-                class="bg-white rounded-xl p-8 border border-gray-200 shadow-sm"
-                style="display:none;"
-            >
+            <div id="panel-portal" class="sett-panel" style="display:none;">
 
-                <h2 class="text-lg font-bold text-gray-900 mb-6">
-                    Client Portal Settings
-                </h2>
-
+                <h2 class="sett-panel-title">Client Portal Settings</h2>
 
                 <form onsubmit="event.preventDefault(); settToast('Portal settings saved!');">
 
-                    <!-- Portal header -->
+                    <div class="sett-field">
+                        <label class="sett-label">Portal header message</label>
+                        <div class="sett-icon-wrap">
+                            <i class="fas fa-heading"></i>
+                            <input class="sett-input" type="text" placeholder="Enter your Portal header message here">
+                        </div>
+                    </div>
 
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Portal header message
-                    </label>
+                    <hr class="border-t border-gray-100 my-6">
 
-                    <input
-                        class="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 outline-none transition focus:bg-white focus:border-[#b8895e] focus:ring-2 focus:ring-[#b8895e] focus:ring-opacity-20"
-                        type="text"
-                        placeholder="Enter your Portal header message here"
-                    >
-
-
-                    <hr class="border-t border-gray-200 my-6">
-
-
-                    <!-- Toggle list -->
-
-                    <div class="flex flex-col border-t border-gray-100">
-
+                    <div class="flex flex-col">
 
                         <div class="flex items-center justify-between py-4 border-b border-gray-100">
-
                             <div>
-
-                                <p class="text-sm font-bold text-gray-900 mb-1">
-                                    Show task list to clients
-                                </p>
-
-                                <p class="text-sm text-[#d4a373]">
-                                    Clients can see project tasks (read-only)
-                                </p>
-
+                                <p class="text-sm font-semibold text-gray-900 mb-1">Show task list to clients</p>
+                                <p class="text-sm text-gray-500">Clients can see project tasks (read-only)</p>
                             </div>
-
-
-                            <label class="relative w-11 h-6 flex-shrink-0">
-
-                                <input
-                                    type="checkbox"
-                                    checked
-                                    class="opacity-0 w-0 h-0 peer"
-                                >
-
-                                <span class="absolute inset-0 bg-gray-300 rounded-full cursor-pointer transition peer-checked:bg-[#4338ca] before:content-[''] before:absolute before:left-1 before:top-1 before:w-4 before:h-4 before:bg-white before:rounded-full before:shadow before:transition peer-checked:before:translate-x-5"></span>
-
-                            </label>
-
+                            <label class="sett-toggle"><input type="checkbox" checked><span></span></label>
                         </div>
-
 
                         <div class="flex items-center justify-between py-4 border-b border-gray-100">
-
                             <div>
-
-                                <p class="text-sm font-bold text-gray-900 mb-1">
-                                    Show payment status
-                                </p>
-
-                                <p class="text-sm text-[#d4a373]">
-                                    Clients can see what they've paid and owe
-                                </p>
-
+                                <p class="text-sm font-semibold text-gray-900 mb-1">Show payment status</p>
+                                <p class="text-sm text-gray-500">Clients can see what they've paid and owe</p>
                             </div>
-
-
-                            <label class="relative w-11 h-6 flex-shrink-0">
-
-                                <input
-                                    type="checkbox"
-                                    checked
-                                    class="opacity-0 w-0 h-0 peer"
-                                >
-
-                                <span class="absolute inset-0 bg-gray-300 rounded-full cursor-pointer transition peer-checked:bg-[#4338ca] before:content-[''] before:absolute before:left-1 before:top-1 before:w-4 before:h-4 before:bg-white before:rounded-full before:shadow before:transition peer-checked:before:translate-x-5"></span>
-
-                            </label>
-
+                            <label class="sett-toggle"><input type="checkbox" checked><span></span></label>
                         </div>
-
 
                         <div class="flex items-center justify-between py-4 border-b border-gray-100">
-
                             <div>
-
-                                <p class="text-sm font-bold text-gray-900 mb-1">
-                                    Show files
-                                </p>
-
-                                <p class="text-sm text-[#d4a373]">
-                                    Clients can download shared files
-                                </p>
-
+                                <p class="text-sm font-semibold text-gray-900 mb-1">Show files</p>
+                                <p class="text-sm text-gray-500">Clients can download shared files</p>
                             </div>
-
-
-                            <label class="relative w-11 h-6 flex-shrink-0">
-
-                                <input
-                                    type="checkbox"
-                                    class="opacity-0 w-0 h-0 peer"
-                                >
-
-                                <span class="absolute inset-0 bg-gray-300 rounded-full cursor-pointer transition peer-checked:bg-[#4338ca] before:content-[''] before:absolute before:left-1 before:top-1 before:w-4 before:h-4 before:bg-white before:rounded-full before:shadow before:transition peer-checked:before:translate-x-5"></span>
-
-                            </label>
-
+                            <label class="sett-toggle"><input type="checkbox"><span></span></label>
                         </div>
-
 
                         <div class="flex items-center justify-between py-4">
-
                             <div>
-
-                                <p class="text-sm font-bold text-gray-900 mb-1">
-                                    Allow client comments
-                                </p>
-
-                                <p class="text-sm text-[#d4a373]">
-                                    Clients can post comments on notes
-                                </p>
-
+                                <p class="text-sm font-semibold text-gray-900 mb-1">Allow client comments</p>
+                                <p class="text-sm text-gray-500">Clients can post comments on notes</p>
                             </div>
-
-
-                            <label class="relative w-11 h-6 flex-shrink-0">
-
-                                <input
-                                    type="checkbox"
-                                    class="opacity-0 w-0 h-0 peer"
-                                >
-
-                                <span class="absolute inset-0 bg-gray-300 rounded-full cursor-pointer transition peer-checked:bg-[#4338ca] before:content-[''] before:absolute before:left-1 before:top-1 before:w-4 before:h-4 before:bg-white before:rounded-full before:shadow before:transition peer-checked:before:translate-x-5"></span>
-
-                            </label>
-
+                            <label class="sett-toggle"><input type="checkbox"><span></span></label>
                         </div>
 
                     </div>
 
-
-                    <div class="flex flex-wrap gap-3 mt-6">
-
-                        <button
-                            type="submit"
-                            class="px-5 py-2.5 text-sm font-semibold text-white bg-[#d4a373] rounded-lg hover:bg-[#b8895e] transition"
-                        >
-                            Save Portal Settings
+                    <div class="flex flex-wrap gap-3 mt-7">
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-check"></i>
+                            <span>Save Portal Settings</span>
                         </button>
-
-                        <button
-                            type="button"
-                            class="px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition"
-                            onclick="settToast('Opening portal preview…')"
-                        >
+                        <button type="button" class="btn-ghost" onclick="settToast('Opening portal preview…')">
+                            <i class="fas fa-eye"></i>
                             Preview Portal
                         </button>
-
                     </div>
 
                 </form>
@@ -940,275 +1498,108 @@
             <!-- BILLING & PLAN -->
             <!-- ══════════════════════════════════════════════ -->
 
-            <div
-                id="panel-billing"
-                class="bg-white rounded-xl p-8 border border-gray-200 shadow-sm"
-                style="display:none;"
-            >
+            <div id="panel-billing" class="sett-panel" style="display:none;">
 
-                <h2 class="text-lg font-bold text-gray-900 mb-6">
-                    Billing &amp; Plan
-                </h2>
+                <h2 class="sett-panel-title">Billing &amp; Plan</h2>
 
-
-                <!-- Warning -->
-
-                <div class="flex items-center gap-3 p-4 bg-amber-50 border border-amber-300 rounded-lg mb-6">
-
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="#d97706"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        class="flex-shrink-0"
-                    >
-
+                <div class="flex items-center gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl mb-7">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                         fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                         class="flex-shrink-0">
                         <circle cx="12" cy="12" r="10"/>
-
                         <line x1="12" y1="8" x2="12" y2="12"/>
-
                         <line x1="12" y1="16" x2="12.01" y2="16"/>
-
                     </svg>
-
-
-                    <p class="text-sm text-amber-900">
+                    <p class="text-sm text-amber-900 font-medium">
                         You're using 5 clients on a Free plan (limit: 3). Upgrade to unlock unlimited clients.
                     </p>
-
                 </div>
 
-
-                <!-- Usage -->
-
-                <div class="border-t border-gray-100 mb-0">
-
-                    <div class="flex items-center justify-between py-3.5 border-b border-gray-100">
-
-                        <span class="text-sm text-[#d4a373] font-medium">
-                            Current plan
-                        </span>
-
-                        <span class="text-sm font-bold text-gray-900">
-                            Free
-                        </span>
-
+                <div class="border-t border-gray-100">
+                    <div class="flex items-center justify-between py-4 border-b border-gray-100">
+                        <span class="text-sm text-gray-500">Current plan</span>
+                        <span class="text-sm font-bold text-gray-900">Free</span>
                     </div>
-
-
-                    <div class="flex items-center justify-between py-3.5 border-b border-gray-100">
-
-                        <span class="text-sm text-gray-600">
-                            Clients
-                        </span>
-
-                        <span class="text-sm font-bold text-red-600">
-                            5 / 3
-                            <span class="font-medium">
-                                (over limit)
-                            </span>
-                        </span>
-
+                    <div class="flex items-center justify-between py-4 border-b border-gray-100">
+                        <span class="text-sm text-gray-500">Clients</span>
+                        <span class="text-sm font-bold text-red-600">5 / 3 <span class="font-medium">(over limit)</span></span>
                     </div>
-
-
-                    <div class="flex items-center justify-between py-3.5 border-b border-gray-100">
-
-                        <span class="text-sm text-gray-600">
-                            Team members
-                        </span>
-
-                        <span class="text-sm font-bold text-gray-900">
-                            2 / 2
-                        </span>
-
+                    <div class="flex items-center justify-between py-4 border-b border-gray-100">
+                        <span class="text-sm text-gray-500">Team members</span>
+                        <span class="text-sm font-bold text-gray-900">2 / 2</span>
                     </div>
-
-
-                    <div class="flex items-center justify-between py-3.5 border-b border-gray-100">
-
-                        <span class="text-sm text-gray-600">
-                            Invoices sent this month
-                        </span>
-
-                        <span class="text-sm font-bold text-gray-900">
-                            3 / 5
-                        </span>
-
+                    <div class="flex items-center justify-between py-4 border-b border-gray-100">
+                        <span class="text-sm text-gray-500">Invoices sent this month</span>
+                        <span class="text-sm font-bold text-gray-900">3 / 5</span>
                     </div>
-
                 </div>
 
-
-                <!-- CTA -->
-
-                <div class="flex flex-wrap gap-3 mt-6">
-
-                    <button
-                        class="px-5 py-2.5 text-sm font-semibold text-white bg-[#d4a373] rounded-lg hover:bg-[#b8895e] transition"
-                        onclick="settToast('Redirecting to upgrade…')"
-                    >
-                        Upgrade to Pro &mdash; NPR 999/mo
+                <div class="flex flex-wrap gap-3 mt-7">
+                    <button class="btn-primary" onclick="settToast('Redirecting to upgrade…')">
+                        <i class="fas fa-rocket"></i>
+                        <span>Upgrade to Pro — NPR 999/mo</span>
                     </button>
-
-                    <button
-                        class="px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition"
-                        onclick="showAllPlans()"
-                    >
+                    <button class="btn-ghost" onclick="showAllPlans()">
+                        <i class="fas fa-list"></i>
                         See all plans
                     </button>
-
                 </div>
 
-
-                <!-- All plans -->
-
-                <div
-                    class="hidden mt-7 border border-gray-200 rounded-xl overflow-hidden"
-                    id="all-plans-modal"
-                >
-
+                <div class="hidden mt-7 border border-gray-200 rounded-2xl overflow-hidden" id="all-plans-modal">
                     <div class="grid grid-cols-1 md:grid-cols-3">
 
-
-                        <!-- Starter -->
-
-                        <div class="p-5 border-r border-gray-200 relative">
-
-                            <p class="text-sm font-bold text-gray-700 mb-1.5">
-                                Starter
-                            </p>
-
-                            <p class="text-2xl font-extrabold text-gray-900 mb-1">
-                                Free
-                            </p>
-
-                            <p class="text-xs text-gray-400 mb-4">
-                                Forever free
-                            </p>
-
-                            <ul class="text-xs text-gray-600 flex flex-col gap-1.5 mb-4">
-
+                        <div class="p-6 border-r border-gray-200">
+                            <p class="text-sm font-bold text-gray-700 mb-1.5">Starter</p>
+                            <p class="text-2xl font-extrabold text-gray-900 mb-1">Free</p>
+                            <p class="text-xs text-gray-400 mb-4">Forever free</p>
+                            <ul class="text-xs text-gray-600 flex flex-col gap-2 mb-5">
                                 <li>✓ &nbsp;3 clients</li>
-
                                 <li>✓ &nbsp;1 seat</li>
-
                                 <li>✓ &nbsp;5 invoices/mo</li>
-
-                                <li class="text-gray-300">
-                                    ✗ &nbsp;Custom branding
-                                </li>
-
-                                <li class="text-gray-300">
-                                    ✗ &nbsp;Priority support
-                                </li>
-
+                                <li class="text-gray-300">✗ &nbsp;Custom branding</li>
+                                <li class="text-gray-300">✗ &nbsp;Priority support</li>
                             </ul>
-
-
-                            <button
-                                class="w-full px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg opacity-60 cursor-default"
-                            >
+                            <button class="w-full px-4 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg opacity-60 cursor-default">
                                 Current plan
                             </button>
-
                         </div>
 
-
-                        <!-- Pro -->
-
-                        <div class="p-5 border-r border-gray-200 bg-purple-50 relative">
-
-                            <span class="absolute top-3.5 right-3.5 bg-[#d4a373] text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
+                        <div class="p-6 border-r border-gray-200 bg-gradient-to-b from-[#fdf8f3] to-white relative">
+                            <span class="absolute top-4 right-4 bg-[#d4a373] text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">
                                 Popular
                             </span>
-
-                            <p class="text-sm font-bold text-[#d4a373] mb-1.5">
-                                Pro
-                            </p>
-
-                            <p class="text-2xl font-extrabold text-gray-900 mb-1">
-                                NPR 999
-                            </p>
-
-                            <p class="text-xs text-gray-400 mb-4">
-                                per month
-                            </p>
-
-
-                            <ul class="text-xs text-gray-600 flex flex-col gap-1.5 mb-4">
-
+                            <p class="text-sm font-bold text-[#b8895e] mb-1.5">Pro</p>
+                            <p class="text-2xl font-extrabold text-gray-900 mb-1">NPR 999</p>
+                            <p class="text-xs text-gray-400 mb-4">per month</p>
+                            <ul class="text-xs text-gray-600 flex flex-col gap-2 mb-5">
                                 <li>✓ &nbsp;Unlimited clients</li>
-
                                 <li>✓ &nbsp;5 seats</li>
-
                                 <li>✓ &nbsp;Unlimited invoices</li>
-
                                 <li>✓ &nbsp;Custom branding</li>
-
                                 <li>✓ &nbsp;Priority support</li>
-
                             </ul>
-
-
-                            <button
-                                class="w-full px-5 py-2.5 text-sm font-semibold text-white bg-[#d4a373] rounded-lg hover:bg-[#b8895e] transition"
-                                onclick="settToast('Redirecting to checkout…')"
-                            >
+                            <button class="btn-primary w-full justify-center" onclick="settToast('Redirecting to checkout…')">
                                 Upgrade to Pro
                             </button>
-
                         </div>
 
-
-                        <!-- Business -->
-
-                        <div class="p-5 relative">
-
-                            <p class="text-sm font-bold text-gray-700 mb-1.5">
-                                Business
-                            </p>
-
-                            <p class="text-2xl font-extrabold text-gray-900 mb-1">
-                                NPR 2,499
-                            </p>
-
-                            <p class="text-xs text-gray-400 mb-4">
-                                per month
-                            </p>
-
-
-                            <ul class="text-xs text-gray-600 flex flex-col gap-1.5 mb-4">
-
+                        <div class="p-6">
+                            <p class="text-sm font-bold text-gray-700 mb-1.5">Business</p>
+                            <p class="text-2xl font-extrabold text-gray-900 mb-1">NPR 2,499</p>
+                            <p class="text-xs text-gray-400 mb-4">per month</p>
+                            <ul class="text-xs text-gray-600 flex flex-col gap-2 mb-5">
                                 <li>✓ &nbsp;Unlimited clients</li>
-
                                 <li>✓ &nbsp;20 seats</li>
-
                                 <li>✓ &nbsp;Unlimited invoices</li>
-
                                 <li>✓ &nbsp;White-label portal</li>
-
                                 <li>✓ &nbsp;Dedicated support</li>
-
                             </ul>
-
-
-                            <button
-                                class="w-full px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition"
-                                onclick="settToast('Contact sales for Business plan.')"
-                            >
+                            <button class="btn-ghost w-full justify-center" onclick="settToast('Contact sales for Business plan.')">
                                 Contact Sales
                             </button>
-
                         </div>
 
                     </div>
-
                 </div>
 
             </div>
@@ -1218,210 +1609,62 @@
             <!-- NOTIFICATIONS -->
             <!-- ══════════════════════════════════════════════ -->
 
-            <div
-                id="panel-notification"
-                class="bg-white rounded-xl p-8 border border-gray-200 shadow-sm"
-                style="display:none;"
-            >
+            <div id="panel-notification" class="sett-panel" style="display:none;">
 
-                <h2 class="text-lg font-bold text-gray-900 mb-1">
-                    Email Notifications
-                </h2>
+                <h2 class="sett-panel-title">Email Notifications</h2>
 
-                <p class="text-sm text-gray-600 mb-6"></p>
-
+                <p class="text-sm text-gray-500 -mt-4 mb-6">
+                    Choose which emails you'd like to receive.
+                </p>
 
                 <div class="flex flex-col border-t border-gray-100">
 
-
-                    <!-- Payment received -->
-
                     <div class="flex items-center justify-between py-4 border-b border-gray-100">
-
                         <div>
-
-                            <p class="text-sm font-semibold text-gray-900 mb-1">
-                                Payment received
-                            </p>
-
-                            <p class="text-sm text-gray-600">
-                                When a client payment is recorded
-                            </p>
-
+                            <p class="text-sm font-semibold text-gray-900 mb-1">Payment received</p>
+                            <p class="text-sm text-gray-500">When a client payment is recorded</p>
                         </div>
-
-
-                        <label class="relative w-11 h-6 flex-shrink-0">
-
-                            <input
-                                type="checkbox"
-                                checked
-                                class="opacity-0 w-0 h-0 peer"
-                            >
-
-                            <span class="absolute inset-0 bg-gray-300 rounded-full cursor-pointer transition peer-checked:bg-[#4338ca] before:content-[''] before:absolute before:left-1 before:top-1 before:w-4 before:h-4 before:bg-white before:rounded-full before:shadow before:transition peer-checked:before:translate-x-5"></span>
-
-                        </label>
-
+                        <label class="sett-toggle"><input type="checkbox" checked><span></span></label>
                     </div>
 
-
-                    <!-- Deadline reminder -->
-
                     <div class="flex items-center justify-between py-4 border-b border-gray-100">
-
                         <div>
-
-                            <p class="text-sm font-semibold text-gray-900 mb-1">
-                                Deadline reminder
-                            </p>
-
-                            <p class="text-sm text-gray-600">
-                                2 days before a project is due
-                            </p>
-
+                            <p class="text-sm font-semibold text-gray-900 mb-1">Deadline reminder</p>
+                            <p class="text-sm text-gray-500">2 days before a project is due</p>
                         </div>
-
-
-                        <label class="relative w-11 h-6 flex-shrink-0">
-
-                            <input
-                                type="checkbox"
-                                checked
-                                class="opacity-0 w-0 h-0 peer"
-                            >
-
-                            <span class="absolute inset-0 bg-gray-300 rounded-full cursor-pointer transition peer-checked:bg-[#4338ca] before:content-[''] before:absolute before:left-1 before:top-1 before:w-4 before:h-4 before:bg-white before:rounded-full before:shadow before:transition peer-checked:before:translate-x-5"></span>
-
-                        </label>
-
+                        <label class="sett-toggle"><input type="checkbox" checked><span></span></label>
                     </div>
 
-
-                    <!-- Overdue alert -->
-
                     <div class="flex items-center justify-between py-4 border-b border-gray-100">
-
                         <div>
-
-                            <p class="text-sm font-semibold text-gray-900 mb-1">
-                                Overdue alert
-                            </p>
-
-                            <p class="text-sm text-gray-600">
-                                When a project passes its deadline
-                            </p>
-
+                            <p class="text-sm font-semibold text-gray-900 mb-1">Overdue alert</p>
+                            <p class="text-sm text-gray-500">When a project passes its deadline</p>
                         </div>
-
-
-                        <label class="relative w-11 h-6 flex-shrink-0">
-
-                            <input
-                                type="checkbox"
-                                checked
-                                class="opacity-0 w-0 h-0 peer"
-                            >
-
-                            <span class="absolute inset-0 bg-gray-300 rounded-full cursor-pointer transition peer-checked:bg-[#4338ca] before:content-[''] before:absolute before:left-1 before:top-1 before:w-4 before:h-4 before:bg-white before:rounded-full before:shadow before:transition peer-checked:before:translate-x-5"></span>
-
-                        </label>
-
+                        <label class="sett-toggle"><input type="checkbox" checked><span></span></label>
                     </div>
 
-
-                    <!-- Client portal viewed -->
-
                     <div class="flex items-center justify-between py-4 border-b border-gray-100">
-
                         <div>
-
-                            <p class="text-sm font-semibold text-gray-900 mb-1">
-                                Client portal viewed
-                            </p>
-
-                            <p class="text-sm text-gray-600">
-                                When a client opens their portal
-                            </p>
-
+                            <p class="text-sm font-semibold text-gray-900 mb-1">Client portal viewed</p>
+                            <p class="text-sm text-gray-500">When a client opens their portal</p>
                         </div>
-
-
-                        <label class="relative w-11 h-6 flex-shrink-0">
-
-                            <input
-                                type="checkbox"
-                                class="opacity-0 w-0 h-0 peer"
-                            >
-
-                            <span class="absolute inset-0 bg-gray-300 rounded-full cursor-pointer transition peer-checked:bg-[#4338ca] before:content-[''] before:absolute before:left-1 before:top-1 before:w-4 before:h-4 before:bg-white before:rounded-full before:shadow before:transition peer-checked:before:translate-x-5"></span>
-
-                        </label>
-
+                        <label class="sett-toggle"><input type="checkbox"><span></span></label>
                     </div>
 
-
-                    <!-- Team member joined -->
-
                     <div class="flex items-center justify-between py-4 border-b border-gray-100">
-
                         <div>
-
-                            <p class="text-sm font-semibold text-gray-900 mb-1">
-                                Team member joined
-                            </p>
-
-                            <p class="text-sm text-gray-600">
-                                When an invite is accepted
-                            </p>
-
+                            <p class="text-sm font-semibold text-gray-900 mb-1">Team member joined</p>
+                            <p class="text-sm text-gray-500">When an invite is accepted</p>
                         </div>
-
-
-                        <label class="relative w-11 h-6 flex-shrink-0">
-
-                            <input
-                                type="checkbox"
-                                checked
-                                class="opacity-0 w-0 h-0 peer"
-                            >
-
-                            <span class="absolute inset-0 bg-gray-300 rounded-full cursor-pointer transition peer-checked:bg-[#4338ca] before:content-[''] before:absolute before:left-1 before:top-1 before:w-4 before:h-4 before:bg-white before:rounded-full before:shadow before:transition peer-checked:before:translate-x-5"></span>
-
-                        </label>
-
+                        <label class="sett-toggle"><input type="checkbox" checked><span></span></label>
                     </div>
-
-
-                    <!-- Weekly summary -->
 
                     <div class="flex items-center justify-between py-4">
-
                         <div>
-
-                            <p class="text-sm font-semibold text-gray-900 mb-1">
-                                Weekly summary
-                            </p>
-
-                            <p class="text-sm text-gray-600">
-                                Monday morning recap of the week ahead
-                            </p>
-
+                            <p class="text-sm font-semibold text-gray-900 mb-1">Weekly summary</p>
+                            <p class="text-sm text-gray-500">Monday morning recap of the week ahead</p>
                         </div>
-
-
-                        <label class="relative w-11 h-6 flex-shrink-0">
-
-                            <input
-                                type="checkbox"
-                                checked
-                                class="opacity-0 w-0 h-0 peer"
-                            >
-
-                            <span class="absolute inset-0 bg-gray-300 rounded-full cursor-pointer transition peer-checked:bg-[#4338ca] before:content-[''] before:absolute before:left-1 before:top-1 before:w-4 before:h-4 before:bg-white before:rounded-full before:shadow before:transition peer-checked:before:translate-x-5"></span>
-
-                        </label>
-
+                        <label class="sett-toggle"><input type="checkbox" checked><span></span></label>
                     </div>
 
                 </div>
@@ -1435,41 +1678,11 @@
 </div>
 
 
-<!-- ══════════════════════════════════════════════ -->
 <!-- TOAST -->
-<!-- ══════════════════════════════════════════════ -->
-
-<div
-    id="sett-toast"
-    class="fixed bottom-6 right-6 bg-gray-900 text-white px-5 py-3 rounded-xl text-sm font-medium flex items-center gap-3 shadow-xl opacity-0 translate-y-3 pointer-events-none transition-all duration-300 z-50"
->
-
+<div id="sett-toast">
     <i class="fas fa-check-circle text-green-400"></i>
-
-    <span id="sett-toast-msg">
-        Saved!
-    </span>
-
+    <span id="sett-toast-msg">Saved!</span>
 </div>
-
-
-<style>
-
-.sett-tab-btn.active {
-    background: #ffffff !important;
-    color: #111827 !important;
-    font-weight: 600 !important;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08) !important;
-    border: 1px solid #e5e7eb !important;
-}
-
-#sett-toast.show {
-    opacity: 1 !important;
-    transform: translateY(0) !important;
-    pointer-events: auto !important;
-}
-
-</style>
 
 
 {% endblock %}
@@ -1493,37 +1706,25 @@
             'notification'
         ].forEach(t => {
 
-            const panel = document.getElementById(
-                'panel-' + t
-            );
+            const panel = document.getElementById('panel-' + t);
+            const button = document.getElementById('tab-btn-' + t);
 
-            const button = document.getElementById(
-                'tab-btn-' + t
-            );
-
-
-            if (panel) {
-                panel.style.display = 'none';
-            }
-
-            if (button) {
-                button.classList.remove('active');
-            }
+            if (panel) panel.style.display = 'none';
+            if (button) button.classList.remove('active');
 
         });
 
-
-        const selectedPanel = document.getElementById(
-            'panel-' + tab
-        );
-
-        const selectedButton = document.getElementById(
-            'tab-btn-' + tab
-        );
-
+        const selectedPanel = document.getElementById('panel-' + tab);
+        const selectedButton = document.getElementById('tab-btn-' + tab);
 
         if (selectedPanel) {
             selectedPanel.style.display = 'block';
+            selectedPanel.style.animation = 'none';
+            void selectedPanel.offsetWidth;
+            selectedPanel.style.animation = '';
+
+            const content = selectedPanel.closest('.sett-content');
+            if (content) content.scrollTop = 0;
         }
 
         if (selectedButton) {
@@ -1540,30 +1741,17 @@
     function settPreviewPhoto(event) {
 
         const file = event.target.files[0];
-
         if (!file) return;
-
 
         const reader = new FileReader();
 
-
         reader.onload = e => {
-
-            const av = document.getElementById(
-                'avatarPreview'
-            );
-
-            av.style.backgroundImage =
-                `url(${e.target.result})`;
-
+            const av = document.getElementById('avatarPreview');
+            av.style.backgroundImage = `url(${e.target.result})`;
             av.style.backgroundSize = 'cover';
-
             av.style.backgroundPosition = 'center';
-
             av.textContent = '';
-
         };
-
 
         reader.readAsDataURL(file);
 
@@ -1576,22 +1764,13 @@
 
     function settToast(msg) {
 
-        const toast = document.getElementById(
-            'sett-toast'
-        );
-
-        document.getElementById(
-            'sett-toast-msg'
-        ).textContent = msg || 'Saved!';
-
+        const toast = document.getElementById('sett-toast');
+        document.getElementById('sett-toast-msg').textContent = msg || 'Saved!';
 
         toast.classList.add('show');
 
-
         setTimeout(() => {
-
             toast.classList.remove('show');
-
         }, 3000);
 
     }
@@ -1603,12 +1782,8 @@
 
     function showAllPlans() {
 
-        const el = document.getElementById(
-            'all-plans-modal'
-        );
-
+        const el = document.getElementById('all-plans-modal');
         if (!el) return;
-
         el.classList.toggle('hidden');
 
     }
@@ -1620,57 +1795,33 @@
 
     function enableOrganizationEdit() {
 
-        const inputs = document.querySelectorAll(
-            '.organization-input'
-        );
+        const inputs = document.querySelectorAll('.organization-input');
+        const logoInput = document.getElementById('organization-logo');
+        const changeButton = document.getElementById('change-org-btn');
+        const actions = document.getElementById('organization-actions');
+        const badge = document.getElementById('org-edit-badge');
 
-        const logoInput = document.getElementById(
-            'organization-logo'
-        );
-
-        const changeButton = document.getElementById(
-            'change-org-btn'
-        );
-
-        const actions = document.getElementById(
-            'organization-actions'
-        );
-
-
-        // Enable text fields
-
-        inputs.forEach(input => {
-
-            input.disabled = false;
-
-        });
-
+        // Enable fields
+        inputs.forEach(input => { input.disabled = false; });
 
         // Enable logo upload
+        if (logoInput) logoInput.disabled = false;
 
-        if (logoInput) {
+        // Hide "Change Details" button, show actions
+        if (changeButton) changeButton.classList.add('hidden');
+        if (actions) actions.classList.remove('hidden');
 
-            logoInput.disabled = false;
-
+        // Switch badge to "editing"
+        if (badge) {
+            badge.innerHTML = '<i class="fas fa-check-circle"></i> Editing';
+            badge.style.background = 'linear-gradient(135deg, #f0fdf4, #dcfce7)';
+            badge.style.borderColor = '#bbf7d0';
+            badge.style.color = '#16a34a';
         }
 
-
-        // Hide Change Details button
-
-        if (changeButton) {
-
-            changeButton.classList.add('hidden');
-
-        }
-
-
-        // Show Save and Cancel buttons
-
-        if (actions) {
-
-            actions.classList.remove('hidden');
-
-        }
+        // Focus first input
+        const firstInput = document.querySelector('.organization-input');
+        if (firstInput) firstInput.focus();
 
     }
 
@@ -1680,16 +1831,39 @@
     // ==================================================
 
     function cancelOrganizationEdit() {
-
-        /*
-         * Reload the page so that any unsaved changes
-         * are discarded and the original database values
-         * are displayed again.
-         */
-
         window.location.reload();
-
     }
+
+
+    // ==================================================
+    // ORG LOGO LIVE PREVIEW (circular)
+    // ==================================================
+
+    (function () {
+        const logoInput = document.getElementById('organization-logo');
+        if (!logoInput) return;
+
+        logoInput.addEventListener('change', function (e) {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = ev => {
+                const circle = document.getElementById('org-logo-preview');
+                if (!circle) return;
+
+                // Remove initial letter / old img
+                circle.innerHTML = '';
+
+                // Append new img
+                const img = document.createElement('img');
+                img.src = ev.target.result;
+                img.alt = 'Organization logo preview';
+                circle.appendChild(img);
+            };
+            reader.readAsDataURL(file);
+        });
+    })();
 
 
     // ==================================================

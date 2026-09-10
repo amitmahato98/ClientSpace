@@ -15,21 +15,17 @@ def settings_page(request):
     active_tab = "profile"
 
     # ==================================================
-    # GET ORGANIZATION FOR MANAGER
+    # GET ORGANIZATION FOR STAFF AND MANAGER
     # ==================================================
 
     organization = None
 
-    if user.role == user.Role.MANAGER:
+    membership = OrganizationMembership.objects.filter(
+        user=user
+    ).select_related("organization").first()
 
-        membership = OrganizationMembership.objects.filter(
-            user=user,
-            role=OrganizationMembership.Role.MANAGER
-        ).select_related("organization").first()
-
-        if membership:
-            organization = membership.organization
-
+    if membership:
+        organization = membership.organization
 
     # ==================================================
     # POST REQUEST
@@ -38,7 +34,6 @@ def settings_page(request):
     if request.method == "POST":
 
         action = request.POST.get("action", "profile")
-
 
         # ==================================================
         # PROFILE
@@ -71,7 +66,6 @@ def settings_page(request):
                 ""
             )
 
-
             # ----------------------------------------------
             # Email uniqueness check
             # ----------------------------------------------
@@ -100,7 +94,6 @@ def settings_page(request):
 
                 user.email = email
 
-
             # ----------------------------------------------
             # Full name
             # ----------------------------------------------
@@ -124,13 +117,11 @@ def settings_page(request):
                 user.first_name = ""
                 user.last_name = ""
 
-
             # ----------------------------------------------
             # Display name
             # ----------------------------------------------
 
             user.display_name = display_name
-
 
             # ----------------------------------------------
             # Profile picture
@@ -141,7 +132,6 @@ def settings_page(request):
                 user.profile_picture = request.FILES[
                     "profile_picture"
                 ]
-
 
             # ----------------------------------------------
             # Password
@@ -165,7 +155,6 @@ def settings_page(request):
                         }
                     )
 
-
                 elif len(new_password) < 6:
 
                     messages.error(
@@ -181,7 +170,6 @@ def settings_page(request):
                             "organization": organization,
                         }
                     )
-
 
                 else:
 
@@ -205,7 +193,6 @@ def settings_page(request):
                         "sett:settings"
                     )
 
-
             # ----------------------------------------------
             # Save profile
             # ----------------------------------------------
@@ -221,7 +208,6 @@ def settings_page(request):
                 "sett:settings"
             )
 
-
         # ==================================================
         # ORGANIZATION
         # ==================================================
@@ -229,7 +215,10 @@ def settings_page(request):
         elif action == "organization":
 
             # ----------------------------------------------
-            # Security check
+            # SECURITY CHECK
+            #
+            # Only MANAGER can modify organization details.
+            # Staff can view them, but cannot update them.
             # ----------------------------------------------
 
             if user.role != user.Role.MANAGER:
@@ -242,7 +231,6 @@ def settings_page(request):
                 return redirect(
                     "sett:settings"
                 )
-
 
             # ----------------------------------------------
             # Make sure organization exists
@@ -259,7 +247,6 @@ def settings_page(request):
                     "sett:settings"
                 )
 
-
             # ----------------------------------------------
             # Organization name
             # ----------------------------------------------
@@ -268,7 +255,6 @@ def settings_page(request):
                 "name",
                 organization.name
             ).strip()
-
 
             # ----------------------------------------------
             # Description
@@ -279,7 +265,6 @@ def settings_page(request):
                 organization.description
             ).strip()
 
-
             # ----------------------------------------------
             # Organization email
             # ----------------------------------------------
@@ -288,7 +273,6 @@ def settings_page(request):
                 "organization_email",
                 organization.email
             ).strip()
-
 
             # ----------------------------------------------
             # Phone
@@ -299,7 +283,6 @@ def settings_page(request):
                 organization.phone
             ).strip()
 
-
             # ----------------------------------------------
             # Address
             # ----------------------------------------------
@@ -309,7 +292,6 @@ def settings_page(request):
                 organization.address
             ).strip()
 
-
             # ----------------------------------------------
             # Website
             # ----------------------------------------------
@@ -318,7 +300,6 @@ def settings_page(request):
                 "website",
                 organization.website
             ).strip()
-
 
             # ----------------------------------------------
             # Organization logo
@@ -330,13 +311,11 @@ def settings_page(request):
                     "logo"
                 ]
 
-
             # ----------------------------------------------
             # Save organization
             # ----------------------------------------------
 
             organization.save()
-
 
             messages.success(
                 request,
@@ -346,7 +325,6 @@ def settings_page(request):
             return redirect(
                 "sett:settings"
             )
-
 
     # ==================================================
     # RENDER SETTINGS PAGE
