@@ -640,6 +640,32 @@
 
         applyFilters();
 
+
+        /* ==========================================================
+           AUTO-OPEN CONTACT PANEL
+           After a form submission Django redirects back here with a
+           flash message. When messages are present the panel should
+           open automatically so the user sees the feedback without
+           having to click "Contact support" again.
+           ========================================================== */
+
+        {% if messages %}
+        if (contactToggle && contactPanel) {
+
+            contactPanel.classList.remove("grid-rows-[0fr]", "opacity-0");
+            contactPanel.classList.add("grid-rows-[1fr]", "opacity-100");
+            contactToggle.setAttribute("aria-expanded", "true");
+
+            window.setTimeout(function () {
+                document.getElementById("contactUs").scrollIntoView({
+                    behavior: "smooth",
+                    block: "start"
+                });
+            }, 100);
+
+        }
+        {% endif %}
+
     });
 </script>
 
