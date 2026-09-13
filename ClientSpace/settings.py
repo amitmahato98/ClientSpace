@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'theme',
     'clients',
     'projects',
+    'tasks',
     'sett',
     'dashboard',
     'staff',
