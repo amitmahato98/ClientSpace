@@ -343,8 +343,18 @@ def staff_setup(request, token):
                 role=OrganizationMembership.Role.STAFF
             )
 
+            # --------------------------------
+            # Notify organization managers
+            # --------------------------------
+            try:
+                from notifications.service import notify_team_member_joined
+                notify_team_member_joined(staff_member=staff_member)
+            except Exception:
+                pass
+
             # Send staff to login
             return redirect("accounts:login")
+
 
     else:
 

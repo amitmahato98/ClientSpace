@@ -133,6 +133,16 @@ def settings_page(request):
                     "profile_picture"
                 ]
 
+                try:
+                    from notifications.service import notify_account_activity
+                    notify_account_activity(
+                        recipient=user,
+                        message="Security notice: You updated your profile picture.",
+                        link="/settings/?tab=profile",
+                    )
+                except Exception:
+                    pass
+
             # ----------------------------------------------
             # Password
             # ----------------------------------------------
@@ -326,9 +336,39 @@ def settings_page(request):
                 "sett:settings"
             )
 
+        # ==================================================
+        # NOTIFICATIONS
+        # ==================================================
+
+        elif action == "notifications":
+
+            from notifications.models import NotificationSetting
+
+            settings_obj, _ = NotificationSetting.objects.get_or_create(user=user)
+            settings_obj.payment_received = request.POST.get("payment_received") == "on"
+            settings_obj.deadline_reminder = request.POST.get("deadline_reminder") == "on"
+            settings_obj.overdue_alert = request.POST.get("overdue_alert") == "on"
+            settings_obj.client_portal_viewed = request.POST.get("client_portal_viewed") == "on"
+            settings_obj.team_member_joined = request.POST.get("team_member_joined") == "on"
+            settings_obj.weekly_summary = request.POST.get("weekly_summary") == "on"
+            settings_obj.account_activity = request.POST.get("account_activity") == "on"
+            settings_obj.save()
+
+            messages.success(
+                request,
+                "Notification preferences updated successfully!"
+            )
+
+            return redirect(
+                "/settings/?tab=notification"
+            )
+
     # ==================================================
     # RENDER SETTINGS PAGE
     # ==================================================
+
+    from notifications.models import NotificationSetting
+    notification_settings, _ = NotificationSetting.objects.get_or_create(user=user)
 
     return render(
         request,
@@ -336,5 +376,57 @@ def settings_page(request):
         {
             "active_tab": active_tab,
             "organization": organization,
+            "notification_settings": notification_settings,
         }
     )
+
+
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+import json
+
+
+@staff_or_above
+@require_http_methods(["POST"])
+def toggle_notification_setting_ajax(request):
+    """
+    AJAX endpoint for instant toggle of a notification setting in Settings.
+    Returns JSON with updated state and recalculates unread notification count.
+    """
+    from notifications.models import NotificationSetting
+    from notifications.views import _get_active_notifications_qs
+
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+        setting_key = data.get("setting")
+        enabled = bool(data.get("enabled"))
+    except Exception:
+        setting_key = request.POST.get("setting")
+        enabled = request.POST.get("enabled") in ["true", "True", "1", "on"]
+
+    valid_keys = [
+        "payment_received",
+        "deadline_reminder",
+        "overdue_alert",
+        "client_portal_viewed",
+        "team_member_joined",
+        "weekly_summary",
+        "account_activity",
+    ]
+
+    if setting_key not in valid_keys:
+        return JsonResponse({"success": False, "error": "Invalid notification setting."}, status=400)
+
+    settings_obj, _ = NotificationSetting.objects.get_or_create(user=request.user)
+    setattr(settings_obj, setting_key, enabled)
+    settings_obj.save(update_fields=[setting_key, "updated_at"])
+
+    unread_count = _get_active_notifications_qs(request.user).filter(is_read=False).count()
+
+    return JsonResponse({
+        "success": True,
+        "setting": setting_key,
+        "enabled": enabled,
+        "unread_count": unread_count,
+        "message": f"Notification preference saved.",
+    })

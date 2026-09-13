@@ -33,7 +33,10 @@ def notifications(request):
         }
 
     try:
-        from .models import Notification
+        from .models import Notification, NotificationSetting
+
+        settings_obj, _ = NotificationSetting.objects.get_or_create(user=request.user)
+        disabled_types = settings_obj.get_disabled_types()
 
         qs = (
             Notification.objects
@@ -41,6 +44,9 @@ def notifications(request):
             .select_related("actor")
             .order_by("-created_at")
         )
+
+        if disabled_types:
+            qs = qs.exclude(notification_type__in=disabled_types)
 
         unread_count    = qs.filter(is_read=False).count()
         notification_list = qs[:10]  # cap at 10 for the dropdown

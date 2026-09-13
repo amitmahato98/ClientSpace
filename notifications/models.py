@@ -28,6 +28,18 @@ class Notification(models.Model):
       Event C — task_status_update → notify project manager(s)
     """
 
+    class NotificationType(models.TextChoices):
+        PAYMENT_RECEIVED = "payment_received", "Payment received"
+        DEADLINE_REMINDER = "deadline_reminder", "Deadline reminder"
+        OVERDUE_ALERT = "overdue_alert", "Overdue alert"
+        CLIENT_PORTAL_VIEWED = "client_portal_viewed", "Client portal viewed"
+        TEAM_MEMBER_JOINED = "team_member_joined", "Team member joined"
+        WEEKLY_SUMMARY = "weekly_summary", "Weekly summary"
+        ACCOUNT_ACTIVITY = "account_activity", "Account activity"
+        TASK_ASSIGNED = "task_assigned", "Task assigned"
+        PROJECT_ASSIGNED = "project_assigned", "Project assigned"
+        GENERAL = "general", "General"
+
     recipient = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -41,6 +53,13 @@ class Notification(models.Model):
         null=True,
         blank=True,
         related_name="triggered_notifications",
+    )
+
+    notification_type = models.CharField(
+        max_length=50,
+        choices=NotificationType.choices,
+        default=NotificationType.GENERAL,
+        db_index=True,
     )
 
     message = models.CharField(max_length=500)
@@ -60,4 +79,61 @@ class Notification(models.Model):
 
     def __str__(self):
         status = "read" if self.is_read else "unread"
-        return f"[{status}] → {self.recipient.username}: {self.message[:60]}"
+        return f"[{status}] [{self.notification_type}] → {self.recipient.username}: {self.message[:60]}"
+
+
+class NotificationSetting(models.Model):
+    """
+    User notification preferences corresponding to the Settings -> Notifications panel.
+    All notification settings default to True (ON).
+    """
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="notification_settings",
+    )
+
+    # Corresponds to Settings toggles
+    payment_received = models.BooleanField(default=True)
+    deadline_reminder = models.BooleanField(default=True)
+    overdue_alert = models.BooleanField(default=True)
+    client_portal_viewed = models.BooleanField(default=True)
+    team_member_joined = models.BooleanField(default=True)
+    weekly_summary = models.BooleanField(default=True)
+    account_activity = models.BooleanField(default=True)
+
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Notification Setting"
+        verbose_name_plural = "Notification Settings"
+
+    def __str__(self):
+        return f"NotificationSettings({self.user.username})"
+
+    def is_enabled(self, notification_type: str) -> bool:
+        """
+        Check if the specified notification type is enabled.
+        Unknown or general types return True by default.
+        """
+        if not notification_type:
+            return True
+        return getattr(self, notification_type, True)
+
+    def get_disabled_types(self) -> list[str]:
+        """
+        Return list of notification type keys currently turned OFF.
+        """
+        keys = [
+            "payment_received",
+            "deadline_reminder",
+            "overdue_alert",
+            "client_portal_viewed",
+            "team_member_joined",
+            "weekly_summary",
+            "account_activity",
+        ]
+        return [k for k in keys if not getattr(self, k, True)]
+
+

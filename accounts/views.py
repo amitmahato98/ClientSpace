@@ -157,6 +157,15 @@ def login_view(request):
                 )
             else:
                 login(request, user)
+                try:
+                    from notifications.service import notify_account_activity
+                    notify_account_activity(
+                        recipient=user,
+                        message="Security notice: You signed in to your account.",
+                        link="/settings/?tab=profile",
+                    )
+                except Exception:
+                    pass
                 return redirect(_post_login_redirect(request, user))
         else:
             messages.error(
@@ -172,9 +181,20 @@ def login_view(request):
 
 def logout_view(request):
     """POST-only logout (CSRF-protected). Always redirects to login."""
+    if request.user.is_authenticated:
+        try:
+            from notifications.service import notify_account_activity
+            notify_account_activity(
+                recipient=request.user,
+                message="Security notice: You signed out of your account.",
+                link="/settings/?tab=profile",
+            )
+        except Exception:
+            pass
     logout(request)
     messages.success(request, "You have been signed out.")
     return redirect(reverse("accounts:login"))
+
 
 
 # ══════════════════════════════════════════════════════════════════════════════

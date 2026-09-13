@@ -392,8 +392,23 @@ def project_detail(request, pk):
 
     if request.user.is_client:
         project = get_object_or_404(qs, pk=pk, client=request.user)
+        session_key = f"portal_viewed_{project.pk}"
+        if not request.session.get(session_key):
+            request.session[session_key] = True
+            try:
+                from notifications.service import notify_client_portal_viewed
+                recipient = project.created_by
+                if recipient:
+                    notify_client_portal_viewed(
+                        recipient=recipient,
+                        client=request.user,
+                        project=project,
+                    )
+            except Exception:
+                pass
     else:
         project = get_object_or_404(qs, pk=pk)
+
 
     # Assigned staff — always load so STAFF/CLIENT can see the list (read-only)
     assigned_staff = (

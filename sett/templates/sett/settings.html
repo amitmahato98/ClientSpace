@@ -1617,57 +1617,158 @@
                     Choose which emails you'd like to receive.
                 </p>
 
-                <div class="flex flex-col border-t border-gray-100">
+                <form method="POST" action="{% url 'sett:settings' %}" id="notification-settings-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="notifications">
 
-                    <div class="flex items-center justify-between py-4 border-b border-gray-100">
-                        <div>
-                            <p class="text-sm font-semibold text-gray-900 mb-1">Payment received</p>
-                            <p class="text-sm text-gray-500">When a client payment is recorded</p>
+                    <div class="flex flex-col border-t border-gray-100">
+
+                        <!-- Payment received -->
+                        <div class="flex items-center justify-between py-4 border-b border-gray-100">
+                            <div>
+                                <p class="text-sm font-semibold text-gray-900 mb-1">Payment received</p>
+                                <p class="text-sm text-gray-500">When a client payment is recorded</p>
+                            </div>
+                            <label class="sett-toggle">
+                                <input
+                                    type="checkbox"
+                                    name="payment_received"
+                                    id="notif-toggle-payment_received"
+                                    class="notif-setting-toggle"
+                                    data-setting="payment_received"
+                                    {% if not notification_settings or notification_settings.payment_received %}checked{% endif %}
+                                >
+                                <span></span>
+                            </label>
                         </div>
-                        <label class="sett-toggle"><input type="checkbox" checked><span></span></label>
+
+                        <!-- Deadline reminder -->
+                        <div class="flex items-center justify-between py-4 border-b border-gray-100">
+                            <div>
+                                <p class="text-sm font-semibold text-gray-900 mb-1">Deadline reminder</p>
+                                <p class="text-sm text-gray-500">2 days before a project is due</p>
+                            </div>
+                            <label class="sett-toggle">
+                                <input
+                                    type="checkbox"
+                                    name="deadline_reminder"
+                                    id="notif-toggle-deadline_reminder"
+                                    class="notif-setting-toggle"
+                                    data-setting="deadline_reminder"
+                                    {% if not notification_settings or notification_settings.deadline_reminder %}checked{% endif %}
+                                >
+                                <span></span>
+                            </label>
+                        </div>
+
+                        <!-- Overdue alert -->
+                        <div class="flex items-center justify-between py-4 border-b border-gray-100">
+                            <div>
+                                <p class="text-sm font-semibold text-gray-900 mb-1">Overdue alert</p>
+                                <p class="text-sm text-gray-500">When a project passes its deadline</p>
+                            </div>
+                            <label class="sett-toggle">
+                                <input
+                                    type="checkbox"
+                                    name="overdue_alert"
+                                    id="notif-toggle-overdue_alert"
+                                    class="notif-setting-toggle"
+                                    data-setting="overdue_alert"
+                                    {% if not notification_settings or notification_settings.overdue_alert %}checked{% endif %}
+                                >
+                                <span></span>
+                            </label>
+                        </div>
+
+                        <!-- Client portal viewed -->
+                        <div class="flex items-center justify-between py-4 border-b border-gray-100">
+                            <div>
+                                <p class="text-sm font-semibold text-gray-900 mb-1">Client portal viewed</p>
+                                <p class="text-sm text-gray-500">When a client opens their portal</p>
+                            </div>
+                            <label class="sett-toggle">
+                                <input
+                                    type="checkbox"
+                                    name="client_portal_viewed"
+                                    id="notif-toggle-client_portal_viewed"
+                                    class="notif-setting-toggle"
+                                    data-setting="client_portal_viewed"
+                                    {% if not notification_settings or notification_settings.client_portal_viewed %}checked{% endif %}
+                                >
+                                <span></span>
+                            </label>
+                        </div>
+
+                        <!-- Team member joined -->
+                        <div class="flex items-center justify-between py-4 border-b border-gray-100">
+                            <div>
+                                <p class="text-sm font-semibold text-gray-900 mb-1">Team member joined</p>
+                                <p class="text-sm text-gray-500">When an invite is accepted</p>
+                            </div>
+                            <label class="sett-toggle">
+                                <input
+                                    type="checkbox"
+                                    name="team_member_joined"
+                                    id="notif-toggle-team_member_joined"
+                                    class="notif-setting-toggle"
+                                    data-setting="team_member_joined"
+                                    {% if not notification_settings or notification_settings.team_member_joined %}checked{% endif %}
+                                >
+                                <span></span>
+                            </label>
+                        </div>
+
+                        <!-- Weekly summary -->
+                        <div class="flex items-center justify-between py-4 border-b border-gray-100">
+                            <div>
+                                <p class="text-sm font-semibold text-gray-900 mb-1">Weekly summary</p>
+                                <p class="text-sm text-gray-500">Monday morning recap of the week ahead</p>
+                            </div>
+                            <label class="sett-toggle">
+                                <input
+                                    type="checkbox"
+                                    name="weekly_summary"
+                                    id="notif-toggle-weekly_summary"
+                                    class="notif-setting-toggle"
+                                    data-setting="weekly_summary"
+                                    {% if not notification_settings or notification_settings.weekly_summary %}checked{% endif %}
+                                >
+                                <span></span>
+                            </label>
+                        </div>
+
+                        <!-- Account & security alerts (login, logout, profile picture) -->
+                        <div class="flex items-center justify-between py-4">
+                            <div>
+                                <p class="text-sm font-semibold text-gray-900 mb-1">Account &amp; security alerts</p>
+                                <p class="text-sm text-gray-500">When you log in, log out, or change your profile picture</p>
+                            </div>
+                            <label class="sett-toggle">
+                                <input
+                                    type="checkbox"
+                                    name="account_activity"
+                                    id="notif-toggle-account_activity"
+                                    class="notif-setting-toggle"
+                                    data-setting="account_activity"
+                                    {% if not notification_settings or notification_settings.account_activity %}checked{% endif %}
+                                >
+                                <span></span>
+                            </label>
+                        </div>
+
+
                     </div>
 
-                    <div class="flex items-center justify-between py-4 border-b border-gray-100">
-                        <div>
-                            <p class="text-sm font-semibold text-gray-900 mb-1">Deadline reminder</p>
-                            <p class="text-sm text-gray-500">2 days before a project is due</p>
-                        </div>
-                        <label class="sett-toggle"><input type="checkbox" checked><span></span></label>
+                    <!-- Actions -->
+                    <div class="mt-7 pt-6 border-t border-gray-100 flex items-center justify-between">
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-check"></i>
+                            <span>Save Preferences</span>
+                        </button>
+                        <span id="notif-ajax-status" class="text-xs text-gray-400 font-medium"></span>
                     </div>
 
-                    <div class="flex items-center justify-between py-4 border-b border-gray-100">
-                        <div>
-                            <p class="text-sm font-semibold text-gray-900 mb-1">Overdue alert</p>
-                            <p class="text-sm text-gray-500">When a project passes its deadline</p>
-                        </div>
-                        <label class="sett-toggle"><input type="checkbox" checked><span></span></label>
-                    </div>
-
-                    <div class="flex items-center justify-between py-4 border-b border-gray-100">
-                        <div>
-                            <p class="text-sm font-semibold text-gray-900 mb-1">Client portal viewed</p>
-                            <p class="text-sm text-gray-500">When a client opens their portal</p>
-                        </div>
-                        <label class="sett-toggle"><input type="checkbox"><span></span></label>
-                    </div>
-
-                    <div class="flex items-center justify-between py-4 border-b border-gray-100">
-                        <div>
-                            <p class="text-sm font-semibold text-gray-900 mb-1">Team member joined</p>
-                            <p class="text-sm text-gray-500">When an invite is accepted</p>
-                        </div>
-                        <label class="sett-toggle"><input type="checkbox" checked><span></span></label>
-                    </div>
-
-                    <div class="flex items-center justify-between py-4">
-                        <div>
-                            <p class="text-sm font-semibold text-gray-900 mb-1">Weekly summary</p>
-                            <p class="text-sm text-gray-500">Monday morning recap of the week ahead</p>
-                        </div>
-                        <label class="sett-toggle"><input type="checkbox" checked><span></span></label>
-                    </div>
-
-                </div>
+                </form>
 
             </div>
 
@@ -1888,6 +1989,75 @@
         }
 
     })();
+
+
+    // ==================================================
+    // NOTIFICATION SETTINGS AJAX AUTO-SAVE & BADGE SYNC
+    // ==================================================
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const notifToggles = document.querySelectorAll('.notif-setting-toggle');
+        const statusEl = document.getElementById('notif-ajax-status');
+
+        notifToggles.forEach(function (toggle) {
+            toggle.addEventListener('change', function () {
+                const settingKey = this.dataset.setting;
+                const isEnabled = this.checked;
+
+                if (statusEl) {
+                    statusEl.textContent = 'Saving…';
+                    statusEl.style.color = '#9ca3af';
+                }
+
+                fetch("{% url 'sett:ajax_toggle_notification' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken(),
+                    },
+                    body: JSON.stringify({
+                        setting: settingKey,
+                        enabled: isEnabled,
+                    }),
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('HTTP error ' + response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        settToast('Notification preference saved!');
+                        if (statusEl) {
+                            statusEl.textContent = 'Saved!';
+                            statusEl.style.color = '#16a34a';
+                            setTimeout(() => {
+                                statusEl.textContent = '';
+                            }, 2500);
+                        }
+
+                        // Update the navbar notification badge immediately
+                        if (typeof updateBadgeCount === 'function') {
+                            updateBadgeCount(data.unread_count);
+                        }
+                    } else {
+                        settToast(data.error || 'Failed to update setting.');
+                        if (statusEl) {
+                            statusEl.textContent = 'Failed to save';
+                            statusEl.style.color = '#dc2626';
+                        }
+                    }
+                })
+                .catch(err => {
+                    console.error('Error saving notification preference:', err);
+                    settToast('Could not save preference.');
+                    if (statusEl) {
+                        statusEl.textContent = 'Failed to save';
+                        statusEl.style.color = '#dc2626';
+                    }
+                });
+            });
+        });
+    });
 
 </script>
 
