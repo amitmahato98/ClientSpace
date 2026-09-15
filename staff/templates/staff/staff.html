@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% load static %}
 
+{% block title %}Staff — ClientSpace{% endblock %}
+{% block page_heading %}Staff{% endblock %}
+{% block page_subheading %}Manage your team and distribute project work{% endblock %}
+
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'staff/staff.css' %}">
 {% endblock %}
@@ -27,33 +31,10 @@
 <div class="staff-page">
 
     <!-- =====================================================
-         PAGE HEADER
+         PAGE HEADER — action buttons
     ====================================================== -->
 
     <div class="page-header">
-
-        <div class="page-heading">
-
-            <div class="page-title-row">
-
-                <div class="page-title-icon">
-                    <i class="fas fa-users"></i>
-                </div>
-
-                <div>
-                    <h1>Staff</h1>
-
-                    <p>
-                        Manage your team and distribute project work.
-                    </p>
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- HEADER ACTIONS -->
 
         <div class="header-actions">
 

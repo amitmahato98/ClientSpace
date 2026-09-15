@@ -1,14 +1,8 @@
 {% extends "base.html" %}
 {% block title %}Tasks — ClientSpace{% endblock %}
 {% block page_heading %}Tasks{% endblock %}
+{% block page_subheading %}{{ tasks.count }} task{{ tasks.count|pluralize }} across {{ tasks_by_staff|length }} staff member{{ tasks_by_staff|length|pluralize }}{% endblock %}
 {% block content %}
-
-<div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
-  <div>
-    <h2 class="text-lg font-semibold text-[#4a3520]">Tasks</h2>
-    <p class="text-sm text-[#8b6f55]">{{ tasks.count }} task{{ tasks.count|pluralize }} across {{ tasks_by_staff|length }} staff member{{ tasks_by_staff|length|pluralize }}</p>
-  </div>
-</div>
 
 {% if not tasks %}
   <div class="bg-white rounded-xl border border-[#e8dccc] p-6 text-sm text-[#8b6f55]">
