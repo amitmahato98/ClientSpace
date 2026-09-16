@@ -1,9 +1,11 @@
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash, get_user_model
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
 
 from accounts.decorators import staff_or_above
 from accounts.models import OrganizationMembership
+from .models import Workspace
 
 User = get_user_model()
 
@@ -12,7 +14,7 @@ User = get_user_model()
 def settings_page(request):
 
     user = request.user
-    active_tab = "profile"
+    active_tab = request.GET.get("tab", "profile")
 
     # ==================================================
     # GET ORGANIZATION FOR STAFF AND MANAGER
@@ -26,6 +28,8 @@ def settings_page(request):
 
     if membership:
         organization = membership.organization
+
+    workspace = Workspace.get_for_user(user)
 
     # ==================================================
     # POST REQUEST
@@ -327,6 +331,11 @@ def settings_page(request):
 
             organization.save()
 
+            # Keep workspace name synchronized with organization
+            if workspace and organization.name:
+                workspace.name = organization.name
+                workspace.save(update_fields=["name"])
+
             messages.success(
                 request,
                 "Organization details updated successfully!"
@@ -334,6 +343,66 @@ def settings_page(request):
 
             return redirect(
                 "sett:settings"
+            )
+
+        # ==================================================
+        # WORKSPACE
+        # ==================================================
+
+        elif action == "workspace":
+
+            workspace_name = request.POST.get("workspace_name", "").strip()
+            role_title = request.POST.get("role", "").strip()
+            currency = request.POST.get("currency", "NPR").strip()
+
+            is_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest"
+
+            if not workspace_name:
+                err_msg = "Studio / Workspace name is required."
+                if is_ajax:
+                    return JsonResponse({"success": False, "error": err_msg}, status=400)
+                messages.error(request, err_msg)
+                return redirect("/settings/?tab=workspace")
+
+            if not role_title:
+                err_msg = "Your role is required."
+                if is_ajax:
+                    return JsonResponse({"success": False, "error": err_msg}, status=400)
+                messages.error(request, err_msg)
+                return redirect("/settings/?tab=workspace")
+
+            valid_currencies = [c[0] for c in Workspace.CURRENCY_CHOICES]
+            if currency not in valid_currencies:
+                currency = "NPR"
+
+            workspace.name = workspace_name
+            workspace.role = role_title
+            workspace.currency = currency
+            workspace.save()
+
+            # If manager and organization exists, sync organization name
+            if organization and user.role == user.Role.MANAGER:
+                organization.name = workspace_name
+                organization.save(update_fields=["name"])
+
+            if is_ajax:
+                return JsonResponse({
+                    "success": True,
+                    "message": "Workspace saved successfully!",
+                    "workspace": {
+                        "name": workspace.name,
+                        "role": workspace.role,
+                        "currency": workspace.currency,
+                    }
+                })
+
+            messages.success(
+                request,
+                "Workspace saved successfully!"
+            )
+
+            return redirect(
+                "/settings/?tab=workspace"
             )
 
         # ==================================================
@@ -377,6 +446,7 @@ def settings_page(request):
             "active_tab": active_tab,
             "organization": organization,
             "notification_settings": notification_settings,
+            "workspace": workspace,
         }
     )
 

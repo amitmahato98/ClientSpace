@@ -1381,13 +1381,15 @@
 
                 <h2 class="sett-panel-title">Workspace</h2>
 
-                <form onsubmit="event.preventDefault(); settToast('Workspace saved successfully!');">
+                <form method="POST" action="{% url 'sett:settings' %}" id="workspace-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="workspace">
 
                     <div class="sett-field">
                         <label class="sett-label">Studio / Workspace name</label>
                         <div class="sett-icon-wrap">
                             <i class="fas fa-briefcase"></i>
-                            <input class="sett-input" type="text" name="workspace_name" placeholder="Enter your workspace name" required>
+                            <input class="sett-input" type="text" name="workspace_name" value="{{ workspace.name|default:organization.name|default:'Rivera Studio' }}" placeholder="Enter your workspace name" required>
                         </div>
                     </div>
 
@@ -1395,7 +1397,7 @@
                         <label class="sett-label">Your role</label>
                         <div class="sett-icon-wrap">
                             <i class="fas fa-user-tag"></i>
-                            <input class="sett-input" type="text" name="role" placeholder="Enter your role" required>
+                            <input class="sett-input" type="text" name="role" value="{{ workspace.role|default:'Freelance Designer & Developer' }}" placeholder="Enter your role" required>
                         </div>
                     </div>
 
@@ -1404,15 +1406,15 @@
                         <div class="sett-icon-wrap">
                             <i class="fas fa-coins"></i>
                             <select class="sett-input" name="currency" required style="padding-left: 40px;">
-                                <option value="NPR" selected>NPR - Nepalese Rupee</option>
-                                <option value="USD">$ USD</option>
-                                <option value="EUR">€ EUR</option>
-                                <option value="INR">₹ INR — Indian Rupee</option>
+                                <option value="NPR" {% if workspace.currency == "NPR" %}selected{% endif %}>NPR - Nepalese Rupee</option>
+                                <option value="USD" {% if workspace.currency == "USD" %}selected{% endif %}>$ USD</option>
+                                <option value="EUR" {% if workspace.currency == "EUR" %}selected{% endif %}>€ EUR</option>
+                                <option value="INR" {% if workspace.currency == "INR" %}selected{% endif %}>₹ INR — Indian Rupee</option>
                             </select>
                         </div>
                     </div>
 
-                    <button type="submit" class="btn-primary">
+                    <button type="submit" class="btn-primary" id="save-workspace-btn">
                         <i class="fas fa-check"></i>
                         <span>Save Workspace</span>
                     </button>
@@ -2057,6 +2059,75 @@
                 });
             });
         });
+
+        // ==================================================
+        // WORKSPACE FORM AJAX SAVE & SYNC
+        // ==================================================
+        const workspaceForm = document.getElementById('workspace-form');
+        if (workspaceForm) {
+            workspaceForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const submitBtn = document.getElementById('save-workspace-btn') || this.querySelector('button[type="submit"]');
+                const originalHtml = submitBtn ? submitBtn.innerHTML : '';
+
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Saving…</span>';
+                }
+
+                const formData = new FormData(this);
+                const csrfToken = (typeof getCsrfToken === 'function')
+                    ? getCsrfToken()
+                    : (formData.get('csrfmiddlewaretoken') || '');
+
+                fetch(this.action || "{% url 'sett:settings' %}", {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': csrfToken,
+                    },
+                    body: formData,
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(data => {
+                            throw new Error(data.error || 'Server returned status ' + response.status);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        settToast(data.message || 'Workspace saved successfully!');
+
+                        // Sync organization name input and header on page if present
+                        if (data.workspace && data.workspace.name) {
+                            const orgNameInput = document.querySelector('input[name="name"].organization-input');
+                            if (orgNameInput) {
+                                orgNameInput.value = data.workspace.name;
+                            }
+                            const orgHeaderH3 = document.querySelector('.org-header-info h3');
+                            if (orgHeaderH3) {
+                                orgHeaderH3.textContent = data.workspace.name;
+                            }
+                        }
+                    } else {
+                        settToast(data.error || 'Failed to save workspace.');
+                    }
+                })
+                .catch(err => {
+                    console.error('Error saving workspace:', err);
+                    settToast(err.message || 'Could not save workspace.');
+                })
+                .finally(() => {
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalHtml;
+                    }
+                });
+            });
+        }
     });
 
 </script>
