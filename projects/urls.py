@@ -28,4 +28,5 @@ urlpatterns = [
 
     # ── Phase 5: AJAX endpoints ──────────────────────────────────────────────
     path("ajax/tasks/<int:task_id>/update-status/", views.task_status_update_ajax, name="ajax_task_status_update"),
+    path("ajax/tasks/<int:task_id>/update-completion/", views.task_completion_update_ajax, name="ajax_task_completion_update"),
 ]

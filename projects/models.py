@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 
@@ -62,6 +63,18 @@ class Task(models.Model):
         max_length=20,
         choices=Status.choices,
         default=Status.PENDING,
+    )
+
+    # Staff-reported completion percentage (0-100), set via the slider on
+    # the "My Tasks" page. Independent of `status` — a staff member can
+    # fine-tune progress within a status (e.g. "In Progress, 40% done")
+    # without that being forced to the coarse PENDING/IN_PROGRESS/COMPLETED
+    # buckets. Managers see this value reflected read-only on the Tasks
+    # overview page.
+    completion_percent = models.PositiveSmallIntegerField(
+        default=0,
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        help_text="Staff-reported percentage of completion (0-100).",
     )
 
     priority = models.CharField(
