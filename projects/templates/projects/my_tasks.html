@@ -170,6 +170,75 @@ document.addEventListener("DOMContentLoaded", function () {
         }, 4000);
     }
 
+    // ══════════════════════════════════════════════════════════
+    // COMPLETION % SLIDER — AJAX UPDATE
+    // ══════════════════════════════════════════════════════════
+    const completionSliders = document.querySelectorAll(".task-completion-slider");
+    const debounceTimers = {};
+
+    function sendCompletionUpdate(taskId, value, slider) {
+        const valueLabel = document.querySelector(`[data-task-completion-value="${taskId}"]`);
+        const container = slider.closest(".flex");
+        const spinner = container.querySelector(".task-completion-spinner");
+        const indicator = container.querySelector(".task-completion-indicator");
+
+        if (spinner) spinner.classList.remove("hidden");
+
+        fetch(`/projects/ajax/tasks/${taskId}/update-completion/`, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": getCsrfToken(),
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ completion_percent: value }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (valueLabel) valueLabel.textContent = `${data.completion_percent}%`;
+                if (indicator) {
+                    indicator.classList.remove("hidden");
+                    setTimeout(() => indicator.classList.add("hidden"), 1500);
+                }
+            } else {
+                showToast(data.error || "Failed to update completion.", "error");
+            }
+        })
+        .catch(error => {
+            console.error("Error updating completion:", error);
+            showToast("Network error. Please try again.", "error");
+        })
+        .finally(() => {
+            if (spinner) spinner.classList.add("hidden");
+        });
+    }
+
+    completionSliders.forEach(slider => {
+        const taskId = slider.dataset.taskId;
+        const valueLabel = document.querySelector(`[data-task-completion-value="${taskId}"]`);
+
+        // Live-update the % label as the user drags, before the request lands.
+        slider.addEventListener("input", function () {
+            if (valueLabel) valueLabel.textContent = `${this.value}%`;
+        });
+
+        // Debounce the network call so dragging doesn't spam the server —
+        // fire once the user pauses or releases the slider.
+        slider.addEventListener("input", function () {
+            clearTimeout(debounceTimers[taskId]);
+            const value = this.value;
+            debounceTimers[taskId] = setTimeout(() => {
+                sendCompletionUpdate(taskId, value, slider);
+            }, 400);
+        });
+
+        // Also fire immediately on release for a snappier feel.
+        slider.addEventListener("change", function () {
+            clearTimeout(debounceTimers[taskId]);
+            sendCompletionUpdate(taskId, this.value, slider);
+        });
+    });
+
     statusSelects.forEach(select => {
         const taskId = select.dataset.taskId;
         const container = select.closest(".flex");

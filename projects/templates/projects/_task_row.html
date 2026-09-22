@@ -34,6 +34,29 @@ Context vars: task, show_status_form (bool)
                 <span class="text-[11px] text-gray-400 truncate max-w-xs">{{ task.description|truncatechars:80 }}</span>
                 {% endif %}
             </div>
+
+            <!-- Completion % slider (staff only) -->
+            {% if show_status_form %}
+            <div class="flex items-center gap-2.5 mt-2.5 max-w-xs">
+                <input type="range"
+                       class="task-completion-slider flex-1 h-1.5 accent-[#d4a373] cursor-pointer"
+                       min="0" max="100" step="5"
+                       value="{{ task.completion_percent }}"
+                       data-task-id="{{ task.pk }}"
+                       aria-label="Completion percentage for {{ task.title }}">
+                <span class="task-completion-value text-[11px] font-semibold text-[#8b6f55] w-9 text-right shrink-0"
+                      data-task-completion-value="{{ task.pk }}">{{ task.completion_percent }}%</span>
+                <span class="task-completion-spinner hidden">
+                    <svg class="animate-spin h-3.5 w-3.5 text-[#d4a373]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </span>
+                <span class="task-completion-indicator hidden text-[11px] text-[#137333]">
+                    <i class="fas fa-check-circle"></i>
+                </span>
+            </div>
+            {% endif %}
         </div>
 
         <!-- Right: status update form (staff only) — Phase 5: AJAX -->
