@@ -177,13 +177,16 @@
           <!-- Right: search · bell · help · avatar · logout -->
           <div class="flex items-center gap-2 shrink-0">
 
-            <!-- Search (hidden on small screens) -->
-            <div class="relative hidden sm:block">
+            <!-- Global Search (hidden on small screens) -->
+            <div class="relative hidden sm:block" id="globalSearchWrapper">
               <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
-              <input type="text" placeholder="Search…"
-                class="pl-8 pr-4 py-1.5 text-xs rounded-full bg-gray-100/80 text-gray-700 placeholder-gray-400
-                       border border-transparent focus:bg-white focus:border-gray-300 focus:outline-none
-                       w-48 lg:w-56 transition">
+              <input type="text" 
+                     id="globalSearchInput" 
+                     placeholder="Search projects, clients, staff, tasks…"
+                     autocomplete="off"
+                     class="pl-8 pr-4 py-1.5 text-xs rounded-full bg-gray-100/80 text-gray-700 placeholder-gray-400
+                            border border-transparent focus:bg-white focus:border-gray-300 focus:outline-none
+                            w-48 lg:w-56 transition">
             </div>
 
             <!-- Notification Bell -->
@@ -631,6 +634,257 @@
       });
     </script>
 
+    <!-- ============================================================ -->
+    <!-- GLOBAL SEARCH JAVASCRIPT                                     -->
+    <!-- ============================================================ -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById("globalSearchInput");
+        const searchDropdown = document.getElementById("globalSearchDropdown");
+        const searchLoading = document.getElementById("searchLoading");
+        const searchResults = document.getElementById("searchResults");
+        const searchEmpty = document.getElementById("searchEmpty");
+
+        if (!searchInput || !searchDropdown) return;
+
+        let searchTimeout = null;
+        let currentQuery = "";
+
+        // Position dropdown below the search input
+        function positionSearchDropdown() {
+          const rect = searchInput.getBoundingClientRect();
+          const gap = 8;
+          const top = rect.bottom + gap;
+          const left = rect.left;
+
+          searchDropdown.style.top = top + "px";
+          searchDropdown.style.left = left + "px";
+        }
+
+        // Show dropdown
+        function showDropdown() {
+          positionSearchDropdown();
+          searchDropdown.classList.remove("hidden");
+        }
+
+        // Hide dropdown
+        function hideDropdown() {
+          searchDropdown.classList.add("hidden");
+        }
+
+        // Show loading state
+        function showLoading() {
+          searchLoading.classList.remove("hidden");
+          searchResults.classList.add("hidden");
+          searchEmpty.classList.add("hidden");
+        }
+
+        // Show results
+        function showResults() {
+          searchLoading.classList.add("hidden");
+          searchResults.classList.remove("hidden");
+          searchEmpty.classList.add("hidden");
+        }
+
+        // Show empty state
+        function showEmpty() {
+          searchLoading.classList.add("hidden");
+          searchResults.classList.add("hidden");
+          searchEmpty.classList.remove("hidden");
+        }
+
+        // Render search results
+        function renderResults(data) {
+          const { projects, clients, staff, tasks, total } = data;
+
+          if (total === 0) {
+            showEmpty();
+            return;
+          }
+
+          let html = '';
+
+          // Projects section
+          if (projects.length > 0) {
+            html += '<div class="px-4 py-2 bg-gray-50 border-b border-gray-100">';
+            html += '<span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Projects</span>';
+            html += '</div>';
+            projects.forEach(project => {
+              html += `
+                <a href="${project.url}" class="flex items-start gap-3 px-4 py-3 hover:bg-[#faf8f5] transition border-b border-gray-50">
+                  <div class="w-8 h-8 rounded-lg bg-[#f5e6d0] flex items-center justify-center shrink-0 mt-0.5">
+                    <i class="fas fa-folder-open text-[#b8895e] text-xs"></i>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <p class="text-xs font-semibold text-gray-800 truncate">${escapeHtml(project.name)}</p>
+                    <p class="text-[11px] text-gray-500 truncate">${escapeHtml(project.status)} · ${escapeHtml(project.client_name)}</p>
+                  </div>
+                </a>
+              `;
+            });
+          }
+
+          // Clients section
+          if (clients.length > 0) {
+            html += '<div class="px-4 py-2 bg-gray-50 border-b border-gray-100">';
+            html += '<span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Clients</span>';
+            html += '</div>';
+            clients.forEach(client => {
+              html += `
+                <a href="${client.url}" class="flex items-start gap-3 px-4 py-3 hover:bg-[#faf8f5] transition border-b border-gray-50">
+                  <div class="w-8 h-8 rounded-full bg-[#e8f0fe] flex items-center justify-center shrink-0 mt-0.5">
+                    <i class="fas fa-user text-[#1a73e8] text-xs"></i>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <p class="text-xs font-semibold text-gray-800 truncate">${escapeHtml(client.name)}</p>
+                    <p class="text-[11px] text-gray-500 truncate">${escapeHtml(client.email)}</p>
+                  </div>
+                </a>
+              `;
+            });
+          }
+
+          // Staff section
+          if (staff.length > 0) {
+            html += '<div class="px-4 py-2 bg-gray-50 border-b border-gray-100">';
+            html += '<span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Staff</span>';
+            html += '</div>';
+            staff.forEach(member => {
+              html += `
+                <a href="${member.url}" class="flex items-start gap-3 px-4 py-3 hover:bg-[#faf8f5] transition border-b border-gray-50">
+                  <div class="w-8 h-8 rounded-full bg-[#fef7e0] flex items-center justify-center shrink-0 mt-0.5">
+                    <i class="fas fa-user-tie text-[#b06000] text-xs"></i>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <p class="text-xs font-semibold text-gray-800 truncate">${escapeHtml(member.name)}</p>
+                    <p class="text-[11px] text-gray-500 truncate">${escapeHtml(member.email)}</p>
+                  </div>
+                </a>
+              `;
+            });
+          }
+
+          // Tasks section
+          if (tasks.length > 0) {
+            html += '<div class="px-4 py-2 bg-gray-50 border-b border-gray-100">';
+            html += '<span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Tasks</span>';
+            html += '</div>';
+            tasks.forEach(task => {
+              html += `
+                <a href="${task.url}" class="flex items-start gap-3 px-4 py-3 hover:bg-[#faf8f5] transition border-b border-gray-50">
+                  <div class="w-8 h-8 rounded-lg bg-[#e6f4ea] flex items-center justify-center shrink-0 mt-0.5">
+                    <i class="fas fa-tasks text-[#137333] text-xs"></i>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <p class="text-xs font-semibold text-gray-800 truncate">${escapeHtml(task.title)}</p>
+                    <p class="text-[11px] text-gray-500 truncate">${escapeHtml(task.status)} · ${escapeHtml(task.project_name)}</p>
+                  </div>
+                </a>
+              `;
+            });
+          }
+
+          searchResults.innerHTML = html;
+          showResults();
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+          const div = document.createElement('div');
+          div.textContent = text;
+          return div.innerHTML;
+        }
+
+        // Perform search
+        function performSearch(query) {
+          if (query.trim().length === 0) {
+            hideDropdown();
+            return;
+          }
+
+          currentQuery = query;
+          showDropdown();
+          showLoading();
+
+          fetch(`/search/?q=${encodeURIComponent(query)}`, {
+            method: 'GET',
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest',
+            },
+          })
+          .then(response => response.json())
+          .then(data => {
+            // Only render if this is still the current query
+            if (currentQuery === query) {
+              renderResults(data);
+            }
+          })
+          .catch(error => {
+            console.error('Search error:', error);
+            searchResults.innerHTML = `
+              <div class="px-4 py-6 text-center">
+                <i class="fas fa-exclamation-triangle text-red-400 text-lg mb-2 block"></i>
+                <p class="text-xs text-red-500">Search failed. Please try again.</p>
+              </div>
+            `;
+            showResults();
+          });
+        }
+
+        // Input event handler with debounce
+        searchInput.addEventListener('input', function(e) {
+          const query = e.target.value;
+
+          // Clear existing timeout
+          if (searchTimeout) {
+            clearTimeout(searchTimeout);
+          }
+
+          // Debounce search by 300ms
+          searchTimeout = setTimeout(() => {
+            performSearch(query);
+          }, 300);
+        });
+
+        // Focus event - show dropdown if there's a query
+        searchInput.addEventListener('focus', function() {
+          if (this.value.trim().length > 0) {
+            performSearch(this.value);
+          }
+        });
+
+        // Escape key to close dropdown
+        document.addEventListener('keydown', function(e) {
+          if (e.key === 'Escape') {
+            hideDropdown();
+            searchInput.blur();
+          }
+        });
+
+        // Click outside to close dropdown
+        document.addEventListener('click', function(e) {
+          if (!searchInput.contains(e.target) && !searchDropdown.contains(e.target)) {
+            hideDropdown();
+          }
+        });
+
+        // Reposition dropdown on window resize
+        window.addEventListener('resize', function() {
+          if (!searchDropdown.classList.contains('hidden')) {
+            positionSearchDropdown();
+          }
+        });
+
+        // Click on result - hide dropdown and navigate
+        searchResults.addEventListener('click', function(e) {
+          const link = e.target.closest('a');
+          if (link) {
+            hideDropdown();
+          }
+        });
+      });  // End DOMContentLoaded
+    </script>
+
     {% block extra_scripts %}{% endblock %}
 
     <!-- ============================================================ -->
@@ -695,6 +949,32 @@
         </a>
       </div>
 
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- GLOBAL SEARCH DROPDOWN                                       -->
+    <!-- Fixed position dropdown for search results                   -->
+    <!-- ============================================================ -->
+    <div id="globalSearchDropdown"
+      class="hidden fixed bg-white rounded-xl border border-gray-200 overflow-hidden shadow-xl"
+      style="z-index: 99998; width: 400px; max-height: 500px;">
+      
+      <!-- Loading state -->
+      <div id="searchLoading" class="hidden px-4 py-6 text-center">
+        <i class="fas fa-spinner fa-spin text-gray-400 text-lg mb-2"></i>
+        <p class="text-xs text-gray-500">Searching…</p>
+      </div>
+
+      <!-- Results container -->
+      <div id="searchResults" class="overflow-y-auto" style="max-height: 500px;">
+        <!-- Results will be injected here by JavaScript -->
+      </div>
+
+      <!-- Empty state -->
+      <div id="searchEmpty" class="hidden px-4 py-6 text-center">
+        <i class="fas fa-search text-gray-300 text-xl mb-2 block"></i>
+        <p class="text-xs text-gray-400">No results found</p>
+      </div>
     </div>
 
   </body>
