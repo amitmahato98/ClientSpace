@@ -313,11 +313,13 @@
                             {% csrf_token %}
 
                             {% if messages %}
-                                <div class="sm:col-span-2 text-[11px] font-bold">
-                                    {% for message in messages %}
-                                        <p class="{% if message.tags == 'success' %}text-green-600{% else %}text-red-600{% endif %}">{{ message }}</p>
-                                    {% endfor %}
-                                </div>
+                            <div class="sm:col-span-2 text-[11px] font-bold">
+                                {% for message in messages %}
+                                <p
+                                    class="{% if message.tags == 'success' %}text-green-600{% else %}text-red-600{% endif %}">
+                                    {{ message }}</p>
+                                {% endfor %}
+                            </div>
                             {% endif %}
 
                             <div class="sm:col-span-1">
@@ -637,7 +639,7 @@
                 // Visual: slightly dim the button to reinforce the disabled state
                 // without altering its shape, colour, or size.
                 submitBtn.style.opacity = "0.65";
-                submitBtn.style.cursor  = "not-allowed";
+                submitBtn.style.cursor = "not-allowed";
 
                 // Allow the native POST to proceed — do NOT call preventDefault().
 
@@ -706,7 +708,7 @@
            having to click "Contact support" again.
            ========================================================== */
 
-        {% if messages %}
+        // {% if messages %}
         if (contactToggle && contactPanel) {
 
             contactPanel.classList.remove("grid-rows-[0fr]", "opacity-0");
@@ -721,7 +723,7 @@
             }, 100);
 
         }
-        {% endif %}
+        // {% endif %}
 
     });
 </script>

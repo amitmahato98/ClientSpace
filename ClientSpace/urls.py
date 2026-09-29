@@ -47,6 +47,9 @@ urlpatterns = [
     path("notifications/", include("notifications.urls", namespace="notifications")),
     path("help/", include("helpcenter.urls", namespace="helpcenter")),
 
+    # Global search
+    path("search/", lambda req: __import__('dashboard.search', fromlist=['global_search']).global_search(req), name="global_search"),
+
     # Root URL — smart redirect based on authentication + organization state
     path("", home_view, name="home"),
 ]

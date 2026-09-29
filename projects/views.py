@@ -795,14 +795,9 @@ def task_overview(request):
         .order_by("assigned_to__username", "due_date", "-priority")
     )
 
-    STATUS_PROGRESS_MAP = {
-        Task.Status.PENDING: 0,
-        Task.Status.IN_PROGRESS: 50,
-        Task.Status.COMPLETED: 100,
-    }
-    for task in tasks:
-        task.progress_percent = STATUS_PROGRESS_MAP.get(task.status, 0)
-
+    # `completion_percent` is now a real, staff-editable field (set via the
+    # slider on "My Tasks") rather than a value derived from `status`, so
+    # the manager view below reads it straight off each task.
     tasks_by_staff = {}
     for task in tasks:
         tasks_by_staff.setdefault(task.assigned_to, []).append(task)
@@ -970,4 +965,67 @@ def task_status_update_ajax(request, task_id):
         "new_status": task.status,
         "new_status_display": task.get_status_display(),
         "old_status": old_status,
+    })
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# AJAX TASK COMPLETION % UPDATE  — STAFF ONLY (own tasks)
+# ──────────────────────────────────────────────────────────────────────────────
+
+@staff_or_above
+@require_http_methods(["POST"])
+def task_completion_update_ajax(request, task_id):
+    """
+    AJAX endpoint: allow a Staff member to set the completion percentage
+    (0-100) of their own assigned task via the slider on "My Tasks".
+
+    This is independent of `status` — the dropdown (Pending / In Progress /
+    Completed) is untouched by this endpoint. The value set here is
+    immediately visible to Managers on the Tasks overview page, since that
+    page reads `task.completion_percent` directly.
+
+    Returns JSON: {"success": true, "completion_percent": <int>, "message": "..."}
+
+    Security:
+      • @staff_or_above  — authenticated STAFF or MANAGER
+      • task.assigned_to == request.user  — ownership check (STAFF only)
+        Managers cannot use this endpoint; there is no manager-side editor
+        for this field by design (it is a staff self-report).
+
+    POST body: {"completion_percent": <int 0-100>}
+    """
+    # Only STAFF may use this endpoint.
+    if request.user.is_manager:
+        return JsonResponse({
+            "success": False,
+            "error": "Managers cannot edit a staff member's completion percentage.",
+        }, status=403)
+
+    # Ownership check — staff can only update their own tasks.
+    task = get_object_or_404(Task, pk=task_id, assigned_to=request.user)
+
+    import json
+    try:
+        data = json.loads(request.body)
+        raw_value = data.get("completion_percent")
+        new_value = int(raw_value)
+    except (json.JSONDecodeError, AttributeError, TypeError, ValueError):
+        return JsonResponse({
+            "success": False,
+            "error": "completion_percent must be an integer between 0 and 100.",
+        }, status=400)
+
+    if new_value < 0 or new_value > 100:
+        return JsonResponse({
+            "success": False,
+            "error": "completion_percent must be between 0 and 100.",
+        }, status=400)
+
+    task.completion_percent = new_value
+    task.save(update_fields=["completion_percent", "updated_at"])
+
+    return JsonResponse({
+        "success": True,
+        "message": f'Completion for "{task.title}" set to {new_value}%.',
+        "completion_percent": task.completion_percent,
     })
