@@ -197,6 +197,13 @@
                 class="project-tab px-4 py-3 text-xs font-medium text-gray-400 hover:text-gray-700 border-b-2 border-transparent whitespace-nowrap transition">
                 <i class="far fa-clock mr-1.5"></i> Activity
             </button>
+            {% if not user.is_client %}
+            <button type="button" data-tab="payments"
+                class="project-tab px-4 py-3 text-xs font-medium text-gray-400 hover:text-gray-700 border-b-2 border-transparent whitespace-nowrap transition">
+                <i class="fas fa-credit-card mr-1.5"></i> Payments
+                {% if payment_requests %}<span class="ml-1 px-1.5 py-0.5 rounded-full bg-[#f5e6d0] text-[#8b6f55] text-[10px] font-semibold">{{ payment_requests|length }}</span>{% endif %}
+            </button>
+            {% endif %}
         </div>
     </div>
 
@@ -610,7 +617,78 @@
       {% endif %}
     </div>
 
+</div><!-- /payments tab panel injected below -->
+
+{% if not user.is_client %}
+<!-- =====================================================
+     PAYMENTS TAB
+     ===================================================== -->
+<div id="tab-payments" class="project-tab-content hidden" data-project-id="{{ project.pk }}">
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+
+    <div class="flex items-center justify-between px-5 py-4 border-b border-[#f2ede4]">
+      <div>
+        <h3 class="text-sm font-bold text-gray-900">Payment Requests</h3>
+        <p class="text-[11px] text-gray-400 mt-0.5">
+          Budget: <span class="font-semibold text-gray-700">{{ project.budget|npr }}</span>
+        </p>
+      </div>
+      {% if user.is_manager %}
+      <a href="{% url 'payments:project_payments' project_pk=project.pk %}"
+         class="px-3 py-1.5 text-xs rounded-lg bg-[#d4a373] text-white hover:bg-[#b8895e] transition flex items-center gap-1.5">
+        <i class="fas fa-external-link-alt text-[10px]"></i>
+        Manage Payments
+      </a>
+      {% endif %}
+    </div>
+
+    {% if payment_requests %}
+    <div class="divide-y divide-[#f2ede4]">
+      {% for pr in payment_requests %}
+      <div class="px-5 py-3 flex flex-col sm:flex-row sm:items-center gap-2">
+        <div class="flex items-center gap-3 flex-1 min-w-0">
+          <div class="w-7 h-7 rounded-full bg-[#f5e6d0] flex items-center justify-center shrink-0">
+            <i class="fas {{ pr.status_icon }} text-[#b8895e] text-[10px]"></i>
+          </div>
+          <div class="min-w-0">
+            <p class="text-xs font-semibold text-[#4a3520] truncate">{{ pr.title }}</p>
+            {% if pr.due_date %}
+            <p class="text-[10px] text-gray-400">Due {{ pr.due_date|date:"M j, Y" }}</p>
+            {% endif %}
+          </div>
+        </div>
+        <div class="flex items-center gap-2 ml-10 sm:ml-0 shrink-0">
+          <span class="text-xs font-semibold text-[#4a3520] font-mono">{{ pr.amount|npr }}</span>
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium {{ pr.status_css_class }}">
+            {{ pr.get_status_display }}
+          </span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="px-5 py-3 border-t border-[#f2ede4] flex justify-end">
+      <a href="{% url 'payments:project_payments' project_pk=project.pk %}"
+         class="text-xs text-[#8b6f55] hover:text-[#b8895e] transition">
+        View all &rarr;
+      </a>
+    </div>
+    {% else %}
+    <div class="px-5 py-10 text-center">
+      <i class="fas fa-credit-card text-gray-300 text-2xl mb-3"></i>
+      <p class="text-xs text-gray-500">No payment requests for this project yet.</p>
+      {% if user.is_manager %}
+      <a href="{% url 'payments:project_payments' project_pk=project.pk %}"
+         class="inline-flex items-center gap-1.5 mt-3 px-3 py-1.5 text-xs rounded-lg bg-[#d4a373] text-white hover:bg-[#b8895e] transition">
+        <i class="fas fa-plus text-[10px]"></i>
+        Add payment request
+      </a>
+      {% endif %}
+    </div>
+    {% endif %}
+
+  </div>
 </div>
+{% endif %}
 
 
 <!-- =========================================================

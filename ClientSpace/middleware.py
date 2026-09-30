@@ -49,6 +49,15 @@ CLIENT_BLOCKED_PATTERNS = [
     r"^/projects/\d+/tasks/\d+/delete/",
     r"^/projects/tasks/my/",
     r"^/projects/tasks/\d+/status/",
+    # Phase 2 — payment management endpoints (manager-only)
+    # /payments/           → manager overview
+    # /payments/project/   → project-level payment views
+    # /payments/<id>/status/ → mark paid/cancelled/overdue
+    # NOTE: /payments/my/ is intentionally NOT listed here so clients can
+    #       access their own payment requests page.
+    r"^/payments/$",
+    r"^/payments/project/",
+    r"^/payments/\d+/status/",
 ]
 
 _PUBLIC_RE = re.compile(

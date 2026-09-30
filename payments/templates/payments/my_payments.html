@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+{% load static currency_tags %}
+
+{% block title %}My Payments — ClientSpace{% endblock %}
+{% block page_heading %}My Payments{% endblock %}
+{% block page_subheading %}Your payment requests across all projects{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto space-y-6">
+
+  <!-- ═══════════════════════════════════════════════════════
+       DJANGO MESSAGES
+       ═══════════════════════════════════════════════════════ -->
+  {% if messages %}
+  <div class="space-y-2">
+    {% for message in messages %}
+    <div class="flex items-center gap-2.5 px-4 py-3 rounded-lg text-xs font-medium
+        {% if message.tags == 'success' %}bg-[#e6f4ea] text-[#137333] border border-[#b7dfbe]
+        {% elif message.tags == 'error' %}bg-[#fce8e6] text-[#c5221f] border border-[#f5c2be]
+        {% else %}bg-[#e8f0fe] text-[#1a73e8] border border-[#c5d8fb]{% endif %}">
+      <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %}"></i>
+      {{ message }}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- ═══════════════════════════════════════════════════════
+       GRAND SUMMARY CARDS
+       ═══════════════════════════════════════════════════════ -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+
+    <!-- Total Project Value -->
+    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs text-gray-400">Total Project Value</span>
+        <i class="fas fa-wallet text-[#d4a373] text-xs"></i>
+      </div>
+      <div class="text-lg font-bold text-gray-900">{{ grand_total|npr }}</div>
+      <p class="text-[11px] text-gray-400 mt-0.5">All payment requests</p>
+    </div>
+
+    <!-- Total Paid -->
+    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs text-gray-400">Total Paid</span>
+        <i class="fas fa-check-circle text-green-500 text-xs"></i>
+      </div>
+      <div class="text-lg font-bold text-[#137333]">{{ grand_paid|npr }}</div>
+      <p class="text-[11px] text-gray-400 mt-0.5">Confirmed payments</p>
+    </div>
+
+    <!-- Remaining Balance -->
+    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs text-gray-400">Remaining Balance</span>
+        <i class="fas fa-hourglass-half text-[#b8895e] text-xs"></i>
+      </div>
+      <div class="text-lg font-bold text-[#b06000]">{{ grand_remaining|npr }}</div>
+      <p class="text-[11px] text-gray-400 mt-0.5">Unpaid total</p>
+    </div>
+
+    <!-- Pending Amount -->
+    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs text-gray-400">Pending Amount</span>
+        <i class="fas fa-clock text-[#b8895e] text-xs"></i>
+      </div>
+      <div class="text-lg font-bold text-gray-900">{{ grand_pending|npr }}</div>
+      <p class="text-[11px] text-gray-400 mt-0.5">Awaiting payment</p>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       EMPTY STATE
+       ═══════════════════════════════════════════════════════ -->
+  {% if not project_groups %}
+  <div class="bg-white rounded-xl border border-[#e8dccc] p-10 text-center">
+    <i class="fas fa-credit-card text-4xl text-[#d4a373] mb-4"></i>
+    <h3 class="text-sm font-semibold text-[#4a3520] mb-1">No payment requests yet</h3>
+    <p class="text-xs text-[#8b6f55]">
+      Your project manager will send payment requests here when they are ready.
+    </p>
+    <a href="{% url 'projects:project_list' %}"
+       class="inline-flex items-center gap-2 mt-4 px-4 py-2 text-xs rounded-lg bg-[#d4a373] text-white hover:bg-[#b8895e] transition">
+      <i class="fas fa-folder-open text-[10px]"></i>
+      View my projects
+    </a>
+  </div>
+
+  {% else %}
+
+  <!-- ═══════════════════════════════════════════════════════
+       PER-PROJECT PAYMENT CARDS
+       ═══════════════════════════════════════════════════════ -->
+  {% for group in project_groups %}
+  <div class="bg-white rounded-xl border border-[#e8dccc] shadow-sm overflow-hidden">
+
+    <!-- Project header -->
+    <div class="px-5 py-4 border-b border-[#f2ede4] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div class="min-w-0">
+        <div class="flex items-center gap-2 min-w-0">
+          <i class="fas fa-folder-open text-[#d4a373] text-sm shrink-0"></i>
+          <h3 class="text-sm font-bold text-[#4a3520] truncate">{{ group.project.name }}</h3>
+          <span class="shrink-0 text-[11px] px-2 py-0.5 rounded-full {{ group.project.status_css_class }}">
+            {{ group.project.get_status_display }}
+          </span>
+        </div>
+        <p class="text-xs text-[#8b6f55] mt-0.5 ml-6">
+          Project budget: <span class="font-semibold text-[#4a3520]">{{ group.project.budget|npr }}</span>
+        </p>
+      </div>
+
+      <!-- Project-level financials -->
+      <div class="flex items-center gap-4 text-xs shrink-0">
+        <div class="text-center">
+          <div class="text-[#8b6f55]">Billed</div>
+          <div class="font-semibold text-[#4a3520] font-mono">{{ group.total_amount|npr }}</div>
+        </div>
+        <div class="text-center">
+          <div class="text-[#8b6f55]">Paid</div>
+          <div class="font-semibold text-[#137333] font-mono">{{ group.total_paid|npr }}</div>
+        </div>
+        <div class="text-center">
+          <div class="text-[#8b6f55]">Pending</div>
+          <div class="font-semibold text-[#b06000] font-mono">{{ group.total_pending|npr }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment request rows -->
+    <div class="divide-y divide-[#f2ede4]">
+      {% for pr in group.requests %}
+      <div class="px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3">
+
+        <!-- Icon + title / description -->
+        <div class="flex items-start gap-3 flex-1 min-w-0">
+          <div class="w-8 h-8 rounded-full bg-[#f5e6d0] flex items-center justify-center shrink-0 mt-0.5">
+            <i class="fas {{ pr.status_icon }} text-[#b8895e] text-xs"></i>
+          </div>
+          <div class="min-w-0">
+            <p class="text-sm font-semibold text-[#4a3520] truncate">{{ pr.title }}</p>
+            {% if pr.description %}
+            <p class="text-xs text-[#8b6f55] mt-0.5 line-clamp-2">{{ pr.description }}</p>
+            {% endif %}
+            {% if pr.due_date %}
+            <p class="text-[11px] text-gray-400 mt-1">
+              <i class="far fa-calendar mr-1"></i>Due {{ pr.due_date|date:"M j, Y" }}
+            </p>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Amount + status + action -->
+        <div class="flex items-center gap-3 shrink-0 ml-11 sm:ml-0">
+          <div class="text-right">
+            <div class="text-sm font-bold text-[#4a3520] font-mono">{{ pr.amount|npr }}</div>
+            <div class="text-[10px] text-gray-400 mt-0.5">
+              Created {{ pr.created_at|date:"M j, Y" }}
+            </div>
+          </div>
+
+          <!-- Status badge -->
+          <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium {{ pr.status_css_class }} shrink-0">
+            <i class="fas {{ pr.status_icon }} text-[10px]"></i>
+            {{ pr.get_status_display }}
+          </span>
+
+          <!-- Pay Now — Phase 2 placeholder -->
+          {% if pr.is_pending %}
+          <button type="button"
+            onclick="showPaymentPlaceholder(this)"
+            data-title="{{ pr.title }}"
+            data-amount="{{ pr.amount|npr }}"
+            class="px-3 py-1.5 text-xs font-medium rounded-lg bg-[#d4a373] text-white hover:bg-[#b8895e] transition shrink-0">
+            Pay Now
+          </button>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  <!-- ── Phase note ─────────────────────────────────────────────── -->
+  <p class="text-[11px] text-gray-400 text-center pb-2">
+    <i class="fas fa-info-circle mr-1"></i>
+    Online payment gateway integration is coming in a future phase.
+    Contact your project manager to confirm payment by bank transfer or other method.
+  </p>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     PAY NOW PLACEHOLDER MODAL
+     ═══════════════════════════════════════════════════════ -->
+<div id="payPlaceholderModal"
+     class="fixed inset-0 bg-black/40 z-50 hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 text-center">
+    <div class="w-14 h-14 rounded-full bg-[#f5e6d0] flex items-center justify-center mx-auto mb-4">
+      <i class="fas fa-credit-card text-[#d4a373] text-xl"></i>
+    </div>
+    <h3 class="text-base font-bold text-[#4a3520] mb-1" id="payModalTitle">Payment</h3>
+    <p class="text-xs text-[#8b6f55] mb-1" id="payModalAmount"></p>
+    <div class="mt-4 p-3 rounded-lg bg-[#fef7e0] border border-[#f5e1a4] text-xs text-[#b06000] text-left">
+      <i class="fas fa-exclamation-triangle mr-1.5"></i>
+      <strong>Online payments coming soon.</strong>
+      Gateway integration (Khalti / eSewa) will be available in a future phase.
+      Please contact your project manager to arrange payment via bank transfer.
+    </div>
+    <button type="button" onclick="closePayModal()"
+      class="mt-5 w-full px-4 py-2 text-sm rounded-lg bg-[#d4a373] text-white hover:bg-[#b8895e] transition font-medium">
+      Got it
+    </button>
+  </div>
+</div>
+
+<script>
+  function showPaymentPlaceholder(btn) {
+    document.getElementById("payModalTitle").textContent = btn.dataset.title;
+    document.getElementById("payModalAmount").textContent = "Amount: " + btn.dataset.amount;
+    document.getElementById("payPlaceholderModal").classList.remove("hidden");
+  }
+  function closePayModal() {
+    document.getElementById("payPlaceholderModal").classList.add("hidden");
+  }
+  document.getElementById("payPlaceholderModal").addEventListener("click", function(e) {
+    if (e.target === this) closePayModal();
+  });
+  document.addEventListener("keydown", function(e) {
+    if (e.key === "Escape") closePayModal();
+  });
+</script>
+{% endblock %}
