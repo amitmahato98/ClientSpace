@@ -109,6 +109,13 @@
                 <i class="fas fa-tasks w-5 text-center text-[#b8895e]"></i>
                 <span>Tasks</span>
               </a>
+
+              <!-- Progress & Reports — MANAGER only -->
+              <a href="{% url 'reports:overview' %}" data-nav="reports"
+                class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#6b4f3a] hover:text-[#4a3520] text-sm transition">
+                <i class="fas fa-chart-line w-5 text-center text-[#b8895e]"></i>
+                <span>Progress &amp; Reports</span>
+              </a>
             {% endif %}
 
             {% if user.is_authenticated and not user.is_client %}
@@ -117,13 +124,6 @@
                 class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#6b4f3a] hover:text-[#4a3520] text-sm transition">
                 <i class="fas fa-credit-card w-5 text-center text-[#b8895e]"></i>
                 <span>Payments</span>
-              </a>
-
-              <!-- Reports — MANAGER and STAFF only -->
-              <a href="#" data-nav="reports"
-                class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-[#6b4f3a] hover:text-[#4a3520] text-sm transition">
-                <i class="fas fa-chart-line w-5 text-center text-[#b8895e]"></i>
-                <span>Progress &amp; Reports</span>
               </a>
 
               <!-- Settings — MANAGER and STAFF only -->
@@ -355,6 +355,11 @@
             <i class="fas fa-tasks w-5 text-center text-[#b8895e]"></i>
             <span>Tasks</span>
           </a>
+          <a href="{% url 'reports:overview' %}" data-nav="reports"
+            class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition">
+            <i class="fas fa-chart-line w-5 text-center text-[#b8895e]"></i>
+            <span>Progress &amp; Reports</span>
+          </a>
         {% endif %}
 
         {% if user.is_authenticated and not user.is_client %}
@@ -362,11 +367,6 @@
             class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition">
             <i class="fas fa-credit-card w-5 text-center text-[#b8895e]"></i>
             <span>Payments</span>
-          </a>
-          <a href="#" data-nav="reports"
-            class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition">
-            <i class="fas fa-chart-line w-5 text-center text-[#b8895e]"></i>
-            <span>Progress &amp; Reports</span>
           </a>
           <a href="#" data-nav="workspace"
             class="sidebar-link sidebar-hover flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition">
