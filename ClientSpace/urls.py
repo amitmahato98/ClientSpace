@@ -44,6 +44,7 @@ urlpatterns = [
     path("settings/", include("sett.urls")),
     path("dashboard/", include("dashboard.urls")),
     path("staff/", include("staff.urls")),
+    path("payments/", include("payments.urls")),
     path("notifications/", include("notifications.urls", namespace="notifications")),
     path("help/", include("helpcenter.urls", namespace="helpcenter")),
 
