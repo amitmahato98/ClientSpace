@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+{% load currency_tags %}
+
+{% block title %}{{ project.name }} — Report{% endblock %}
+{% block page_heading %}{{ project.name }}{% endblock %}
+{% block page_subheading %}Project report · {{ project.client_display_name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto space-y-6">
+
+  <!-- Top bar -->
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <a href="{% url 'reports:overview' %}" class="text-xs text-[#8b6f55] hover:text-[#4a3520] transition"><i class="fas fa-arrow-left text-[10px] mr-1"></i> All reports</a>
+    <div class="flex items-center gap-2">
+      <button type="button" onclick="window.print()" class="px-4 py-2 bg-white hover:bg-[#fdf6ec] text-[#5a3e2b] text-xs font-medium rounded-lg border border-[#e8dccc] transition"><i class="fas fa-print text-[10px] mr-1"></i> Print</button>
+      <a href="{% url 'projects:project_detail' project.pk %}" class="px-4 py-2 bg-[#d4a373] hover:bg-[#b8895e] text-white text-xs font-medium rounded-lg transition">Open project</a>
+    </div>
+  </div>
+
+  <!-- Summary card -->
+  <section class="bg-white rounded-xl border border-[#e8dccc] p-5 grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2">
+      <div class="flex flex-wrap items-center gap-2 mb-3">
+        <span class="inline-flex px-2.5 py-0.5 rounded-full text-[11px] font-medium" style="background: {{ m.health_bg }}; color: {{ m.health_fg }}">{{ m.health_label }}</span>
+        <span class="inline-flex px-2.5 py-0.5 rounded-full text-[11px] font-medium {{ project.status_css_class }}">{{ project.get_status_display }}</span>
+        <span class="text-[11px] text-gray-400">{{ project.get_priority_display }} priority</span>
+      </div>
+      {% if project.description %}<p class="text-xs text-gray-600 leading-relaxed mb-4">{{ project.description|truncatewords:45 }}</p>{% endif %}
+
+      <div class="flex items-end justify-between mb-1.5">
+        <span class="text-[10px] font-semibold text-gray-500 tracking-wide">OVERALL PROGRESS</span>
+        <span class="text-2xl font-bold text-gray-900">{{ m.progress }}%</span>
+      </div>
+      <div class="relative h-3 bg-[#f2ede4] rounded-full overflow-hidden">
+        <div class="h-full rounded-full" style="width: {{ m.progress }}%; background: {{ m.bar_color }}"></div>
+        {% if m.expected is not None %}<div class="absolute top-0 bottom-0 w-0.5 bg-[#4a3520]/50" style="left: {{ m.expected }}%"></div>{% endif %}
+      </div>
+      {% if m.expected is not None %}
+      <p class="text-[11px] text-gray-400 mt-1.5">{{ m.expected }}% of the timeline has elapsed{% if m.progress >= m.expected %} — work is keeping pace.{% else %} — but only {{ m.progress }}% of the work is done.{% endif %}</p>
+      {% endif %}
+
+      {% if timeline %}
+      <div class="mt-4 flex items-center justify-between text-[11px] text-gray-500">
+        <span>{{ project.start_date|date:"M j, Y" }}</span>
+        <span class="{% if m.deadline_overdue %}text-[#c5221f] font-medium{% endif %}">{{ m.deadline_note }}</span>
+        <span>{{ project.deadline|date:"M j, Y" }}</span>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="flex items-center gap-6 lg:justify-end">
+      <div class="relative w-28 h-28 shrink-0 rounded-full" style="background: {{ task_donut }}">
+        <div class="absolute inset-3.5 rounded-full bg-white flex flex-col items-center justify-center">
+          <span class="text-lg font-bold text-gray-900 leading-none">{{ m.done }}/{{ m.total }}</span>
+          <span class="text-[10px] text-gray-400 mt-1">done</span>
+        </div>
+      </div>
+      <ul class="space-y-1.5 text-xs">
+        <li class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-[#137333]"></span>Completed <b class="ml-2">{{ m.done }}</b></li>
+        <li class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-[#1a73e8]"></span>In progress <b class="ml-2">{{ m.in_progress }}</b></li>
+        <li class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-[#c9c2b6]"></span>Pending <b class="ml-2">{{ m.pending }}</b></li>
+        <li class="flex items-center gap-2 text-[#c5221f]"><i class="fas fa-exclamation-circle text-[10px]"></i>Overdue <b class="ml-2">{{ m.overdue_tasks }}</b></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Finance + priority + team -->
+  <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="bg-white rounded-xl border border-[#e8dccc] p-5">
+      <h3 class="text-sm font-semibold text-[#4a3520] mb-3">Budget</h3>
+      <p class="text-xl font-bold text-gray-900">{{ m.paid|npr }}</p>
+      <p class="text-[11px] text-gray-400 mb-3">paid of {{ m.budget|npr }}</p>
+      <div class="h-2 bg-[#f2ede4] rounded-full overflow-hidden"><div class="h-full bg-[#137333] rounded-full" style="width: {{ m.paid_pct }}%"></div></div>
+      <div class="flex justify-between text-[11px] text-gray-500 mt-2">
+        <span>{{ m.outstanding|npr }} outstanding</span>
+        <span>{{ m.pending_pay|npr }} pending</span>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl border border-[#e8dccc] p-5">
+      <h3 class="text-sm font-semibold text-[#4a3520] mb-3">Tasks by priority</h3>
+      <div class="space-y-2.5">
+        {% for p in priority_counts %}
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-gray-600">{{ p.label }}</span>
+          <span class="text-gray-900 font-semibold">{{ p.done }}<span class="text-gray-400 font-normal"> / {{ p.count }} done</span></span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl border border-[#e8dccc] p-5">
+      <h3 class="text-sm font-semibold text-[#4a3520] mb-3">Assigned team</h3>
+      {% for a in team %}
+      <div class="flex items-center gap-2 py-1.5 text-xs">
+        <span class="w-6 h-6 rounded-full bg-[#f5e6d0] text-[#8b6f55] flex items-center justify-center text-[10px] font-semibold">{{ a.staff.first_name|slice:":1" }}{{ a.staff.last_name|slice:":1" }}</span>
+        <span class="text-gray-800 truncate">{{ a.staff }}</span>
+        <span class="ml-auto text-[11px] text-gray-400">{{ a.staff.role }}</span>
+      </div>
+      {% empty %}
+      <p class="text-xs text-gray-400">No staff assigned</p>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Task table -->
+  <section class="bg-white rounded-xl border border-[#e8dccc]">
+    <div class="px-5 py-4 border-b border-[#e8dccc] flex flex-wrap items-center justify-between gap-2">
+      <h3 class="text-sm font-semibold text-[#4a3520]">Task breakdown</h3>
+      <div class="flex gap-1.5 text-[11px]">
+        <a href="?" class="px-3 py-1 rounded-full border {% if not status_filter %}bg-[#f5e6d0] border-[#d4a373] text-[#4a3520]{% else %}border-[#e8dccc] text-[#8b6f55]{% endif %}">All</a>
+        <a href="?status=PENDING" class="px-3 py-1 rounded-full border {% if status_filter == 'PENDING' %}bg-[#f5e6d0] border-[#d4a373] text-[#4a3520]{% else %}border-[#e8dccc] text-[#8b6f55]{% endif %}">Pending</a>
+        <a href="?status=IN_PROGRESS" class="px-3 py-1 rounded-full border {% if status_filter == 'IN_PROGRESS' %}bg-[#f5e6d0] border-[#d4a373] text-[#4a3520]{% else %}border-[#e8dccc] text-[#8b6f55]{% endif %}">In progress</a>
+        <a href="?status=COMPLETED" class="px-3 py-1 rounded-full border {% if status_filter == 'COMPLETED' %}bg-[#f5e6d0] border-[#d4a373] text-[#4a3520]{% else %}border-[#e8dccc] text-[#8b6f55]{% endif %}">Completed</a>
+      </div>
+    </div>
+    {% if task_rows %}
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm min-w-[720px]">
+        <thead>
+          <tr class="text-left text-[11px] uppercase tracking-wide text-[#8b6f55] border-b border-[#e8dccc]">
+            <th class="px-5 py-3 font-semibold">Task</th>
+            <th class="px-2 py-3 font-semibold">Assignee</th>
+            <th class="px-2 py-3 font-semibold">Status</th>
+            <th class="px-2 py-3 font-semibold">Priority</th>
+            <th class="px-2 py-3 font-semibold w-40">Completion</th>
+            <th class="px-5 py-3 font-semibold">Due</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in task_rows %}
+          <tr class="border-b border-[#f2ede4]">
+            <td class="px-5 py-2.5 text-xs font-medium text-gray-800">{{ r.task.title }}</td>
+            <td class="px-2 py-2.5 text-xs text-gray-600">{{ r.task.assigned_display_name }}</td>
+            <td class="px-2 py-2.5"><span class="inline-flex px-2 py-0.5 rounded-full text-[11px] font-medium {{ r.task.status_css_class }}">{{ r.task.get_status_display }}</span></td>
+            <td class="px-2 py-2.5"><span class="inline-flex px-2 py-0.5 rounded-full text-[11px] font-medium {{ r.task.priority_css_class }}">{{ r.task.get_priority_display }}</span></td>
+            <td class="px-2 py-2.5">
+              <div class="flex items-center gap-2">
+                <div class="flex-1 h-1.5 bg-[#f2ede4] rounded-full overflow-hidden"><div class="h-full bg-[#d4a373]" style="width: {{ r.percent }}%"></div></div>
+                <span class="text-[11px] text-gray-500 w-8 text-right">{{ r.percent }}%</span>
+              </div>
+            </td>
+            <td class="px-5 py-2.5 text-xs {% if r.overdue %}text-[#c5221f] font-medium{% else %}text-gray-600{% endif %}">
+              {% if r.task.due_date %}{{ r.task.due_date|date:"M j, Y" }}{% if r.overdue %} · late{% endif %}{% else %}—{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="py-10 text-center text-xs text-gray-400">No tasks {% if status_filter %}with this status{% else %}in this project yet{% endif %}</div>
+    {% endif %}
+  </section>
+
+  <!-- Workload + payments + activity -->
+  <section class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div class="bg-white rounded-xl border border-[#e8dccc]">
+      <div class="px-5 py-4 border-b border-[#e8dccc]"><h3 class="text-sm font-semibold text-[#4a3520]">Contribution by staff</h3></div>
+      {% for s in workload %}
+      <div class="px-5 py-3 border-b border-[#f2ede4] last:border-b-0">
+        <div class="flex justify-between text-xs mb-1.5">
+          <span class="font-semibold text-[#4a3520]">{{ s.name }}</span>
+          <span class="text-gray-500">{{ s.done }}/{{ s.total }} done{% if s.overdue %} · <span class="text-[#c5221f]">{{ s.overdue }} overdue</span>{% endif %}</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="flex-1 h-1.5 bg-[#f2ede4] rounded-full overflow-hidden"><div class="h-full rounded-full" style="width: {{ s.avg }}%; background: {{ s.bar_color }}"></div></div>
+          <span class="text-[11px] text-gray-500 w-8 text-right">{{ s.avg }}%</span>
+        </div>
+      </div>
+      {% empty %}
+      <div class="py-8 text-center text-xs text-gray-400">No assigned tasks</div>
+      {% endfor %}
+    </div>
+
+    <div class="bg-white rounded-xl border border-[#e8dccc]">
+      <div class="px-5 py-4 border-b border-[#e8dccc]"><h3 class="text-sm font-semibold text-[#4a3520]">Payments</h3></div>
+      {% for pay in payments %}
+      <div class="flex items-center justify-between px-5 py-2.5 border-b border-[#f2ede4] last:border-b-0 text-xs">
+        <div>
+          <p class="font-medium text-gray-800">{{ pay.amount|npr }}</p>
+          <p class="text-[11px] text-gray-400">{{ pay.date|date:"M j, Y" }}</p>
+        </div>
+        <span class="px-2 py-0.5 rounded-full text-[11px] font-medium
+          {% if pay.status == 'paid' %}bg-[#e6f4ea] text-[#137333]{% elif pay.status == 'pending' %}bg-[#fef7e0] text-[#b06000]{% else %}bg-[#fce8e6] text-[#c5221f]{% endif %}">{{ pay.get_status_display }}</span>
+      </div>
+      {% empty %}
+      <div class="py-8 text-center text-xs text-gray-400">No payments recorded</div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="bg-white rounded-xl border border-[#e8dccc]">
+    <div class="px-5 py-4 border-b border-[#e8dccc]"><h3 class="text-sm font-semibold text-[#4a3520]">Project timeline</h3></div>
+    {% for a in activities %}
+    {% with ic=a.icon_css %}
+    <div class="flex items-start gap-3 px-5 py-3 border-b border-[#f2ede4] last:border-b-0">
+      <span class="w-7 h-7 shrink-0 rounded-full flex items-center justify-center text-[10px] {{ ic.bg }}"><i class="fas {{ ic.icon }}"></i></span>
+      <div class="flex-1 min-w-0">
+        <p class="text-xs text-gray-800">{{ a.description }}</p>
+        <p class="text-[11px] text-gray-400 mt-0.5">{{ a.created_at|date:"M j, Y · g:i A" }}</p>
+      </div>
+    </div>
+    {% endwith %}
+    {% empty %}
+    <div class="py-8 text-center text-xs text-gray-400">No activity recorded yet</div>
+    {% endfor %}
+  </section>
+</div>
+
+<style>@media print { aside, header, button, a[href^="?"], form { display: none !important; } main { padding: 0 !important; } }</style>
+{% endblock %}

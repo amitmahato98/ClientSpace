@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'staff',
     'notifications',
     'helpcenter',
+    'reports',
 ]
 
 AUTH_USER_MODEL = "accounts.User"

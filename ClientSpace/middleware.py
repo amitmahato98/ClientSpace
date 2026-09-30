@@ -40,6 +40,7 @@ CLIENT_BLOCKED_PATTERNS = [
     r"^/dashboard/",
     r"^/clients/",
     r"^/settings/",
+     r"^/reports/", 
     r"^/projects/create/",
     r"^/projects/\d+/assign-staff/",
     r"^/projects/\d+/remove-staff/",
