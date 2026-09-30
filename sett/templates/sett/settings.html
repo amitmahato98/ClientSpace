@@ -1403,13 +1403,16 @@
                         <label class="sett-label">Currency</label>
                         <div class="sett-icon-wrap">
                             <i class="fas fa-coins"></i>
-                            <select class="sett-input" name="currency" required style="padding-left: 40px;">
-                                <option value="NPR" selected>NPR - Nepalese Rupee</option>
-                                <option value="USD">$ USD</option>
-                                <option value="EUR">€ EUR</option>
-                                <option value="INR">₹ INR — Indian Rupee</option>
-                            </select>
+                            <!-- ClientSpace is NPR-only. Currency is fixed and cannot be changed. -->
+                            <input class="sett-input" type="text" value="NPR — Nepalese Rupee"
+                                   readonly disabled
+                                   style="padding-left: 40px; background:#f9fafb; color:#6b7280; cursor:not-allowed;"
+                                   title="ClientSpace uses NPR (Nepalese Rupee) as the only currency.">
                         </div>
+                        <p class="text-[11px] text-gray-400 mt-1.5">
+                            <i class="fas fa-lock text-[10px] mr-1"></i>
+                            All monetary values are in Nepalese Rupees (NPR). This cannot be changed.
+                        </p>
                     </div>
 
                     <button type="submit" class="btn-primary">

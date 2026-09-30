@@ -124,9 +124,12 @@ class ProjectForm(forms.ModelForm):
             "description": "Description (optional)",
             "status":      "Status",
             "priority":    "Priority",
-            "budget":      "Budget ($)",
+            "budget":      "Budget (NPR)",
             "start_date":  "Start date",
             "deadline":    "Deadline",
+        }
+        help_texts = {
+            "budget": "Enter the amount in Nepalese Rupees (NPR).",
         }
 
     # ── Field-level validation ────────────────────────────────────────────

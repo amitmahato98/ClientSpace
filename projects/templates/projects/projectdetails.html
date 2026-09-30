@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static currency_tags %}
 
 {% block title %}{{ project.name }} - ClientSpace{% endblock %}
 
@@ -129,7 +129,7 @@
                 <i class="fas fa-wallet text-[#d4a373] text-xs"></i>
             </div>
             <div class="text-xl font-bold text-gray-900 mt-2">
-                ${{ project.budget|floatformat:2 }}
+                {{ project.budget|npr }}
             </div>
             <p class="text-[11px] text-gray-400 mt-0.5">Total project budget</p>
         </div>
@@ -252,7 +252,7 @@
                     </div>
                     <div class="flex items-start gap-3">
                         <dt class="w-28 shrink-0 text-[11px] font-medium text-gray-400 uppercase tracking-wide pt-0.5">Budget</dt>
-                        <dd class="text-xs text-gray-800 font-semibold">${{ project.budget|floatformat:2 }}</dd>
+                        <dd class="text-xs text-gray-800 font-semibold">{{ project.budget|npr }}</dd>
                     </div>
                     <div class="flex items-start gap-3">
                         <dt class="w-28 shrink-0 text-[11px] font-medium text-gray-400 uppercase tracking-wide pt-0.5">Created by</dt>

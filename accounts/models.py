@@ -192,6 +192,17 @@ class Organization(models.Model):
         null=True,
     )
 
+    # ClientSpace is NPR-only. This field is kept for future extensibility
+    # (e.g. Khalti Sandbox integration) but its only valid value is "NPR".
+    # The choices list intentionally contains only NPR so no other currency
+    # can be selected or stored.
+    currency = models.CharField(
+        max_length=3,
+        choices=[("NPR", "NPR — Nepalese Rupee")],
+        default="NPR",
+        help_text="Currency used for all monetary amounts in this workspace. Always NPR.",
+    )
+
     # The user who created this organization. PROTECT prevents accidental
     # deletion of the organization when the owner account is deleted.
     created_by = models.ForeignKey(

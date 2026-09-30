@@ -83,6 +83,10 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'notifications.context_processors.notifications',
+                # Injects active_currency ("NPR") and active_currency_label
+                # into every template so monetary values can be formatted
+                # consistently without hard-coding the currency code.
+                'accounts.context_processors.workspace_currency',
             ],
         },
     },

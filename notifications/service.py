@@ -195,7 +195,7 @@ def notify_payment_received(*, recipient, client, amount, project=None, actor=No
     return _create(
         recipient=recipient,
         actor=actor,
-        message=f"Payment received: ₹{amount} from {client_name}{proj_text}.",
+        message=f"Payment received: NPR {amount} from {client_name}{proj_text}.",
         link=link,
         notification_type="payment_received",
     )

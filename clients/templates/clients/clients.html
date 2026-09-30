@@ -1,4 +1,4 @@
-{% extends "base.html" %} {% block title %}Clients — ClientSpace{% endblock %}
+{% extends "base.html" %} {% load currency_tags %} {% block title %}Clients — ClientSpace{% endblock %}
 {% block page_heading %}Clients{% endblock %}
 {% block page_subheading %}{{ clients.count }} client{{ clients.count|pluralize }}{% endblock %}
 {% block content %}
@@ -98,7 +98,7 @@
               >{{ p.get_status_display }}</span
             >
           </td>
-          <td class="py-2 font-mono text-[#4a3520]">₹{{ p.budget }}</td>
+          <td class="py-2 font-mono text-[#4a3520]">{{ p.budget|npr }}</td>
         </tr>
         {% endfor %}
       </table>
@@ -110,17 +110,17 @@
       <div>
         <div class="text-[#8b6f55] text-xs">Total Billed</div>
         <div class="text-[#4a3520] font-mono">
-          ₹{{ financials.total_billed }}
+          {{ financials.total_billed|npr }}
         </div>
       </div>
       <div>
         <div class="text-[#8b6f55] text-xs">Total Paid</div>
-        <div class="text-[#4a3520] font-mono">₹{{ financials.total_paid }}</div>
+        <div class="text-[#4a3520] font-mono">{{ financials.total_paid|npr }}</div>
       </div>
       <div>
         <div class="text-[#8b6f55] text-xs">Outstanding</div>
         <div class="text-[#4a3520] font-mono">
-          ₹{{ financials.outstanding }}
+          {{ financials.outstanding|npr }}
         </div>
       </div>
     </div>
@@ -141,7 +141,7 @@
           <td class="py-2 text-[#4a3520]">
             {{ pay.project.name|default:"—" }}
           </td>
-          <td class="py-2 font-mono text-[#4a3520]">₹{{ pay.amount }}</td>
+          <td class="py-2 font-mono text-[#4a3520]">{{ pay.amount|npr }}</td>
           <td class="py-2">
             <span
               class="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700"
