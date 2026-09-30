@@ -46,6 +46,7 @@ urlpatterns = [
     path("staff/", include("staff.urls")),
     path("notifications/", include("notifications.urls", namespace="notifications")),
     path("help/", include("helpcenter.urls", namespace="helpcenter")),
+     path("reports/", include("reports.urls", namespace="reports")), 
 
     # Global search
     path("search/", lambda req: __import__('dashboard.search', fromlist=['global_search']).global_search(req), name="global_search"),
