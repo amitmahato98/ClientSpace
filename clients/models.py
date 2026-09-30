@@ -30,7 +30,7 @@ class Payment(models.Model):
         ordering = ['-date']
 
     def __str__(self):
-        return f"{self.client.username} — ₹{self.amount} ({self.status})"
+        return f"{self.client.username} — NPR {self.amount} ({self.status})"
 
     def save(self, *args, **kwargs):
         is_new = self.pk is None
