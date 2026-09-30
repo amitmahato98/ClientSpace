@@ -1,0 +1,310 @@
+{% extends "base.html" %}
+{% load currency_tags %}
+
+{% block title %}Progress &amp; Reports — ClientSpace{% endblock %}
+{% block page_heading %}Progress &amp; Reports{% endblock %}
+{% block page_subheading %}{{ total_projects }} project{{ total_projects|pluralize }} · {{ total_tasks }} task{{ total_tasks|pluralize }} · as of {{ today|date:"M j, Y" }}{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto space-y-6">
+
+  <!-- ═════════ FILTER BAR + EXPORT ═════════ -->
+  <form method="get" class="bg-white rounded-xl border border-[#e8dccc] p-4 flex flex-col lg:flex-row lg:items-center gap-3">
+    <div class="relative flex-1">
+      <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
+      <input type="text" name="q" value="{{ filters.q }}" placeholder="Search project or client…"
+             class="w-full pl-8 pr-3 py-2 text-xs rounded-lg bg-[#fdf6ec] border border-[#e8dccc] focus:outline-none focus:border-[#d4a373]">
+    </div>
+    <select name="status" class="text-xs rounded-lg bg-[#fdf6ec] border border-[#e8dccc] px-3 py-2 focus:outline-none focus:border-[#d4a373]">
+      <option value="">All statuses</option>
+      {% for value, label in status_choices %}
+      <option value="{{ value }}" {% if filters.status == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <select name="health" class="text-xs rounded-lg bg-[#fdf6ec] border border-[#e8dccc] px-3 py-2 focus:outline-none focus:border-[#d4a373]">
+      <option value="">All health</option>
+      {% for value, label in health_choices %}
+      <option value="{{ value }}" {% if filters.health == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <div class="flex items-center gap-2">
+      <button type="submit" class="px-4 py-2 bg-[#d4a373] hover:bg-[#b8895e] text-white text-xs font-medium rounded-lg transition">
+        <i class="fas fa-filter text-[10px] mr-1"></i> Apply
+      </button>
+      {% if filters.q or filters.status or filters.health %}
+      <a href="{% url 'reports:overview' %}" class="px-3 py-2 text-xs text-[#8b6f55] hover:text-[#4a3520] transition">Clear</a>
+      {% endif %}
+      <div class="relative group">
+        <button type="button" class="px-4 py-2 bg-white hover:bg-[#fdf6ec] text-[#5a3e2b] text-xs font-medium rounded-lg border border-[#e8dccc] transition">
+          <i class="fas fa-download text-[10px] mr-1"></i> Export <i class="fas fa-chevron-down text-[8px] ml-1"></i>
+        </button>
+        <div class="hidden group-hover:block group-focus-within:block absolute right-0 top-full pt-1 w-44 z-30">
+          <div class="bg-white border border-[#e8dccc] rounded-lg shadow-lg overflow-hidden">
+            <a href="{% url 'reports:export_csv' %}?type=projects&q={{ filters.q|urlencode }}&status={{ filters.status }}&health={{ filters.health }}"
+               class="block px-4 py-2.5 text-xs text-[#5a3e2b] hover:bg-[#fdf6ec] transition"><i class="fas fa-folder-open w-4 text-[#b8895e]"></i> Projects (CSV)</a>
+            <a href="{% url 'reports:export_csv' %}?type=tasks&q={{ filters.q|urlencode }}&status={{ filters.status }}&health={{ filters.health }}"
+               class="block px-4 py-2.5 text-xs text-[#5a3e2b] hover:bg-[#fdf6ec] transition border-t border-[#f2ede4]"><i class="fas fa-tasks w-4 text-[#b8895e]"></i> Tasks (CSV)</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <!-- ═════════ KPI CARDS ═════════ -->
+  <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="bg-white rounded-xl border border-[#e8dccc] p-5 relative overflow-hidden">
+      <div class="absolute left-0 top-0 bottom-0 w-1 bg-[#d4a373]"></div>
+      <span class="block text-[10px] text-gray-500 font-semibold tracking-wide mb-2">OVERALL PROGRESS</span>
+      <h2 class="text-3xl font-bold text-gray-900">{{ overall_progress }}%</h2>
+      <div class="mt-3 h-1.5 bg-[#f2ede4] rounded-full overflow-hidden">
+        <div class="h-full rounded-full" style="width: {{ overall_progress }}%; background: {{ overall_color }}"></div>
+      </div>
+      <p class="text-[11px] text-gray-400 mt-2">average across all tasks</p>
+    </div>
+
+    <div class="bg-white rounded-xl border border-[#e8dccc] p-5 relative overflow-hidden">
+      <div class="absolute left-0 top-0 bottom-0 w-1 bg-purple-600"></div>
+      <span class="block text-[10px] text-gray-500 font-semibold tracking-wide mb-2">PROJECTS</span>
+      <h2 class="text-3xl font-bold text-gray-900">{{ total_projects }}</h2>
+      <p class="text-[11px] text-gray-400 mt-3">{{ completed_projects }} completed · {{ attention }} need attention</p>
+    </div>
+
+    <div class="bg-white rounded-xl border border-[#e8dccc] p-5 relative overflow-hidden">
+      <div class="absolute left-0 top-0 bottom-0 w-1 bg-[#137333]"></div>
+      <span class="block text-[10px] text-gray-500 font-semibold tracking-wide mb-2">TASKS COMPLETED</span>
+      <h2 class="text-3xl font-bold text-gray-900">{{ done_tasks }}<span class="text-base font-medium text-gray-400"> / {{ total_tasks }}</span></h2>
+      <p class="text-[11px] text-gray-400 mt-3">{{ completion_rate }}% completion rate</p>
+    </div>
+
+    <div class="bg-white rounded-xl border border-[#e8dccc] p-5 relative overflow-hidden">
+      <div class="absolute left-0 top-0 bottom-0 w-1 bg-red-500"></div>
+      <span class="block text-[10px] text-gray-500 font-semibold tracking-wide mb-2">OVERDUE TASKS</span>
+      <h2 class="text-3xl font-bold {% if overdue_tasks %}text-[#c5221f]{% else %}text-gray-900{% endif %}">{{ overdue_tasks }}</h2>
+      <p class="text-[11px] text-gray-400 mt-3">{% if overdue_tasks %}past due, not completed{% else %}nothing overdue 🎉{% endif %}</p>
+    </div>
+  </section>
+
+  <!-- ═════════ CHARTS ═════════ -->
+  <section class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+    <!-- Task status donut -->
+    <div class="bg-white rounded-xl border border-[#e8dccc] p-5">
+      <h3 class="text-sm font-semibold text-[#4a3520] mb-4">Task status</h3>
+      <div class="flex items-center gap-6">
+        <div class="relative w-32 h-32 shrink-0 rounded-full" style="background: {{ task_donut }}">
+          <div class="absolute inset-4 rounded-full bg-white flex flex-col items-center justify-center">
+            <span class="text-xl font-bold text-gray-900 leading-none">{{ total_tasks }}</span>
+            <span class="text-[10px] text-gray-400 mt-1">tasks</span>
+          </div>
+        </div>
+        <ul class="space-y-2 text-xs flex-1">
+          {% for s in task_legend %}
+          <li class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background: {{ s.color }}"></span>
+            <span class="text-gray-600">{{ s.label }}</span>
+            <span class="ml-auto font-semibold text-gray-900">{{ s.count }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <!-- Projects by status -->
+    <div class="bg-white rounded-xl border border-[#e8dccc] p-5">
+      <h3 class="text-sm font-semibold text-[#4a3520] mb-4">Projects by status</h3>
+      <div class="space-y-3">
+        {% for s in project_status_bars %}
+        <div>
+          <div class="flex justify-between text-[11px] mb-1">
+            <span class="text-gray-600">{{ s.label }}</span>
+            <span class="font-semibold text-gray-900">{{ s.count }}</span>
+          </div>
+          <div class="h-2 bg-[#f2ede4] rounded-full overflow-hidden">
+            <div class="h-full rounded-full" style="width: {{ s.pct }}%; background: {{ s.color }}"></div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Budget & payments -->
+    <div class="bg-white rounded-xl border border-[#e8dccc] p-5">
+      <h3 class="text-sm font-semibold text-[#4a3520] mb-4">Budget &amp; payments</h3>
+      <p class="text-2xl font-bold text-gray-900">{{ total_paid|npr }}</p>
+      <p class="text-[11px] text-gray-400 mb-3">collected of {{ total_budget|npr }} budgeted</p>
+      <div class="h-2 bg-[#f2ede4] rounded-full overflow-hidden">
+        <div class="h-full rounded-full bg-[#137333]" style="width: {{ collected_pct }}%"></div>
+      </div>
+      <div class="flex justify-between text-[11px] mt-2 text-gray-500">
+        <span>{{ collected_pct }}% collected</span>
+        <span>{{ total_pending_pay|npr }} pending</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════ PROJECT PROGRESS TABLE ═════════ -->
+  <section class="bg-white rounded-xl border border-[#e8dccc]">
+    <div class="px-5 py-4 border-b border-[#e8dccc] flex items-center justify-between">
+      <h3 class="text-sm font-semibold text-[#4a3520]">Project progress</h3>
+      <span class="text-[11px] text-[#8b6f55]">Click a project for its full report</span>
+    </div>
+
+    {% if rows %}
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm min-w-[900px]">
+        <thead>
+          <tr class="text-left text-[11px] uppercase tracking-wide text-[#8b6f55] border-b border-[#e8dccc]">
+            <th class="px-5 py-3 font-semibold">Project</th>
+            <th class="px-2 py-3 font-semibold">Health</th>
+            <th class="px-2 py-3 font-semibold w-48">Progress</th>
+            <th class="px-2 py-3 font-semibold">Tasks</th>
+            <th class="px-2 py-3 font-semibold">Deadline</th>
+            <th class="px-5 py-3 font-semibold text-right">Budget / Paid</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in rows %}
+          <tr class="border-b border-[#f2ede4] hover:bg-[#fdf9f3] transition">
+            <td class="px-5 py-3">
+              <a href="{% url 'reports:project_report' r.project.pk %}" class="font-semibold text-[#4a3520] hover:text-[#b8895e] transition">{{ r.project.name }}</a>
+              <div class="text-[11px] text-gray-400">{{ r.project.client_display_name }} · {{ r.project.get_priority_display }} priority</div>
+            </td>
+            <td class="px-2 py-3">
+              <span class="inline-flex px-2.5 py-0.5 rounded-full text-[11px] font-medium" style="background: {{ r.health_bg }}; color: {{ r.health_fg }}">{{ r.health_label }}</span>
+            </td>
+            <td class="px-2 py-3">
+              <div class="flex items-center gap-2">
+                <div class="relative flex-1 h-2 bg-[#f2ede4] rounded-full overflow-hidden">
+                  <div class="h-full rounded-full" style="width: {{ r.progress }}%; background: {{ r.bar_color }}"></div>
+                  {% if r.expected is not None %}
+                  <div class="absolute top-0 bottom-0 w-0.5 bg-[#4a3520]/50" style="left: {{ r.expected }}%" title="Time elapsed: {{ r.expected }}%"></div>
+                  {% endif %}
+                </div>
+                <span class="text-xs font-semibold text-gray-700 w-9 text-right">{{ r.progress }}%</span>
+              </div>
+            </td>
+            <td class="px-2 py-3 text-xs text-gray-600">
+              {{ r.done }}/{{ r.total }} done
+              {% if r.overdue_tasks %}<div class="text-[11px] text-[#c5221f]">{{ r.overdue_tasks }} overdue</div>{% endif %}
+            </td>
+            <td class="px-2 py-3 text-xs">
+              <div class="text-gray-700">{% if r.project.deadline %}{{ r.project.deadline|date:"M j, Y" }}{% else %}—{% endif %}</div>
+              <div class="text-[11px] {% if r.deadline_overdue %}text-[#c5221f] font-medium{% else %}text-gray-400{% endif %}">{{ r.deadline_note }}</div>
+            </td>
+            <td class="px-5 py-3 text-right text-xs">
+              <div class="text-gray-700">{{ r.budget|npr }}</div>
+              <div class="text-[11px] text-[#137333]">{{ r.paid|npr }} paid</div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p class="px-5 py-3 text-[11px] text-gray-400 border-t border-[#f2ede4]">
+      The dark tick on each bar marks how much of the project's timeline has elapsed — a bar that stops well short of it is falling behind.
+    </p>
+    {% else %}
+    <div class="py-12 text-center">
+      <i class="fas fa-chart-line text-gray-300 text-2xl mb-3"></i>
+      <p class="text-xs text-gray-500">No projects match these filters</p>
+    </div>
+    {% endif %}
+  </section>
+
+  <!-- ═════════ WORKLOAD + ATTENTION ═════════ -->
+  <section class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+    <!-- Staff workload -->
+    <div class="bg-white rounded-xl border border-[#e8dccc]">
+      <div class="px-5 py-4 border-b border-[#e8dccc] flex items-center justify-between">
+        <h3 class="text-sm font-semibold text-[#4a3520]">Staff workload</h3>
+        {% if unassigned_count %}<span class="text-[11px] text-[#b06000]">{{ unassigned_count }} unassigned task{{ unassigned_count|pluralize }}</span>{% endif %}
+      </div>
+      {% if workload %}
+      <div class="divide-y divide-[#f2ede4]">
+        {% for s in workload %}
+        <div class="px-5 py-3 flex items-center gap-3">
+          <div class="w-8 h-8 shrink-0 rounded-full bg-[#d4a373] text-white flex items-center justify-center text-xs font-medium">{{ s.initials }}</div>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-xs font-semibold text-[#4a3520] truncate">{{ s.name }}</span>
+              <span class="text-[11px] text-gray-500 shrink-0">{{ s.done }}/{{ s.total }} done{% if s.overdue %} · <span class="text-[#c5221f]">{{ s.overdue }} overdue</span>{% endif %}</span>
+            </div>
+            <div class="flex items-center gap-2 mt-1.5">
+              <div class="flex-1 h-1.5 bg-[#f2ede4] rounded-full overflow-hidden">
+                <div class="h-full rounded-full" style="width: {{ s.avg }}%; background: {{ s.bar_color }}"></div>
+              </div>
+              <span class="text-[11px] text-gray-500 w-8 text-right">{{ s.avg }}%</span>
+            </div>
+            <div class="text-[10px] text-gray-400 mt-1">{{ s.projects }} project{{ s.projects|pluralize }} · {{ s.in_progress }} in progress</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="py-10 text-center text-xs text-gray-400">No assigned tasks yet</div>
+      {% endif %}
+    </div>
+
+    <!-- Needs attention -->
+    <div class="space-y-4">
+      <div class="bg-white rounded-xl border border-[#e8dccc]">
+        <div class="px-5 py-4 border-b border-[#e8dccc] flex items-center gap-2">
+          <i class="fas fa-exclamation-circle text-[#c5221f] text-sm"></i>
+          <h3 class="text-sm font-semibold text-[#4a3520]">Overdue tasks</h3>
+        </div>
+        {% for item in overdue_list %}
+        <a href="{% url 'projects:project_detail' item.task.project_id %}" class="flex items-center gap-3 px-5 py-2.5 border-b border-[#f2ede4] last:border-b-0 hover:bg-[#fdf9f3] transition">
+          <div class="min-w-0 flex-1">
+            <p class="text-xs font-medium text-gray-800 truncate">{{ item.task.title }}</p>
+            <p class="text-[11px] text-gray-400 truncate">{{ item.task.project.name }} · {{ item.task.assigned_display_name }}</p>
+          </div>
+          <span class="text-[11px] font-medium text-[#c5221f] shrink-0">{% widthratio item.days 1 -1 %}d late</span>
+        </a>
+        {% empty %}
+        <div class="py-6 text-center text-xs text-gray-400">No overdue tasks</div>
+        {% endfor %}
+      </div>
+
+      <div class="bg-white rounded-xl border border-[#e8dccc]">
+        <div class="px-5 py-4 border-b border-[#e8dccc] flex items-center gap-2">
+          <i class="far fa-calendar-alt text-[#b06000] text-sm"></i>
+          <h3 class="text-sm font-semibold text-[#4a3520]">Due in the next 14 days</h3>
+        </div>
+        {% for item in upcoming_list %}
+        <a href="{% url 'projects:project_detail' item.task.project_id %}" class="flex items-center gap-3 px-5 py-2.5 border-b border-[#f2ede4] last:border-b-0 hover:bg-[#fdf9f3] transition">
+          <div class="min-w-0 flex-1">
+            <p class="text-xs font-medium text-gray-800 truncate">{{ item.task.title }}</p>
+            <p class="text-[11px] text-gray-400 truncate">{{ item.task.project.name }} · {{ item.percent }}% done</p>
+          </div>
+          <span class="text-[11px] text-gray-500 shrink-0">{% if item.days == 0 %}Today{% else %}{{ item.task.due_date|date:"M j" }}{% endif %}</span>
+        </a>
+        {% empty %}
+        <div class="py-6 text-center text-xs text-gray-400">Nothing due soon</div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════ RECENT ACTIVITY ═════════ -->
+  <section class="bg-white rounded-xl border border-[#e8dccc]">
+    <div class="px-5 py-4 border-b border-[#e8dccc]">
+      <h3 class="text-sm font-semibold text-[#4a3520]">Recent activity</h3>
+    </div>
+    {% for a in activities %}
+    {% with ic=a.icon_css %}
+    <div class="flex items-start gap-3 px-5 py-3 border-b border-[#f2ede4] last:border-b-0">
+      <span class="w-7 h-7 shrink-0 rounded-full flex items-center justify-center text-[10px] {{ ic.bg }}"><i class="fas {{ ic.icon }}"></i></span>
+      <div class="min-w-0 flex-1">
+        <p class="text-xs text-gray-800">{{ a.description }}</p>
+        <p class="text-[11px] text-gray-400 mt-0.5">{{ a.project.name }} · {{ a.created_at|timesince }} ago</p>
+      </div>
+    </div>
+    {% endwith %}
+    {% empty %}
+    <div class="py-8 text-center text-xs text-gray-400">No activity recorded yet</div>
+    {% endfor %}
+  </section>
+
+</div>
+{% endblock %}
