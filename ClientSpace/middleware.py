@@ -53,8 +53,12 @@ CLIENT_BLOCKED_PATTERNS = [
     # /payments/           → manager overview
     # /payments/project/   → project-level payment views
     # /payments/<id>/status/ → mark paid/cancelled/overdue
-    # NOTE: /payments/my/ is intentionally NOT listed here so clients can
-    #       access their own payment requests page.
+    # NOTE: the following are intentionally NOT listed so clients can access:
+    #   /payments/my/          → client's own payment requests
+    #   /payments/initiate/    → Phase 3: start a payment transaction
+    #   /payments/simulate/    → Phase 3: simulation (guarded by DEBUG server-side)
+    #   /payments/result/      → Phase 3: post-payment result page
+    #   /payments/history/     → Phase 3: transaction history
     r"^/payments/$",
     r"^/payments/project/",
     r"^/payments/\d+/status/",

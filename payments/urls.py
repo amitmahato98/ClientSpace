@@ -18,4 +18,21 @@ urlpatterns = [
 
     # ── Client: view their own payment requests ───────────────────────────────
     path("my/", views.client_payments, name="client_payments"),
+
+    # ── Phase 3: Client — initiate a payment transaction ─────────────────────
+    # GET  → confirmation page showing PR details before committing
+    # POST → creates the PaymentTransaction (INITIATED), redirects to simulate
+    path("initiate/<int:pr_pk>/", views.initiate_payment, name="initiate_payment"),
+
+    # ── Phase 3: Simulation — confirm SUCCESS or FAILED (DEBUG only) ─────────
+    # POST with outcome=success|failed.
+    # Guarded server-side: returns 404 when DEBUG=False.
+    path("simulate/<int:txn_pk>/", views.simulate_payment_result, name="simulate_payment_result"),
+
+    # ── Phase 3: Payment result page ─────────────────────────────────────────
+    # Shown after simulate completes; also reachable from history.
+    path("result/<int:txn_pk>/", views.payment_result, name="payment_result"),
+
+    # ── Phase 3: Client — full transaction history ────────────────────────────
+    path("history/", views.transaction_history, name="transaction_history"),
 ]
