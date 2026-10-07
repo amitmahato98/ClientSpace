@@ -8,9 +8,7 @@
 {% block content %}
 <div class="max-w-5xl mx-auto space-y-6">
 
-  <!-- ═══════════════════════════════════════════════════════
-       DJANGO MESSAGES
-       ═══════════════════════════════════════════════════════ -->
+  <!-- ═══ MESSAGES ══════════════════════════════════════════════════════════ -->
   {% if messages %}
   <div class="space-y-2">
     {% for message in messages %}
@@ -25,9 +23,7 @@
   </div>
   {% endif %}
 
-  <!-- ═══════════════════════════════════════════════════════
-       GRAND SUMMARY CARDS  (totals from actual transactions)
-       ═══════════════════════════════════════════════════════ -->
+  <!-- ═══ GRAND SUMMARY CARDS (transaction-based totals) ════════════════════ -->
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
 
     <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
@@ -68,9 +64,7 @@
 
   </div>
 
-  <!-- ═══════════════════════════════════════════════════════
-       EMPTY STATE
-       ═══════════════════════════════════════════════════════ -->
+  <!-- ═══ EMPTY STATE ════════════════════════════════════════════════════════ -->
   {% if not project_groups %}
   <div class="bg-white rounded-xl border border-[#e8dccc] p-10 text-center">
     <i class="fas fa-credit-card text-4xl text-[#d4a373] mb-4"></i>
@@ -80,54 +74,86 @@
     </p>
     <a href="{% url 'projects:project_list' %}"
        class="inline-flex items-center gap-2 mt-4 px-4 py-2 text-xs rounded-lg bg-[#d4a373] text-white hover:bg-[#b8895e] transition">
-      <i class="fas fa-folder-open text-[10px]"></i>
-      View my projects
+      <i class="fas fa-folder-open text-[10px]"></i>View my projects
     </a>
   </div>
 
   {% else %}
 
-  <!-- ═══════════════════════════════════════════════════════
-       PER-PROJECT PAYMENT CARDS
-       ═══════════════════════════════════════════════════════ -->
+  <!-- ═══ PER-PROJECT PAYMENT CARDS ════════════════════════════════════════ -->
   {% for group in project_groups %}
   <div class="bg-white rounded-xl border border-[#e8dccc] shadow-sm overflow-hidden">
 
-    <!-- Project header -->
-    <div class="px-5 py-4 border-b border-[#f2ede4] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-      <div class="min-w-0">
-        <div class="flex items-center gap-2 min-w-0">
-          <i class="fas fa-folder-open text-[#d4a373] text-sm shrink-0"></i>
-          <h3 class="text-sm font-bold text-[#4a3520] truncate">{{ group.project.name }}</h3>
-          <span class="shrink-0 text-[11px] px-2 py-0.5 rounded-full {{ group.project.status_css_class }}">
-            {{ group.project.get_status_display }}
-          </span>
+    <!-- Project header ──────────────────────────────────────────────────── -->
+    <div class="px-5 py-4 border-b border-[#f2ede4]">
+      <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+
+        <!-- Left: project name + status + fully-paid badge -->
+        <div class="min-w-0">
+          <div class="flex items-center gap-2 flex-wrap min-w-0">
+            <i class="fas fa-folder-open text-[#d4a373] text-sm shrink-0"></i>
+            <h3 class="text-sm font-bold text-[#4a3520] truncate">{{ group.project.name }}</h3>
+            <span class="shrink-0 text-[11px] px-2 py-0.5 rounded-full {{ group.project.status_css_class }}">
+              {{ group.project.get_status_display }}
+            </span>
+            {% if group.is_fully_paid %}
+            <span class="inline-flex items-center gap-1 shrink-0 text-[10px] px-2 py-0.5 rounded-full bg-[#e6f4ea] text-[#137333] font-semibold">
+              <i class="fas fa-check-double text-[9px]"></i>Fully Paid
+            </span>
+            {% endif %}
+          </div>
+          <!-- Budget line -->
+          <p class="text-xs text-[#8b6f55] mt-1 ml-6">
+            Total budget:
+            <span class="font-semibold text-[#4a3520] font-mono">{{ group.budget|npr }}</span>
+          </p>
         </div>
-        <p class="text-xs text-[#8b6f55] mt-0.5 ml-6">
-          Budget: <span class="font-semibold text-[#4a3520]">{{ group.project.budget|npr }}</span>
-        </p>
+
+        <!-- Right: financial mini-summary -->
+        <div class="flex items-center gap-4 text-xs shrink-0 ml-6 sm:ml-0">
+          <div class="text-center">
+            <div class="text-[#8b6f55] text-[10px]">Paid</div>
+            <div class="font-semibold text-[#137333] font-mono">{{ group.total_paid|npr }}</div>
+          </div>
+          <div class="text-center">
+            <div class="text-[#8b6f55] text-[10px]">Pending</div>
+            <div class="font-semibold text-[#b06000] font-mono">{{ group.total_pending|npr }}</div>
+          </div>
+          <div class="text-center">
+            <div class="text-[#8b6f55] text-[10px]">Remaining</div>
+            <div class="font-semibold text-[#4a3520] font-mono">{{ group.available|npr }}</div>
+          </div>
+        </div>
+
       </div>
-      <div class="flex items-center gap-4 text-xs shrink-0">
-        <div class="text-center">
-          <div class="text-[#8b6f55]">Billed</div>
-          <div class="font-semibold text-[#4a3520] font-mono">{{ group.total_amount|npr }}</div>
+
+      <!-- Budget progress bar -->
+      {% if group.budget > 0 %}
+      {% with paid_pct=group.total_paid|floatformat:0 %}
+      <div class="mt-3 ml-6">
+        <div class="flex justify-between text-[10px] text-[#8b6f55] mb-1">
+          <span>Payment progress</span>
+          <span class="font-mono">{{ group.total_paid|npr }} / {{ group.budget|npr }}</span>
         </div>
-        <div class="text-center">
-          <div class="text-[#8b6f55]">Paid</div>
-          <div class="font-semibold text-[#137333] font-mono">{{ group.total_paid|npr }}</div>
-        </div>
-        <div class="text-center">
-          <div class="text-[#8b6f55]">Pending</div>
-          <div class="font-semibold text-[#b06000] font-mono">{{ group.total_pending|npr }}</div>
+        <div class="h-1.5 bg-[#f2ede4] rounded-full overflow-hidden">
+          {% if group.budget > 0 %}
+          <div class="h-full bg-[#137333] rounded-full transition-all"
+               style="width: {{ group.total_paid|floatformat:2 }}{% widthratio group.total_paid group.budget 100 %}%;
+                      max-width:100%">
+          </div>
+          {% endif %}
         </div>
       </div>
+      {% endwith %}
+      {% endif %}
     </div>
 
-    <!-- Payment request rows -->
+    <!-- Payment request rows ─────────────────────────────────────────────── -->
     <div class="divide-y divide-[#f2ede4]">
       {% for pr in group.requests %}
       <div class="px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3">
 
+        <!-- Icon + title / description -->
         <div class="flex items-start gap-3 flex-1 min-w-0">
           <div class="w-8 h-8 rounded-full bg-[#f5e6d0] flex items-center justify-center shrink-0 mt-0.5">
             <i class="fas {{ pr.status_icon }} text-[#b8895e] text-xs"></i>
@@ -145,6 +171,7 @@
           </div>
         </div>
 
+        <!-- Amount + status + action -->
         <div class="flex items-center gap-3 shrink-0 ml-11 sm:ml-0">
           <div class="text-right">
             <div class="text-sm font-bold text-[#4a3520] font-mono">{{ pr.amount|npr }}</div>
@@ -156,7 +183,7 @@
             {{ pr.get_status_display }}
           </span>
 
-          <!-- Phase 3: real Pay Now button (only for PENDING) -->
+          <!-- Pay Now (PENDING only) -->
           {% if pr.is_pending %}
           <a href="{% url 'payments:initiate_payment' pr_pk=pr.pk %}"
              class="px-3 py-1.5 text-xs font-medium rounded-lg bg-[#d4a373] text-white hover:bg-[#b8895e] transition shrink-0">
@@ -168,12 +195,19 @@
       {% endfor %}
     </div>
 
+    <!-- Fully-paid footer strip ────────────────────────────────────────── -->
+    {% if group.is_fully_paid %}
+    <div class="px-5 py-3 bg-[#f0faf2] border-t border-[#b7dfbe] flex items-center gap-2 text-xs text-[#137333]">
+      <i class="fas fa-check-double"></i>
+      <span class="font-semibold">Project fully paid.</span>
+      <span class="text-[#137333]/70">All {{ group.budget|npr }} collected. Thank you!</span>
+    </div>
+    {% endif %}
+
   </div>
   {% endfor %}
 
-  <!-- ═══════════════════════════════════════════════════════
-       RECENT PAYMENT HISTORY
-       ═══════════════════════════════════════════════════════ -->
+  <!-- ═══ RECENT TRANSACTIONS ════════════════════════════════════════════ -->
   {% if recent_transactions %}
   <div class="bg-white rounded-xl border border-[#e8dccc] shadow-sm overflow-hidden">
     <div class="px-5 py-4 border-b border-[#f2ede4] flex items-center justify-between">
@@ -220,7 +254,7 @@
   </div>
   {% endif %}
 
-  {% endif %}
+  {% endif %}{# /project_groups #}
 
   <!-- Phase note -->
   <p class="text-[11px] text-gray-400 text-center pb-2">

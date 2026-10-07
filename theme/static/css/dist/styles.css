@@ -816,6 +816,9 @@
   .cursor-default {
     cursor: default;
   }
+  .cursor-not-allowed {
+    cursor: not-allowed;
+  }
   .cursor-pointer {
     cursor: pointer;
   }
@@ -917,6 +920,13 @@
       --tw-space-y-reverse: 0;
       margin-block-start: calc(calc(var(--spacing) * 1) * var(--tw-space-y-reverse));
       margin-block-end: calc(calc(var(--spacing) * 1) * calc(1 - var(--tw-space-y-reverse)));
+    }
+  }
+  .space-y-1\.5 {
+    :where(& > :not(:last-child)) {
+      --tw-space-y-reverse: 0;
+      margin-block-start: calc(calc(var(--spacing) * 1.5) * var(--tw-space-y-reverse));
+      margin-block-end: calc(calc(var(--spacing) * 1.5) * calc(1 - var(--tw-space-y-reverse)));
     }
   }
   .space-y-2 {
@@ -1170,6 +1180,9 @@
   }
   .bg-\[\#137333\] {
     background-color: #137333;
+  }
+  .bg-\[\#137333\]\/10 {
+    background-color: color-mix(in oklab, #137333 10%, transparent);
   }
   .bg-\[\#b06000\] {
     background-color: #b06000;
@@ -1461,6 +1474,9 @@
   .pt-1 {
     padding-top: calc(var(--spacing) * 1);
   }
+  .pt-1\.5 {
+    padding-top: calc(var(--spacing) * 1.5);
+  }
   .pt-2 {
     padding-top: calc(var(--spacing) * 2);
   }
@@ -1727,6 +1743,12 @@
   }
   .text-\[\#137333\] {
     color: #137333;
+  }
+  .text-\[\#137333\]\/70 {
+    color: color-mix(in oklab, #137333 70%, transparent);
+  }
+  .text-\[\#137333\]\/80 {
+    color: color-mix(in oklab, #137333 80%, transparent);
   }
   .text-\[\#657084\] {
     color: #657084;

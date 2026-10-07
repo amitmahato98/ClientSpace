@@ -12,9 +12,7 @@
 {% block content %}
 <div class="max-w-4xl mx-auto space-y-6">
 
-  <!-- ═══════════════════════════════════════════════════════
-       DJANGO MESSAGES
-       ═══════════════════════════════════════════════════════ -->
+  <!-- ═══ MESSAGES ══════════════════════════════════════════════════════════ -->
   {% if messages %}
   <div class="space-y-2">
     {% for message in messages %}
@@ -29,14 +27,11 @@
   </div>
   {% endif %}
 
-  <!-- ═══════════════════════════════════════════════════════
-       BACK + PROJECT INFO HEADER
-       ═══════════════════════════════════════════════════════ -->
+  <!-- ═══ BACK + PROJECT HEADER ═════════════════════════════════════════════ -->
   <div class="pt-1">
     <a href="{% url 'payments:payment_view' %}"
        class="inline-flex items-center gap-2 text-xs font-medium text-gray-400 hover:text-[#b8895e] transition mb-4">
-      <i class="fas fa-arrow-left text-[10px]"></i>
-      Back to payments
+      <i class="fas fa-arrow-left text-[10px]"></i>Back to payments
     </a>
 
     <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
@@ -46,70 +41,114 @@
           <span class="text-[11px] px-2 py-0.5 rounded-full {{ project.status_css_class }}">
             {{ project.get_status_display }}
           </span>
+          {% if is_fully_paid %}
+          <span class="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-full bg-[#e6f4ea] text-[#137333] font-semibold">
+            <i class="fas fa-check-double text-[9px]"></i>Fully Paid
+          </span>
+          {% endif %}
         </div>
         <p class="text-xs text-[#8b6f55] mt-1">
           Client: <strong class="text-[#4a3520]">{{ project.client_display_name }}</strong>
-          &nbsp;·&nbsp;
-          Budget: <strong class="text-[#4a3520] font-mono">{{ project.budget|npr }}</strong>
+          &nbsp;·&nbsp;Budget: <strong class="text-[#4a3520] font-mono">{{ budget|npr }}</strong>
         </p>
       </div>
 
       {% if user.is_manager %}
-      <button type="button" id="openCreateModal"
-        class="px-4 py-2 text-xs font-medium rounded-lg bg-[#d4a373] text-white hover:bg-[#b8895e] transition flex items-center gap-1.5 shrink-0">
-        <i class="fas fa-plus text-[10px]"></i>
-        New Payment Request
-      </button>
+        {% if is_fully_paid %}
+        <button type="button" disabled
+          class="px-4 py-2 text-xs font-medium rounded-lg bg-gray-100 text-gray-400 cursor-not-allowed flex items-center gap-1.5 shrink-0"
+          title="No remaining balance — project is fully paid">
+          <i class="fas fa-check-circle text-[10px]"></i>Project Fully Paid
+        </button>
+        {% else %}
+        <button type="button" id="openCreateModal"
+          class="px-4 py-2 text-xs font-medium rounded-lg bg-[#d4a373] text-white hover:bg-[#b8895e] transition flex items-center gap-1.5 shrink-0">
+          <i class="fas fa-plus text-[10px]"></i>New Payment Request
+        </button>
+        {% endif %}
       {% endif %}
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════════════════════
-       FINANCIAL SUMMARY CARDS
-       ═══════════════════════════════════════════════════════ -->
-  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+  <!-- ═══ FULLY PAID BANNER ════════════════════════════════════════════════ -->
+  {% if is_fully_paid %}
+  <div class="flex items-start gap-3 px-5 py-4 rounded-xl bg-[#e6f4ea] border border-[#b7dfbe]">
+    <div class="w-9 h-9 rounded-full bg-[#137333]/10 flex items-center justify-center shrink-0">
+      <i class="fas fa-check-double text-[#137333]"></i>
+    </div>
+    <div>
+      <p class="text-sm font-semibold text-[#137333]">Project Fully Paid</p>
+      <p class="text-xs text-[#137333]/80 mt-0.5">
+        The entire project budget of {{ budget|npr }} has been collected.
+        No additional payment requests can be created.
+      </p>
+    </div>
+  </div>
+  {% endif %}
 
+  <!-- ═══ FINANCIAL SUMMARY — 5 CARDS ══════════════════════════════════════ -->
+  <div class="grid grid-cols-2 lg:grid-cols-5 gap-3">
+
+    <!-- Budget -->
     <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
       <div class="flex items-center justify-between mb-1">
-        <span class="text-xs text-gray-400">Total Billed</span>
-        <i class="fas fa-file-invoice-dollar text-[#d4a373] text-xs"></i>
+        <span class="text-[11px] text-gray-400">Project Budget</span>
+        <i class="fas fa-wallet text-[#d4a373] text-xs"></i>
       </div>
-      <div class="text-base font-bold text-gray-900 font-mono">{{ total_amount|npr }}</div>
+      <div class="text-sm font-bold text-gray-900 font-mono">{{ budget|npr }}</div>
+      <p class="text-[10px] text-gray-400 mt-0.5">Total project value</p>
     </div>
 
+    <!-- Paid -->
     <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
       <div class="flex items-center justify-between mb-1">
-        <span class="text-xs text-gray-400">Total Paid</span>
+        <span class="text-[11px] text-gray-400">Paid</span>
         <i class="fas fa-check-circle text-green-500 text-xs"></i>
       </div>
-      <div class="text-base font-bold text-[#137333] font-mono">{{ total_paid|npr }}</div>
+      <div class="text-sm font-bold text-[#137333] font-mono">{{ total_paid|npr }}</div>
+      <p class="text-[10px] text-gray-400 mt-0.5">Confirmed payments</p>
     </div>
 
+    <!-- Pending requests -->
     <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
       <div class="flex items-center justify-between mb-1">
-        <span class="text-xs text-gray-400">Remaining</span>
-        <i class="fas fa-hourglass-half text-[#b06000] text-xs"></i>
+        <span class="text-[11px] text-gray-400">Pending</span>
+        <i class="fas fa-clock text-[#b06000] text-xs"></i>
       </div>
-      <div class="text-base font-bold text-[#b06000] font-mono">{{ remaining|npr }}</div>
+      <div class="text-sm font-bold text-[#b06000] font-mono">{{ total_pending|npr }}</div>
+      <p class="text-[10px] text-gray-400 mt-0.5">Requested, not yet paid</p>
     </div>
 
+    <!-- Available for new requests -->
+    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100
+      {% if available <= 0 %}opacity-60{% endif %}">
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-[11px] text-gray-400">Available</span>
+        <i class="fas fa-coins text-[#b8895e] text-xs"></i>
+      </div>
+      <div class="text-sm font-bold text-[#4a3520] font-mono">{{ available|npr }}</div>
+      <p class="text-[10px] text-gray-400 mt-0.5">Budget for new requests</p>
+    </div>
+
+    <!-- Billed total (sum of all PR amounts) -->
     <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
       <div class="flex items-center justify-between mb-1">
-        <span class="text-xs text-gray-400">Pending</span>
-        <i class="fas fa-clock text-[#b8895e] text-xs"></i>
+        <span class="text-[11px] text-gray-400">Total Billed</span>
+        <i class="fas fa-file-invoice-dollar text-[#b8895e] text-xs"></i>
       </div>
-      <div class="text-base font-bold text-gray-900 font-mono">{{ total_pending|npr }}</div>
+      <div class="text-sm font-bold text-gray-900 font-mono">{{ total_amount|npr }}</div>
+      <p class="text-[10px] text-gray-400 mt-0.5">All requests combined</p>
     </div>
 
   </div>
 
-  <!-- ═══════════════════════════════════════════════════════
-       PAYMENT REQUESTS TABLE
-       ═══════════════════════════════════════════════════════ -->
+  <!-- ═══ PAYMENT REQUESTS TABLE ════════════════════════════════════════════ -->
   <div class="bg-white rounded-xl border border-[#e8dccc] shadow-sm overflow-hidden">
     <div class="px-5 py-4 border-b border-[#f2ede4] flex items-center justify-between">
       <h3 class="text-sm font-bold text-[#4a3520]">Payment Requests</h3>
-      <span class="text-xs text-[#8b6f55]">{{ payment_requests|length }} request{{ payment_requests|length|pluralize }}</span>
+      <span class="text-xs text-[#8b6f55]">
+        {{ payment_requests|length }} request{{ payment_requests|length|pluralize }}
+      </span>
     </div>
 
     {% if not payment_requests %}
@@ -117,10 +156,10 @@
       <i class="fas fa-file-invoice text-3xl text-[#d4a373] mb-3"></i>
       <p class="text-sm text-[#4a3520] font-semibold mb-1">No payment requests yet</p>
       <p class="text-xs text-[#8b6f55]">
-        {% if user.is_manager %}
+        {% if user.is_manager and not is_fully_paid %}
           Click "New Payment Request" above to add one.
         {% else %}
-          No payment requests have been created for this project yet.
+          No payment requests have been created for this project.
         {% endif %}
       </p>
     </div>
@@ -151,7 +190,8 @@
               {{ pr.amount|npr }}
             </td>
             <td class="px-3 py-3 text-xs text-[#4a3520]">
-              {% if pr.due_date %}{{ pr.due_date|date:"M j, Y" }}{% else %}<span class="text-gray-400">—</span>{% endif %}
+              {% if pr.due_date %}{{ pr.due_date|date:"M j, Y" }}
+              {% else %}<span class="text-gray-400">—</span>{% endif %}
             </td>
             <td class="px-3 py-3">
               <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium {{ pr.status_css_class }}">
@@ -179,16 +219,19 @@
     {% endif %}
   </div>
 
-  <!-- Link to project detail -->
-  <div class="flex justify-end">
+  <!-- Link to project detail + transaction history ─────────────────────── -->
+  <div class="flex justify-between items-center">
+    <a href="{% url 'payments:transaction_history' %}"
+       class="text-xs text-[#8b6f55] hover:text-[#b8895e] transition">
+      <i class="fas fa-history mr-1"></i>View full transaction history
+    </a>
     <a href="{% url 'projects:project_detail' pk=project.pk %}"
        class="inline-flex items-center gap-1.5 text-xs text-[#8b6f55] hover:text-[#b8895e] transition">
-      <i class="fas fa-external-link-alt text-[10px]"></i>
-      View full project details
+      <i class="fas fa-external-link-alt text-[10px]"></i>View full project details
     </a>
   </div>
 
-  <!-- ── Phase 3: Transaction history for this project ───── -->
+  <!-- ═══ TRANSACTION HISTORY ══════════════════════════════════════════════ -->
   {% if transactions %}
   <div class="bg-white rounded-xl border border-[#e8dccc] shadow-sm overflow-hidden">
     <div class="px-5 py-4 border-b border-[#f2ede4] flex items-center justify-between">
@@ -226,7 +269,8 @@
               </span>
             </td>
             <td class="px-3 py-2.5 text-[#8b6f55] whitespace-nowrap">
-              {% if txn.paid_at %}{{ txn.paid_at|date:"M j, Y" }}{% else %}{{ txn.created_at|date:"M j, Y" }}{% endif %}
+              {% if txn.paid_at %}{{ txn.paid_at|date:"M j, Y" }}
+              {% else %}{{ txn.created_at|date:"M j, Y" }}{% endif %}
             </td>
           </tr>
           {% endfor %}
@@ -239,10 +283,8 @@
 </div><!-- /max-w-4xl -->
 
 
-<!-- ═══════════════════════════════════════════════════════
-     CREATE PAYMENT REQUEST MODAL  (Manager only)
-     ═══════════════════════════════════════════════════════ -->
-{% if user.is_manager %}
+<!-- ═══ CREATE PAYMENT REQUEST MODAL (Manager only) ══════════════════════ -->
+{% if user.is_manager and not is_fully_paid %}
 <div id="createPaymentModal"
      class="fixed inset-0 bg-black/40 z-50 hidden flex items-center justify-center p-4">
   <div class="bg-white rounded-2xl shadow-xl w-full max-w-md">
@@ -290,12 +332,28 @@
         {{ create_form.due_date }}
       </div>
 
-      <!-- Project budget hint -->
-      <p class="text-[11px] text-[#8b6f55] bg-[#faf1e3] rounded-lg px-3 py-2">
-        <i class="fas fa-info-circle mr-1"></i>
-        Project budget: <strong>{{ project.budget|npr }}</strong>.
-        Total already billed: <strong>{{ total_amount|npr }}</strong>.
-      </p>
+      <!-- Financial context panel -->
+      <div class="rounded-lg bg-[#faf1e3] border border-[#e8dccc] px-4 py-3 space-y-1.5 text-xs">
+        <div class="flex justify-between">
+          <span class="text-[#8b6f55]">Project budget</span>
+          <span class="font-semibold text-[#4a3520] font-mono">{{ budget|npr }}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-[#8b6f55]">Already paid</span>
+          <span class="font-semibold text-[#137333] font-mono">{{ total_paid|npr }}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-[#8b6f55]">Pending requests</span>
+          <span class="font-semibold text-[#b06000] font-mono">{{ total_pending|npr }}</span>
+        </div>
+        <div class="flex justify-between border-t border-[#e8dccc] pt-1.5 mt-1">
+          <span class="text-[#4a3520] font-medium">Available to request</span>
+          <span class="font-bold text-[#4a3520] font-mono">{{ available|npr }}</span>
+        </div>
+        <p class="text-[10px] text-[#8b6f55] pt-0.5">
+          You can request any amount up to {{ available|npr }}.
+        </p>
+      </div>
 
       <div class="flex gap-3 pt-1">
         <button type="button" onclick="closeCreateModal()"
@@ -304,7 +362,7 @@
         </button>
         <button type="submit"
           class="flex-1 px-4 py-2 text-xs rounded-lg bg-[#d4a373] text-white hover:bg-[#b8895e] transition font-medium">
-          Create Request
+          Create &amp; Notify Client
         </button>
       </div>
     </form>
@@ -313,9 +371,7 @@
 {% endif %}
 
 
-<!-- ═══════════════════════════════════════════════════════
-     UPDATE STATUS MODAL  (Manager only)
-     ═══════════════════════════════════════════════════════ -->
+<!-- ═══ UPDATE STATUS MODAL (Manager only) ═══════════════════════════════ -->
 {% if user.is_manager %}
 <div id="statusModal"
      class="fixed inset-0 bg-black/40 z-50 hidden flex items-center justify-center p-4">
@@ -361,7 +417,7 @@
 {% endif %}
 
 <script>
-  // ── Create Modal ────────────────────────────────────────────────────
+  // ── Create Modal ──────────────────────────────────────────────────────────
   const createModal = document.getElementById("createPaymentModal");
   function openCreateModal() { createModal && createModal.classList.remove("hidden"); }
   function closeCreateModal() { createModal && createModal.classList.add("hidden"); }
@@ -371,13 +427,12 @@
     createModal.addEventListener("click", function(e) { if (e.target === this) closeCreateModal(); });
   }
 
-  // ── Status Modal ────────────────────────────────────────────────────
+  // ── Status Modal ──────────────────────────────────────────────────────────
   const statusModal = document.getElementById("statusModal");
   function openStatusModal(pk, title, currentStatus) {
     document.getElementById("statusModalTitle").textContent = title;
     document.getElementById("statusModalCurrent").textContent = currentStatus;
-    document.getElementById("statusModalForm").action =
-      "/payments/" + pk + "/status/";
+    document.getElementById("statusModalForm").action = "/payments/" + pk + "/status/";
     if (statusModal) statusModal.classList.remove("hidden");
   }
   function closeStatusModal() { statusModal && statusModal.classList.add("hidden"); }
@@ -389,7 +444,7 @@
     if (e.key === "Escape") { closeCreateModal(); closeStatusModal(); }
   });
 
-  // Auto-open create modal if there were form errors (re-open after failed submit)
+  // Auto-reopen create modal if form had errors on POST
   {% if create_form.errors %}
   document.addEventListener("DOMContentLoaded", openCreateModal);
   {% endif %}

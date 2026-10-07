@@ -1,29 +1,32 @@
 """
 payments/views.py
 ─────────────────
-Phase 2 views (unchanged structure, client_payments upgraded to txn-based totals):
-  client_payments          — CLIENT; transaction-based paid totals
-  payment_view             — MANAGER/STAFF; org-scoped overview
-  project_payments         — MANAGER/STAFF; single project
-  create_payment_request   — MANAGER; POST-only
-  update_payment_status    — MANAGER; POST-only
-
-Phase 3 views (new):
-  initiate_payment         — CLIENT; GET=confirm page, POST=create INITIATED txn
-  simulate_payment_result  — CLIENT; POST-only, DEBUG=True only
-  payment_result           — CLIENT; read-only result page
-  transaction_history      — CLIENT; full transaction history
+Phase 2 — PaymentRequest CRUD (manager) + client payment list
+Phase 3 — PaymentTransaction lifecycle: initiate, simulate, result, history
+Phase 4 — Balance enforcement, over-request guard, email, financial summary
 
 Security model
 ──────────────
-• All sensitive values (amount, project, client) are always derived
-  server-side from DB records — never from POST data.
-• simulate_payment_result returns 404 when DEBUG=False, making it
-  impossible to call in production.
+• All sensitive values (amount, project, client, balance) are always
+  derived server-side from DB records — NEVER from POST data.
+• simulate_payment_result returns 404 when DEBUG=False.
 • All client views filter strictly by client=request.user.
 • All manager views filter by project__organization=manager_org.
 • The service layer is the ONLY code that writes PaymentTransaction rows
   or transitions PaymentRequest.status.
+• create_payment_request uses select_for_update() + transaction.atomic()
+  to prevent concurrent over-requests for the same project.
+
+Phase 4 balance calculation
+────────────────────────────
+  paid      = SUM of PaymentTransaction.amount WHERE status=SUCCESS
+  pending   = SUM of PaymentRequest.amount WHERE status IN (PENDING, OVERDUE)
+  available = max(0, project.budget - paid - pending)
+
+  A new PaymentRequest.amount must be > 0 and <= available.
+  This is enforced in both:
+    (a) PaymentRequestForm.clean_amount() — catches it before save
+    (b) The view — recomputes available inside the lock to catch races
 """
 
 import logging
@@ -32,9 +35,11 @@ from decimal import Decimal
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db import transaction as db_transaction
 from django.db.models import Sum, Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.views.decorators.http import require_http_methods
 
 from accounts.decorators import manager_required, staff_or_above
@@ -49,18 +54,18 @@ logger = logging.getLogger(__name__)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# CLIENT VIEW — /payments/my/   (Phase 2, upgraded to txn-based paid totals)
+# CLIENT VIEW — /payments/my/
+# Phase 4: adds project budget + financial summary per-project group
 # ─────────────────────────────────────────────────────────────────────────────
 
 @login_required
 def client_payments(request):
     """
-    Show all PaymentRequests for the logged-in CLIENT with transaction-based
-    paid totals.
+    Show all PaymentRequests for the logged-in CLIENT.
 
-    Phase 3 upgrade:
-      grand_paid is now calculated from successful PaymentTransactions, not
-      from PaymentRequest.status == PAID.  This is the authoritative source.
+    Per-project groups now include full financial summary from the service
+    layer (budget, paid, pending, available, is_fully_paid) so the client
+    sees exactly what the project costs and where it stands.
     """
     payment_requests = (
         PaymentRequest.objects
@@ -69,41 +74,43 @@ def client_payments(request):
         .order_by("project__name", "created_at")
     )
 
-    # Transaction-based paid amount (authoritative for Phase 3+)
+    # Transaction-based paid total — authoritative source
     txn_paid_total = service.get_paid_amount_for_client(request.user)
 
-    # Per-project grouping
+    # Per-project grouping with full financial summary
     projects_seen = {}
     for pr in payment_requests:
         pid = pr.project_id
         if pid not in projects_seen:
-            # Per-project paid is transaction-based too
-            proj_paid = service.get_paid_amount_for_project(pr.project)
+            summary = service.get_project_financial_summary(pr.project)
             projects_seen[pid] = {
-                "project":       pr.project,
-                "requests":      [],
-                "total_amount":  Decimal("0.00"),
-                "total_paid":    proj_paid,
-                "total_pending": Decimal("0.00"),
+                "project":        pr.project,
+                "requests":       [],
+                "total_amount":   Decimal("0.00"),   # sum of PR amounts billed
+                "total_paid":     summary["paid"],
+                "total_pending":  summary["pending"],
+                "available":      summary["available"],
+                "is_fully_paid":  summary["is_fully_paid"],
+                "budget":         summary["budget"],
             }
         entry = projects_seen[pid]
         entry["requests"].append(pr)
         entry["total_amount"] += pr.amount
-        if pr.status == PaymentRequest.Status.PENDING:
-            entry["total_pending"] += pr.amount
 
     project_groups = list(projects_seen.values())
 
     # Grand totals
     agg = payment_requests.aggregate(total=Sum("amount"))
     grand_total     = agg["total"] or Decimal("0.00")
-    grand_paid      = txn_paid_total                        # from transactions
-    grand_pending   = payment_requests.filter(
-        status=PaymentRequest.Status.PENDING
-    ).aggregate(t=Sum("amount"))["t"] or Decimal("0.00")
-    grand_remaining = grand_total - grand_paid
+    grand_paid      = txn_paid_total
+    grand_pending   = (
+        payment_requests
+        .filter(status=PaymentRequest.Status.PENDING)
+        .aggregate(t=Sum("amount"))["t"] or Decimal("0.00")
+    )
+    grand_remaining = max(Decimal("0.00"), grand_total - grand_paid)
 
-    # Recent transactions for inline history (last 5)
+    # Recent transactions (last 5) for inline history strip
     recent_transactions = (
         PaymentTransaction.objects
         .select_related("payment_request", "project")
@@ -122,12 +129,20 @@ def client_payments(request):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# MANAGER / STAFF OVERVIEW — /payments/   (Phase 2, unchanged)
+# MANAGER / STAFF OVERVIEW — /payments/
+# Phase 4: consistent transaction-based paid totals
 # ─────────────────────────────────────────────────────────────────────────────
 
 @staff_or_above
 def payment_view(request):
-    """Manager/Staff org-scoped overview of all PaymentRequests."""
+    """
+    Org-scoped overview of all projects with payment activity.
+
+    Phase 4: per-project paid totals now come from PaymentTransactions
+    (status=SUCCESS), matching the source of truth used everywhere else.
+    The overview also shows available remaining per project so managers
+    can see at a glance which projects still have budget to request against.
+    """
     manager_org = get_user_organization(request.user)
     if manager_org is None:
         messages.error(request, "You must complete organisation setup first.")
@@ -135,40 +150,44 @@ def payment_view(request):
 
     payment_requests = (
         PaymentRequest.objects
-        .select_related("project", "client", "created_by")
+        .select_related("project", "project__organization", "client", "created_by")
         .filter(project__organization=manager_org)
         .order_by("project__name", "created_at")
     )
 
+    # Group by project; compute per-project financials from transactions
     projects_seen = {}
     for pr in payment_requests:
         pid = pr.project_id
         if pid not in projects_seen:
+            summary = service.get_project_financial_summary(pr.project)
             projects_seen[pid] = {
                 "project":       pr.project,
                 "requests":      [],
                 "total_amount":  Decimal("0.00"),
-                "total_paid":    Decimal("0.00"),
-                "total_pending": Decimal("0.00"),
+                "total_paid":    summary["paid"],
+                "total_pending": summary["pending"],
+                "available":     summary["available"],
+                "is_fully_paid": summary["is_fully_paid"],
+                "budget":        summary["budget"],
             }
         entry = projects_seen[pid]
         entry["requests"].append(pr)
         entry["total_amount"] += pr.amount
-        if pr.status == PaymentRequest.Status.PAID:
-            entry["total_paid"] += pr.amount
-        elif pr.status == PaymentRequest.Status.PENDING:
-            entry["total_pending"] += pr.amount
 
     project_groups = list(projects_seen.values())
 
-    totals = payment_requests.aggregate(
-        total_amount=Sum("amount"),
-        total_paid=Sum("amount", filter=Q(status=PaymentRequest.Status.PAID)),
-        total_pending=Sum("amount", filter=Q(status=PaymentRequest.Status.PENDING)),
+    # Grand totals — transaction-based paid
+    all_projects_in_org = Project.objects.filter(organization=manager_org)
+    grand_paid    = Decimal("0.00")
+    grand_pending = Decimal("0.00")
+    for group in project_groups:
+        grand_paid    += group["total_paid"]
+        grand_pending += group["total_pending"]
+
+    grand_total = (
+        payment_requests.aggregate(t=Sum("amount"))["t"] or Decimal("0.00")
     )
-    grand_total   = totals["total_amount"]  or Decimal("0.00")
-    grand_paid    = totals["total_paid"]    or Decimal("0.00")
-    grand_pending = totals["total_pending"] or Decimal("0.00")
 
     status_counts = {
         "pending":   payment_requests.filter(status=PaymentRequest.Status.PENDING).count(),
@@ -188,12 +207,16 @@ def payment_view(request):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# PROJECT-LEVEL PAYMENTS — /payments/project/<pk>/   (Phase 2, unchanged)
+# PROJECT-LEVEL PAYMENTS — /payments/project/<pk>/
+# Phase 4: full financial summary + fully-paid state
 # ─────────────────────────────────────────────────────────────────────────────
 
 @staff_or_above
 def project_payments(request, project_pk):
-    """Manager/Staff: all PaymentRequests for a single org-scoped project."""
+    """
+    All PaymentRequests for a single project, with full Phase 4 financial
+    context: budget, paid (txn-based), pending, available remaining.
+    """
     manager_org = get_user_organization(request.user)
     if manager_org is None:
         messages.error(request, "You must complete organisation setup first.")
@@ -212,17 +235,17 @@ def project_payments(request, project_pk):
         .order_by("created_at")
     )
 
-    totals = payment_requests.aggregate(
-        total_amount=Sum("amount"),
-        total_paid=Sum("amount", filter=Q(status=PaymentRequest.Status.PAID)),
-        total_pending=Sum("amount", filter=Q(status=PaymentRequest.Status.PENDING)),
-    )
-    total_amount  = totals["total_amount"]  or Decimal("0.00")
-    total_paid    = totals["total_paid"]    or Decimal("0.00")
-    total_pending = totals["total_pending"] or Decimal("0.00")
-    remaining     = total_amount - total_paid
+    # Full Phase 4 financial summary
+    summary = service.get_project_financial_summary(project)
 
-    # Phase 3: transaction history for this project (manager view)
+    # Build an initial form; amount pre-populated with available balance
+    available = summary["available"]
+    create_form = PaymentRequestForm(
+        max_amount=available if available > Decimal("0.00") else None,
+        initial_amount=available if available > Decimal("0.00") else None,
+    )
+
+    # Phase 3: recent transaction history for this project
     transactions = (
         PaymentTransaction.objects
         .select_related("payment_request", "client")
@@ -233,67 +256,175 @@ def project_payments(request, project_pk):
     return render(request, "payments/project_payments.html", {
         "project":          project,
         "payment_requests": payment_requests,
-        "total_amount":     total_amount,
-        "total_paid":       total_paid,
-        "total_pending":    total_pending,
-        "remaining":        remaining,
-        "create_form":      PaymentRequestForm(),
+        # Phase 4 financial summary (consistent names across templates)
+        "budget":           summary["budget"],
+        "total_paid":       summary["paid"],
+        "total_pending":    summary["pending"],
+        "available":        summary["available"],
+        "is_fully_paid":    summary["is_fully_paid"],
+        # Legacy aliases kept so existing template references still work
+        "total_amount":     payment_requests.aggregate(
+                                t=Sum("amount"))["t"] or Decimal("0.00"),
+        "remaining":        summary["available"],
+        # Form and status choices
+        "create_form":      create_form,
         "status_choices":   PaymentRequest.Status.choices,
-        "transactions":     transactions,          # Phase 3 addition
+        # Transactions
+        "transactions":     transactions,
     })
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# CREATE PAYMENT REQUEST — /payments/project/<pk>/create/   (Phase 2, unchanged)
+# CREATE PAYMENT REQUEST — /payments/project/<pk>/create/
+# Phase 4: select_for_update concurrency lock, available-amount guard,
+#          transaction.on_commit email notification
 # ─────────────────────────────────────────────────────────────────────────────
 
 @manager_required
 @require_http_methods(["POST"])
 def create_payment_request(request, project_pk):
-    """POST-only: Manager creates a new PaymentRequest for a project."""
+    """
+    POST-only: Manager creates a new PaymentRequest for a project.
+
+    Phase 4 changes
+    ───────────────
+    1. Concurrency: wraps the entire create in transaction.atomic() and
+       calls select_for_update() on the Project row.  This serialises
+       concurrent POST requests so two managers cannot both create
+       requests that together exceed the available balance.
+
+    2. Available-amount guard: recomputes available_amount inside the
+       lock and passes it as max_amount to PaymentRequestForm, which then
+       enforces it in clean_amount().  A direct POST with a manipulated
+       amount larger than available is rejected here, not just in HTML.
+
+    3. Fully-paid block: rejects the request immediately if the project
+       is already fully paid (available == 0 and no balance to request).
+
+    4. Email: on successful creation, schedules an email to the client
+       via transaction.on_commit() so the email only fires after the DB
+       row is committed.  Email errors are caught and logged; they never
+       roll back the PaymentRequest.
+
+    Security
+    ────────
+    • project.client is ALWAYS set server-side (never from POST).
+    • amount is validated against the server-computed available balance.
+    • The organisation is ALWAYS verified via `organization=manager_org`.
+    """
     manager_org = get_user_organization(request.user)
     if manager_org is None:
         messages.error(request, "Organisation setup required.")
         return redirect("accounts:create_organization")
 
-    project = get_object_or_404(
-        Project.objects.select_related("client"),
-        pk=project_pk,
-        organization=manager_org,
-    )
+    # ── Acquire row-level lock + validate inside a single atomic block ────────
+    try:
+        with db_transaction.atomic():
+            # select_for_update locks the Project row for the duration of
+            # this transaction so no concurrent request can read a stale
+            # available_amount before we finish writing.
+            project = get_object_or_404(
+                Project.objects.select_related("client").select_for_update(),
+                pk=project_pk,
+                organization=manager_org,
+            )
 
-    if not project.client:
-        messages.error(
-            request,
-            f'Project "{project.name}" has no client assigned. '
-            "Assign a client before creating payment requests.",
-        )
+            if not project.client:
+                # Cannot create a PR without a client — surface error outside
+                # the atomic block to avoid suppressing the exception.
+                raise ValueError("no_client")
+
+            # Recompute available amount inside the lock so we see the latest
+            # committed state even if another request just created a PR.
+            available = service.get_available_amount_for_project(project)
+
+            # Hard block: project budget fully committed, no more requests.
+            if available <= Decimal("0.00"):
+                raise ValueError("fully_paid")
+
+            form = PaymentRequestForm(
+                request.POST,
+                max_amount=available,      # server-side ceiling
+            )
+
+            if not form.is_valid():
+                # Re-raise as a sentinel so we can handle outside atomic
+                raise ValueError("form_invalid")
+
+            pr = form.save(commit=False)
+            pr.project    = project           # server-side only
+            pr.client     = project.client    # server-side only
+            pr.created_by = request.user      # server-side only
+            pr.status     = PaymentRequest.Status.PENDING
+            pr.save()
+
+            # Capture values for the on_commit closure BEFORE the request
+            # object is potentially recycled.
+            pr_pk      = pr.pk
+            login_url  = request.build_absolute_uri(reverse("accounts:login"))
+            pr_title   = pr.title
+            pr_amount  = pr.amount
+
+            # Email fires AFTER the atomic block commits successfully.
+            # Capture `pr` in the closure now; it is safe because the row
+            # exists in the DB at commit time.
+            def _send_email(_pr=pr, _url=login_url):
+                service.send_payment_request_email(_pr, _url)
+
+            db_transaction.on_commit(_send_email)
+
+    except ValueError as exc:
+        sentinel = str(exc)
+
+        if sentinel == "no_client":
+            messages.error(
+                request,
+                f'Project "{project_pk}" has no client assigned. '
+                "Assign a client before creating payment requests.",
+            )
+            return redirect("payments:project_payments", project_pk=project_pk)
+
+        if sentinel == "fully_paid":
+            messages.error(
+                request,
+                "This project has no remaining balance available. "
+                "No further payment requests can be created.",
+            )
+            return redirect("payments:project_payments", project_pk=project_pk)
+
+        if sentinel == "form_invalid":
+            # Retrieve the project without a lock for the redirect (read-only)
+            error_text = " | ".join(
+                f"{field}: {', '.join(errs)}"
+                for field, errs in form.errors.items()
+            )
+            messages.error(request, f"Could not create payment request — {error_text}")
+            return redirect("payments:project_payments", project_pk=project_pk)
+
+        # Any other unexpected ValueError — log and surface generic error
+        logger.error("create_payment_request unexpected error: %s", exc)
+        messages.error(request, "Something went wrong. Please try again.")
         return redirect("payments:project_payments", project_pk=project_pk)
 
-    form = PaymentRequestForm(request.POST)
-    if form.is_valid():
-        pr = form.save(commit=False)
-        pr.project    = project
-        pr.client     = project.client
-        pr.created_by = request.user
-        pr.status     = PaymentRequest.Status.PENDING
-        pr.save()
-        messages.success(
-            request,
-            f'Payment request "{pr.title}" (NPR {pr.amount:,.2f}) created successfully.',
-        )
-    else:
-        error_text = " | ".join(
-            f"{field}: {', '.join(errs)}"
-            for field, errs in form.errors.items()
-        )
-        messages.error(request, f"Could not create payment request — {error_text}")
+    except Http404:
+        # Project not found in this org — let Django render the standard 404.
+        raise
 
+    except Exception as exc:
+        logger.error("create_payment_request failed for project #%d: %s", project_pk, exc)
+        messages.error(request, "Something went wrong. Please try again.")
+        return redirect("payments:project_payments", project_pk=project_pk)
+
+    messages.success(
+        request,
+        f'Payment request "{pr_title}" (NPR {pr_amount:,.2f}) created successfully. '
+        f"The client has been notified by email.",
+    )
     return redirect("payments:project_payments", project_pk=project_pk)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# UPDATE PAYMENT STATUS — /payments/<pk>/status/   (Phase 2, unchanged)
+# UPDATE PAYMENT STATUS — /payments/<pk>/status/   (unchanged)
 # ─────────────────────────────────────────────────────────────────────────────
 
 @manager_required
@@ -334,39 +465,26 @@ def update_payment_status(request, pk):
 
 
 # ═════════════════════════════════════════════════════════════════════════════
-# PHASE 3 VIEWS
+# PHASE 3 VIEWS  (unchanged from Phase 3)
 # ═════════════════════════════════════════════════════════════════════════════
-
-# ─────────────────────────────────────────────────────────────────────────────
-# INITIATE PAYMENT — /payments/initiate/<pr_pk>/
-# ─────────────────────────────────────────────────────────────────────────────
 
 @login_required
 def initiate_payment(request, pr_pk):
-    """
-    GET  — Show the payment confirmation page for a specific PaymentRequest.
-    POST — Create a PaymentTransaction (INITIATED), then redirect to simulate.
-
-    Security:
-      • The PaymentRequest is fetched with client=request.user — a client
-        cannot initiate a payment for another client's request.
-      • Amount is NEVER read from POST — always from the DB record.
-      • Only PENDING requests can be paid (PAID/CANCELLED are rejected).
-    """
+    """GET: confirm page. POST: create INITIATED transaction → simulate."""
     payment_request = get_object_or_404(
         PaymentRequest.objects.select_related("project", "client"),
         pk=pr_pk,
-        client=request.user,          # ownership enforced at DB level
+        client=request.user,
     )
 
     if request.method == "GET":
-        # Show confirmation page
+        project_summary = service.get_project_financial_summary(payment_request.project)
         return render(request, "payments/payment_processing.html", {
             "payment_request": payment_request,
-            "is_dev": settings.DEBUG,
+            "project_summary": project_summary,
+            "is_dev":          settings.DEBUG,
         })
 
-    # POST — initiate the transaction
     try:
         txn = service.initiate_payment(
             payment_request=payment_request,
@@ -377,50 +495,32 @@ def initiate_payment(request, pr_pk):
         messages.info(request, "This payment request has already been paid.")
         return redirect("payments:client_payments")
     except service.PaymentCancelledError:
-        messages.error(request, "This payment request has been cancelled by your project manager.")
+        messages.error(
+            request,
+            "This payment request has been cancelled by your project manager.",
+        )
         return redirect("payments:client_payments")
     except service.PaymentError as exc:
         logger.error("initiate_payment failed for PR #%d: %s", pr_pk, exc)
         messages.error(request, "Could not initiate payment. Please try again.")
         return redirect("payments:client_payments")
 
-    # In Phase 3 always go to the simulation page
     return redirect("payments:simulate_payment_result", txn_pk=txn.pk)
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# SIMULATE PAYMENT RESULT — /payments/simulate/<txn_pk>/
-# ─────────────────────────────────────────────────────────────────────────────
 
 @login_required
 @require_http_methods(["GET", "POST"])
 def simulate_payment_result(request, txn_pk):
-    """
-    GET  — Show the simulation choice page (Success / Fail buttons).
-    POST — Process the simulated outcome.
-
-    PRODUCTION GUARD: returns Http404 when DEBUG=False.
-    This view must never be reachable in a live deployment without DEBUG=True.
-
-    Security:
-      • The transaction is fetched with client=request.user — a client
-        cannot simulate a result for another client's transaction.
-      • Status can only be advanced by the service layer — POST data
-        contains only the outcome choice, not the new status string.
-      • 'outcome' must be exactly "success" or "failed" — any other value
-        is silently treated as a failure.
-    """
+    """Dev/test simulation endpoint. Returns 404 when DEBUG=False."""
     if not settings.DEBUG:
         raise Http404("Simulation endpoint is disabled in production.")
 
     txn = get_object_or_404(
         PaymentTransaction.objects.select_related("payment_request", "project", "client"),
         pk=txn_pk,
-        client=request.user,          # ownership enforced at DB level
+        client=request.user,
     )
 
-    # If the transaction has already been resolved (e.g. user hit back),
-    # redirect straight to the result page.
     if txn.status != PaymentTransaction.Status.INITIATED:
         return redirect("payments:payment_result", txn_pk=txn.pk)
 
@@ -430,9 +530,7 @@ def simulate_payment_result(request, txn_pk):
             "payment_request": txn.payment_request,
         })
 
-    # POST: process outcome
     outcome = request.POST.get("outcome", "failed").strip().lower()
-
     if outcome == "success":
         try:
             service.record_success(txn)
@@ -449,23 +547,11 @@ def simulate_payment_result(request, txn_pk):
     return redirect("payments:payment_result", txn_pk=txn.pk)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# PAYMENT RESULT — /payments/result/<txn_pk>/
-# ─────────────────────────────────────────────────────────────────────────────
-
 @login_required
 def payment_result(request, txn_pk):
-    """
-    Read-only: show the outcome of a specific PaymentTransaction.
-
-    Security:
-      • Fetched with client=request.user — a client cannot view another
-        client's transaction result.
-    """
+    """Read-only transaction result page."""
     txn = get_object_or_404(
-        PaymentTransaction.objects.select_related(
-            "payment_request", "project", "client"
-        ),
+        PaymentTransaction.objects.select_related("payment_request", "project", "client"),
         pk=txn_pk,
         client=request.user,
     )
@@ -476,22 +562,9 @@ def payment_result(request, txn_pk):
     })
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# TRANSACTION HISTORY — /payments/history/
-# ─────────────────────────────────────────────────────────────────────────────
-
 @login_required
 def transaction_history(request):
-    """
-    Full transaction history for the logged-in user.
-
-    CLIENT: sees only their own transactions.
-    MANAGER/STAFF: sees all transactions for projects in their org.
-
-    Security:
-      • CLIENT queryset always filters client=request.user.
-      • MANAGER/STAFF queryset filters project__organization=manager_org.
-    """
+    """Full transaction history — CLIENT sees own; MANAGER sees org-scoped."""
     if request.user.is_client:
         transactions = (
             PaymentTransaction.objects
@@ -499,10 +572,7 @@ def transaction_history(request):
             .filter(client=request.user)
             .order_by("-created_at")
         )
-        context = {
-            "transactions": transactions,
-            "is_client_view": True,
-        }
+        context = {"transactions": transactions, "is_client_view": True}
     else:
         manager_org = get_user_organization(request.user)
         if manager_org is None:
@@ -511,9 +581,7 @@ def transaction_history(request):
 
         transactions = (
             PaymentTransaction.objects
-            .select_related(
-                "payment_request", "project", "client"
-            )
+            .select_related("payment_request", "project", "client")
             .filter(project__organization=manager_org)
             .order_by("-created_at")
         )
