@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% load static currency_tags %}
+
+{% block title %}
+  {% if txn.is_success %}Payment Successful{% else %}Payment Failed{% endif %} — ClientSpace
+{% endblock %}
+{% block page_heading %}
+  {% if txn.is_success %}Payment Successful{% else %}Payment Failed{% endif %}
+{% endblock %}
+{% block page_subheading %}Transaction #{{ txn.pk }}{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto space-y-6 pt-4">
+
+  <!-- ── Result card ───────────────────────────────────────── -->
+  <div class="bg-white rounded-2xl border shadow-sm overflow-hidden
+    {% if txn.is_success %}border-[#b7dfbe]{% else %}border-[#f5c2be]{% endif %}">
+
+    <!-- Icon + headline -->
+    <div class="px-6 py-8 text-center border-b
+      {% if txn.is_success %}border-[#d2eed7] bg-[#f0faf2]{% else %}border-[#fad7d4] bg-[#fff5f5]{% endif %}">
+      <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4
+        {% if txn.is_success %}bg-[#e6f4ea]{% else %}bg-[#fce8e6]{% endif %}">
+        <i class="fas {% if txn.is_success %}fa-check-circle text-[#137333]{% else %}fa-times-circle text-[#c5221f]{% endif %} text-3xl"></i>
+      </div>
+      <h2 class="text-lg font-bold {% if txn.is_success %}text-[#137333]{% else %}text-[#c5221f]{% endif %}">
+        {% if txn.is_success %}Payment Confirmed{% else %}Payment Failed{% endif %}
+      </h2>
+      <p class="text-xs text-gray-500 mt-1">
+        {% if txn.is_success %}
+          Your payment of <strong>{{ txn.amount|npr }}</strong> has been successfully processed.
+        {% else %}
+          Your payment attempt was unsuccessful. No amount was charged.
+        {% endif %}
+      </p>
+    </div>
+
+    <!-- Transaction details -->
+    <div class="px-6 py-5 space-y-3">
+      <div class="flex justify-between text-xs">
+        <span class="text-[#8b6f55]">Payment Request</span>
+        <span class="font-semibold text-[#4a3520]">{{ payment_request.title }}</span>
+      </div>
+      <div class="flex justify-between text-xs">
+        <span class="text-[#8b6f55]">Project</span>
+        <span class="text-[#4a3520]">{{ project.name }}</span>
+      </div>
+      <div class="flex justify-between text-xs">
+        <span class="text-[#8b6f55]">Amount</span>
+        <span class="font-bold text-[#4a3520] font-mono">{{ txn.amount|npr }}</span>
+      </div>
+      <div class="flex justify-between text-xs">
+        <span class="text-[#8b6f55]">Payment Method</span>
+        <span class="text-[#4a3520]">{{ txn.get_payment_method_display }}</span>
+      </div>
+      <div class="flex justify-between text-xs">
+        <span class="text-[#8b6f55]">Status</span>
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium {{ txn.status_css_class }}">
+          <i class="fas {{ txn.status_icon }} text-[9px]"></i>
+          {{ txn.get_status_display }}
+        </span>
+      </div>
+      {% if txn.gateway_transaction_id %}
+      <div class="flex justify-between text-xs">
+        <span class="text-[#8b6f55]">Reference ID</span>
+        <span class="font-mono text-[#4a3520] text-[11px]">{{ txn.gateway_transaction_id }}</span>
+      </div>
+      {% endif %}
+      {% if txn.paid_at %}
+      <div class="flex justify-between text-xs">
+        <span class="text-[#8b6f55]">Paid At</span>
+        <span class="text-[#4a3520]">{{ txn.paid_at|date:"M j, Y, g:i A" }}</span>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Actions -->
+    <div class="px-6 pb-6 flex gap-3">
+      <a href="{% url 'payments:client_payments' %}"
+         class="flex-1 px-4 py-2.5 text-xs text-center rounded-xl border border-[#e8dccc] text-[#5a3e2b] hover:bg-[#f5e6d0] transition font-medium">
+        My Payments
+      </a>
+      {% if not txn.is_success %}
+      <a href="{% url 'payments:initiate_payment' pr_pk=payment_request.pk %}"
+         class="flex-1 px-4 py-2.5 text-xs text-center rounded-xl bg-[#d4a373] text-white hover:bg-[#b8895e] transition font-semibold">
+        Try Again
+      </a>
+      {% else %}
+      <a href="{% url 'payments:transaction_history' %}"
+         class="flex-1 px-4 py-2.5 text-xs text-center rounded-xl bg-[#d4a373] text-white hover:bg-[#b8895e] transition font-semibold">
+        View History
+      </a>
+      {% endif %}
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

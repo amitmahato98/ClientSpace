@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% load static currency_tags %}
+
+{% block title %}Transaction History — ClientSpace{% endblock %}
+{% block page_heading %}Transaction History{% endblock %}
+{% block page_subheading %}
+  {% if is_client_view %}Your complete payment transaction history
+  {% else %}{{ organization.name }} — all payment transactions{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto space-y-6">
+
+  {% if messages %}
+  <div class="space-y-2">
+    {% for message in messages %}
+    <div class="flex items-center gap-2.5 px-4 py-3 rounded-lg text-xs font-medium
+        {% if message.tags == 'success' %}bg-[#e6f4ea] text-[#137333] border border-[#b7dfbe]
+        {% elif message.tags == 'error' %}bg-[#fce8e6] text-[#c5221f] border border-[#f5c2be]
+        {% else %}bg-[#e8f0fe] text-[#1a73e8] border border-[#c5d8fb]{% endif %}">
+      <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %}"></i>
+      {{ message }}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Back link -->
+  {% if is_client_view %}
+  <a href="{% url 'payments:client_payments' %}"
+     class="inline-flex items-center gap-2 text-xs font-medium text-gray-400 hover:text-[#b8895e] transition">
+    <i class="fas fa-arrow-left text-[10px]"></i>
+    Back to my payments
+  </a>
+  {% else %}
+  <a href="{% url 'payments:payment_view' %}"
+     class="inline-flex items-center gap-2 text-xs font-medium text-gray-400 hover:text-[#b8895e] transition">
+    <i class="fas fa-arrow-left text-[10px]"></i>
+    Back to payments overview
+  </a>
+  {% endif %}
+
+  <!-- ═══════════════════════════════════════════════════════
+       EMPTY STATE
+       ═══════════════════════════════════════════════════════ -->
+  {% if not transactions %}
+  <div class="bg-white rounded-xl border border-[#e8dccc] p-10 text-center">
+    <i class="fas fa-receipt text-4xl text-[#d4a373] mb-4"></i>
+    <h3 class="text-sm font-semibold text-[#4a3520] mb-1">No transactions yet</h3>
+    <p class="text-xs text-[#8b6f55]">
+      {% if is_client_view %}
+        Transactions will appear here once you make a payment.
+      {% else %}
+        No transactions have been recorded for projects in this organisation yet.
+      {% endif %}
+    </p>
+    {% if is_client_view %}
+    <a href="{% url 'payments:client_payments' %}"
+       class="inline-flex items-center gap-2 mt-4 px-4 py-2 text-xs rounded-lg bg-[#d4a373] text-white hover:bg-[#b8895e] transition">
+      <i class="fas fa-credit-card text-[10px]"></i>
+      View payment requests
+    </a>
+    {% endif %}
+  </div>
+
+  {% else %}
+
+  <!-- ═══════════════════════════════════════════════════════
+       TRANSACTION TABLE
+       ═══════════════════════════════════════════════════════ -->
+  <div class="bg-white rounded-xl border border-[#e8dccc] shadow-sm overflow-hidden">
+    <div class="px-5 py-4 border-b border-[#f2ede4] flex items-center justify-between">
+      <h3 class="text-sm font-bold text-[#4a3520]">All Transactions</h3>
+      <span class="text-xs text-[#8b6f55]">{{ transactions|length }} record{{ transactions|length|pluralize }}</span>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-xs min-w-[700px]">
+        <thead>
+          <tr class="text-left text-[#8b6f55] border-b border-[#e8dccc]">
+            <th class="px-5 py-3 font-medium">Description</th>
+            <th class="px-3 py-3 font-medium">Project</th>
+            {% if not is_client_view %}
+            <th class="px-3 py-3 font-medium">Client</th>
+            {% endif %}
+            <th class="px-3 py-3 font-medium">Amount</th>
+            <th class="px-3 py-3 font-medium">Method</th>
+            <th class="px-3 py-3 font-medium">Reference ID</th>
+            <th class="px-3 py-3 font-medium">Status</th>
+            <th class="px-3 py-3 font-medium">Date</th>
+            {% if is_client_view %}
+            <th class="px-3 py-3 font-medium">Receipt</th>
+            {% endif %}
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-[#f2ede4]">
+          {% for txn in transactions %}
+          <tr class="hover:bg-[#faf1e3] transition">
+            <td class="px-5 py-3 font-semibold text-[#4a3520]">{{ txn.payment_request.title }}</td>
+            <td class="px-3 py-3 text-[#8b6f55] truncate max-w-[120px]">{{ txn.project.name }}</td>
+            {% if not is_client_view %}
+            <td class="px-3 py-3 text-[#4a3520]">{{ txn.client.get_full_name|default:txn.client.username }}</td>
+            {% endif %}
+            <td class="px-3 py-3 font-mono font-semibold text-[#4a3520] whitespace-nowrap">
+              {{ txn.amount|npr }}
+            </td>
+            <td class="px-3 py-3 text-[#8b6f55]">{{ txn.get_payment_method_display }}</td>
+            <td class="px-3 py-3 font-mono text-[11px] text-[#8b6f55]">
+              {% if txn.gateway_transaction_id %}
+                <span title="{{ txn.gateway_transaction_id }}">
+                  {{ txn.gateway_transaction_id|truncatechars:18 }}
+                </span>
+              {% else %}
+                <span class="text-gray-300">—</span>
+              {% endif %}
+            </td>
+            <td class="px-3 py-3">
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium {{ txn.status_css_class }} whitespace-nowrap">
+                <i class="fas {{ txn.status_icon }} text-[9px]"></i>
+                {{ txn.get_status_display }}
+              </span>
+            </td>
+            <td class="px-3 py-3 text-[#8b6f55] whitespace-nowrap">
+              {% if txn.paid_at %}{{ txn.paid_at|date:"M j, Y" }}
+              {% else %}{{ txn.created_at|date:"M j, Y" }}{% endif %}
+            </td>
+            {% if is_client_view %}
+            <td class="px-3 py-3">
+              <a href="{% url 'payments:payment_result' txn_pk=txn.pk %}"
+                 class="text-[#b8895e] hover:text-[#8b6f55] transition" title="View receipt">
+                <i class="fas fa-receipt"></i>
+              </a>
+            </td>
+            {% endif %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

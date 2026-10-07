@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% load static currency_tags %}
+
+{% block title %}Simulate Payment — ClientSpace (Dev){% endblock %}
+{% block page_heading %}Simulate Payment{% endblock %}
+{% block page_subheading %}Development &amp; testing mode — choose an outcome{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto space-y-6 pt-4">
+
+  <!-- Dev mode banner -->
+  <div class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#fef7e0] border border-[#f5e1a4] text-xs text-[#b06000]">
+    <i class="fas fa-flask text-lg shrink-0"></i>
+    <div>
+      <p class="font-semibold">Development / Test Mode</p>
+      <p class="mt-0.5">This simulation step will be replaced by a real payment gateway (Khalti / eSewa) in a future phase. Choose an outcome to test the payment lifecycle.</p>
+    </div>
+  </div>
+
+  <!-- Transaction card -->
+  <div class="bg-white rounded-2xl border border-[#e8dccc] shadow-sm overflow-hidden">
+    <div class="px-6 py-5 border-b border-[#f2ede4]">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-xs text-[#8b6f55]">Transaction #{{ txn.pk }}</p>
+          <h2 class="text-sm font-bold text-[#4a3520] mt-0.5">{{ payment_request.title }}</h2>
+          <p class="text-xs text-[#8b6f55]">{{ txn.project.name }}</p>
+        </div>
+        <div class="text-right">
+          <div class="text-xl font-bold text-[#4a3520] font-mono">{{ txn.amount|npr }}</div>
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium {{ txn.status_css_class }} mt-1">
+            <i class="fas {{ txn.status_icon }} text-[9px]"></i>
+            {{ txn.get_status_display }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="px-6 py-5 space-y-3">
+      <p class="text-xs text-[#8b6f55] font-medium mb-3">Choose a simulated outcome:</p>
+
+      <!-- SUCCESS -->
+      <form method="POST" action="{% url 'payments:simulate_payment_result' txn_pk=txn.pk %}">
+        {% csrf_token %}
+        <input type="hidden" name="outcome" value="success">
+        <button type="submit"
+          class="w-full px-4 py-3 rounded-xl bg-[#e6f4ea] border border-[#b7dfbe] text-[#137333] hover:bg-[#d2eed7] transition text-sm font-semibold flex items-center justify-center gap-2">
+          <i class="fas fa-check-circle"></i>
+          Simulate Successful Payment
+        </button>
+      </form>
+
+      <!-- FAILED -->
+      <form method="POST" action="{% url 'payments:simulate_payment_result' txn_pk=txn.pk %}">
+        {% csrf_token %}
+        <input type="hidden" name="outcome" value="failed">
+        <button type="submit"
+          class="w-full px-4 py-3 rounded-xl bg-[#fce8e6] border border-[#f5c2be] text-[#c5221f] hover:bg-[#fad7d4] transition text-sm font-semibold flex items-center justify-center gap-2">
+          <i class="fas fa-times-circle"></i>
+          Simulate Failed Payment
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <p class="text-[11px] text-gray-400 text-center">
+    Transaction reference: <code class="font-mono">TXN-{{ txn.pk }}</code> &nbsp;·&nbsp;
+    Method: {{ txn.get_payment_method_display }}
+  </p>
+
+</div>
+{% endblock %}

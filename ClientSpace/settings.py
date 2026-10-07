@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'notifications',
     'helpcenter',
     'reports',
+    'payments'
 ]
 
 AUTH_USER_MODEL = "accounts.User"

@@ -278,6 +278,36 @@ def project_create(request):
                     # Phase 4 — Activity: project created
                     log_project_created(actor=request.user, project=project)
 
+                    # ── Phase 2 Payment: auto-create 20% initial request ──
+                    # Only create a PaymentRequest when:
+                    #   (a) the project has a positive budget, and
+                    #   (b) the project has a client (always true here, but
+                    #       defensive check avoids an IntegrityError).
+                    # The amount is stored as Decimal to match the model field.
+                    if project.budget and project.budget > 0 and project.client:
+                        from decimal import Decimal
+                        from payments.models import PaymentRequest as _PaymentRequest
+                        initial_amount = (project.budget * Decimal("0.20")).quantize(
+                            Decimal("0.01")
+                        )
+                        _PaymentRequest.objects.create(
+                            project    = project,
+                            client     = project.client,
+                            created_by = request.user,
+                            title      = "Initial Payment (20%)",
+                            description=(
+                                f"Automatic 20% initial payment for project "
+                                f'"{project.name}". '
+                                f"Total budget: NPR {project.budget:,.2f}."
+                            ),
+                            amount = initial_amount,
+                            status = _PaymentRequest.Status.PENDING,
+                        )
+                        logger.info(
+                            "Auto-created 20%% PaymentRequest (NPR %s) for project #%d",
+                            initial_amount, project.pk,
+                        )
+
                     # ── Schedule the outbound email after commit ──────────
                     # Capture all values in the closure NOW, before the
                     # request object may be recycled.
@@ -457,12 +487,24 @@ def project_detail(request, pk):
             .order_by("-created_at")[:50]   # latest 50 entries
         )
 
+    # Payment requests for the Payments tab — MANAGER/STAFF only.
+    # Clients do not see this tab; they use /payments/my/ instead.
+    payment_requests = None
+    if not request.user.is_client:
+        from payments.models import PaymentRequest
+        payment_requests = (
+            PaymentRequest.objects
+            .filter(project=project)
+            .order_by("created_at")
+        )
+
     return render(request, "projects/projectdetails.html", {
         "project": project,
         "assigned_staff": assigned_staff,
         "assign_form": assign_form,
         "tasks": tasks,
         "activities": activities,
+        "payment_requests": payment_requests,
         "filter_status": filter_status,
         "filter_priority": filter_priority,
         "filter_assigned": filter_assigned,
